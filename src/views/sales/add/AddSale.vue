@@ -1,0 +1,577 @@
+<template>
+  <CCard>
+    <CCardHeader>
+      <CIcon name="cil-notes"/> {{title}}
+    </CCardHeader>
+    <CCardBody>
+      <CRow>
+        <CCol lg="12">
+          <CForm>
+            
+            <CRow>
+              <CCol md="4">
+                <template v-if="loadingClients">
+                  <div class="spinner-border m-4" role="status">
+                    <span class="visually-hidden"></span>
+                  </div>
+                </template>
+                <template v-else>
+                  <div>
+                    <label>Cliente</label>
+                    <multiselect
+                      v-model="sale.client"
+                      :options=clients
+                      placeholder="Selecciona el cliente"
+                      label="name"
+                      track-by="id"
+                    />
+                    <br>
+                  </div>
+                </template>
+              </CCol>
+              <CCol md="4">
+                <CInput
+                  label="Fecha Actual"
+                  :lazy="false"
+                  :value="sale.date"
+                  disabled
+                  autocomplete="off"
+                />
+              </CCol>
+              <CCol md="4">
+                <CInput
+                  label="Número de Venta"
+                  :lazy="false"
+                  :value="sale.consecutive"
+                  disabled
+                  autocomplete="off"
+                />
+              </CCol>
+            </CRow>
+
+            <CRow>
+              <CCol md="4">
+                <CSelect
+                  :value.sync="sale.type"
+                  :options=types
+                  label="Tipo de Venta"
+                  placeholder="Seleccione un tipo"
+                />
+              </CCol>
+              <CCol md="4">
+                <CSelect
+                  :value.sync="sale.boleta_factura"
+                  :options=types_sales
+                  label="Boleta/Factura"
+                  placeholder="Seleccione un tipo"
+                />
+              </CCol>
+              <CCol v-if="sale.boleta_factura == 'factura'" md="4">
+                <CInput
+                  :value.sync="sale.ruc"
+                  @keydown="validateNumber"
+                  label="RUC"
+                  maxlength="11"
+                  placeholder="Ingresa el ruc..."
+                />
+              </CCol>
+            </CRow>
+
+            <CRow>
+              <CCol md="12">
+                <CTextarea
+                  label="Descripción"
+                  :value.sync="sale.description"
+                  placeholder="Ingrese una descripción..."
+                  vertical
+                  rows="3"
+                />
+              </CCol>
+            </CRow>
+
+            <!-- AGREGAR DETALLE -->
+            <CRow>
+              <CCol md="4">
+                <CButton color="success" @click="openModalDetail()" class="mr-1 mb-3">
+                  Agregar
+                </CButton>
+              </CCol>
+            </CRow>
+
+            <ModalDetail
+              :details="sale.details"
+              :isVisibleModalDetail="flagModalDetail"
+              @get-detail="getDetail"
+              @close-modal-detail="closeModalDetail"
+            />
+
+            <!-- LISTA DE PRODUCTOS SELECCIONADOS -->
+            <CTableProductsSelected :items="sale.details" @get-total-general="getTotalGeneral">
+              <template #header>
+                <CIcon name="cil-grid"/> Listado de Productos seleccionados
+              </template>
+            </CTableProductsSelected>
+            <CRow>
+              <CCol md="6">
+              </CCol>
+              <CCol md="6">
+                <CInput
+                  horizontal
+                  label="Subtotal (S/.)"
+                  disabled
+                  @input="getTotalGeneral()"
+                  @keydown="preventInvalidDecimal($event)"
+                  v-model="sale.subtotal"
+                />
+              </CCol>
+            </CRow>
+            <CRow>
+              <CCol md="6">
+              </CCol>
+              <CCol v-if="sale.type == 'credito'" md="6">
+                <CInput
+                  horizontal
+                  label="Depositó (S/.)"
+                  @input="getTotalGeneral()"
+                  @keydown="preventInvalidDecimal($event)"
+                  v-model="sale.deposit"
+                />
+              </CCol>
+            </CRow>
+            <CRow>
+              <CCol md="6">
+              </CCol>
+              <CCol md="6">
+                <CInput
+                  horizontal
+                  disabled
+                  label="Total (S/.)"
+                  :value.sync="sale.total"
+                />
+              </CCol>
+            </CRow>
+
+            <!-- ACCIONES -->
+            <CRow>
+              <CCol md="4">
+                <template v-if="!loadingButtonsActions">
+                  <CCardBody>
+                    <div class="sk-chase">
+                      <div class="sk-chase-dot"></div>
+                      <div class="sk-chase-dot"></div>
+                      <div class="sk-chase-dot"></div>
+                      <div class="sk-chase-dot"></div>
+                      <div class="sk-chase-dot"></div>
+                      <div class="sk-chase-dot"></div>
+                    </div>
+                  </CCardBody>
+                </template>
+                <template v-else>
+                  <CButton color="primary" @click="saveSale()" class="mr-1 mb-3">
+                    <span v-text="btnSaveSale"></span>
+                  </CButton>
+                </template>
+              </CCol>
+            </CRow>
+            
+          </CForm>
+          <br/>
+        </CCol>
+      </CRow>
+    </CCardBody>
+  </CCard>
+</template>
+
+<script>
+
+  import CTableProductsSelected from '../add/TableListProductsSelected.vue'
+  import ModalDetail from './ModalDetail.vue';
+  import Multiselect from 'vue-multiselect'
+  import Swal from "sweetalert2"
+  import {list, save, ticket} from '../../../assets/js/methods/functions.js'
+
+  import 'vue-select/dist/vue-select.css'
+  import 'vue-multiselect/dist/vue-multiselect.min.css'
+
+  export default {
+    name: 'AddSale',
+    data() {
+      return {
+        prefix: "sale",
+        prefix_clients: "clients",
+        clients: [],
+        title: "Nueva Venta",
+        btnSaveSale: "Guardar",
+        disabledGeneral: false,
+        types: ['contado', 'credito'],
+        types_sales: ['boleta', 'factura'],
+        sale: {
+          id: "",
+          consecutive: "",
+          date: this.getCurrentDate(),
+          client: "",
+          ruc: "",
+          description: "",
+          subtotal: 0,
+          deposit: 0,
+          consumption: 0,
+          total: 0,
+          type: "contado",
+          boleta_factura: "boleta",
+          details: []
+        },
+        flagModalDetail: false,
+        loadingClients: false,
+        loadingButtonsActions: true,
+      }
+    },
+    async mounted() {
+      await this.getClients();
+      await this.getSale();
+      this.getTotalGeneral();
+    },
+    components: {
+      ModalDetail,
+      Multiselect,
+      CTableProductsSelected
+    },
+    methods: {
+      async getClients(){
+        
+        this.loadingClients = true;
+
+        try {
+        
+          const url = this.$store.state.url;
+          const response = await list(url + this.prefix_clients);
+
+          if (response.status === 200) {
+            
+            let setClients = (response.data.data).map(role => ({
+              id: role.id, 
+              name: role.name
+            }));
+
+            this.clients = setClients;
+
+          }
+        } catch (errors) {
+
+          if (errors.length > 0) {
+            Swal.fire("Alerta", errors[0], "warning");
+          } else {
+            Swal.fire("Alerta", "Ocurrió un error desconocido", "error");
+          }
+
+        } finally {
+          
+          this.loadingClients = false;
+        
+        }
+
+      },
+      async saveSale(){
+
+        this.loadingButtonsActions = false;
+
+        try {
+
+          const url = this.$store.state.url;
+          const data = this.getSetData(this.sale);
+          const response = await save(url + this.prefix, data, this.sale.id);
+
+          if (response.status === 200) {
+
+            if(response.data.flag){
+
+              // Swal.fire("Alerta", response.data.message, "success");
+
+              this.title = "Modificar Venta";
+              this.btnSaveSale = "Modificar";
+              this.sale.id = response?.data?.data?.id;
+              this.sale.consecutive = response?.data?.data?.consecutive;
+
+              //? Imprime el ticket
+              await this.downloadReport('sale_pdf', '.pdf', response.data.message);
+
+              this.$router.push({ 
+                name: 'Listado ventas'
+              });
+
+            } else {
+
+              Swal.fire("Alerta", response.data.message, "warning");
+
+            }
+
+          }
+
+        } catch (errors) {
+
+          if (errors.length > 0) {
+            Swal.fire("Alerta", errors[0], "warning");
+          } else {
+            Swal.fire("Alerta", "Ocurrió un error desconocido", "error");
+          }
+
+        } finally {
+
+          this.loadingButtonsActions = true;
+
+        }
+
+      },
+      async getSale(){
+
+        const data = this.$route.query.data;
+        
+        if (data && typeof data === 'string' && data.trim() !== '') {
+
+          const item = JSON.parse(data);
+
+          this.sale.id          = item.id;
+          this.sale.consecutive = item.consecutive;
+          this.sale.date        = item.date;
+          this.sale.client      = item.client;
+          this.sale.description = item.description;
+          this.sale.subtotal    = item.subtotal;
+          this.sale.deposit     = item.deposit;
+          this.sale.consumption = item.consumption;
+          this.sale.boleta_factura = item.boleta_factura;
+          this.sale.ruc         = item.ruc;
+          this.sale.total       = item.total;
+          this.sale.details     = item.details;
+
+          this.disabledGeneral  = true;
+          this.title = "Modificar Venta";
+
+        }
+
+      },
+      async downloadReport(method, extention, message) {
+
+        let el = this;
+
+        Swal.fire({
+          title: "Ticket",
+          html: "¿Desea imprimir el ticket?",
+          icon: "warning",
+          confirmButtonText: "Sí",
+          closeOnConfirm: false,
+          showCancelButton: true,
+          cancelButtonText: "No"
+        })
+        .then(async function(result) {
+
+          if(result.value) {
+
+            try {
+
+              const url = el.$store.state.url;
+
+              await ticket(url+method, el.sale, "reporte #"+el.sale.consecutive+extention);
+
+              Swal.fire("Alerta", message, "success");
+
+            } catch (errors) {
+
+              if (errors.length > 0) {
+                Swal.fire("Alerta", errors[0], "warning");
+              } else {
+                Swal.fire("Alerta", "Ocurrió un error desconocido", "error");
+              }
+
+            }
+
+          } else {
+
+            Swal.fire("Alerta", message, "success");
+
+          }
+
+        });
+
+      },
+      validateNumber(event) {
+
+        const key = event.key;
+
+        // Permite solo números, un solo punto decimal, y teclas útiles como Retroceso, Suprimir, etc.
+        if (!/^[0-9]$/.test(key) && !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(key)) {
+          event.preventDefault();
+          return;
+        }
+
+        // Permitir borrar (Backspace, Delete) y escribir nuevamente en la parte entera
+        if (['Backspace', 'Delete'].includes(key)) {
+          return; // Permite borrar sin restricciones
+        }
+
+      },
+      getCurrentDate() {
+        
+        const today = new Date();
+        const day = String(today.getDate()).padStart(2, '0');
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const year = today.getFullYear();
+
+        return `${day}/${month}/${year}`;
+      
+      },
+      openModalDetail(){
+        this.flagModalDetail = true;
+      },
+      closeModalDetail(){
+        this.flagModalDetail = false;
+      },
+      getDetail(data){
+
+        let total = (data.amount * data.price).toFixed(4);
+
+        const newDetail = {
+          "product": {
+            "id": data.product.id,
+            "name": data.product.name,
+            "um": data.um,
+            // "um": data.product.um,
+          },
+          amount: data.amount,
+          // name_unit_measure: data.product.um,
+          name_unit_measure: data.um_name,
+          price: data.price,
+          total: total,
+        };
+
+        this.sale.details.push(newDetail);
+        this.getTotalGeneral();
+
+      },
+      getSetData(data){
+
+        let formData = new FormData();
+        let id = -1;
+        let idUser = sessionStorage.getItem('id');
+
+        if(idUser == undefined || idUser == null || idUser == ""){
+            if (this.$route.name !== 'Login') {
+                Swal.fire("Alerta", "Sesión Expirada", "warning");
+                this.$router.push({ name: 'Login' });
+            }
+        }
+
+        formData.append('user_id', idUser);
+        formData.append('client_id', data.client.id);
+        formData.append('deposit', data.deposit);
+        formData.append('consumption', data.consumption);
+        formData.append('subtotal', data.subtotal);
+        formData.append('total', data.total);
+        formData.append('type', data.type);
+        formData.append('boleta_factura', data.boleta_factura);
+        formData.append('ruc', data.ruc);
+        formData.append('description', data.description);
+
+        (data.details).forEach(function(detail, index) {
+
+          id = (detail.id != null && detail.id != undefined && detail.id != "") ? detail.id : -1;
+
+          formData.append(`details[${index}][id]`, id);
+          formData.append(`details[${index}][product_id]`, detail.product.id);
+          formData.append(`details[${index}][um]`, detail.product.um);
+          formData.append(`details[${index}][amount]`, detail.amount);
+          formData.append(`details[${index}][name_unit_measure]`, detail.name_unit_measure);
+          formData.append(`details[${index}][price]`, detail.price);
+          formData.append(`details[${index}][total]`, detail.total);
+
+        });
+
+        return formData;
+
+      },
+      getTotalGeneral() {
+
+        let total = 0;
+        let deposit = (this.sale.deposit == "" || this.sale.type == "contado") ? 0 : this.sale.deposit;
+        // let consumption = (this.sale.consumption == "") ? 0 : this.sale.consumption;
+
+        for (let index = 0; index < this.sale.details.length; index++) {
+          total += parseFloat(this.sale.details[index].price) * parseFloat(this.sale.details[index].amount);
+        }
+
+        // this.sale.total = parseFloat(total) + parseFloat(consumption);
+        this.sale.total = parseFloat(total);
+
+        if(deposit > total){
+
+          this.sale.deposit  = 0;
+          this.sale.subtotal = parseFloat(total);
+          this.sale.total    = parseFloat(total);
+          // this.sale.subtotal = parseFloat(total) + parseFloat(consumption);
+          // this.sale.total    = parseFloat(total) + parseFloat(consumption);
+
+          Swal.fire("Alerta", "El depósito no puede ser mayor que el total", "warning");
+
+        } else {
+
+          this.sale.subtotal = parseFloat(total);
+          // this.sale.subtotal = parseFloat(total) + parseFloat(consumption);
+          this.sale.total     = parseFloat(this.sale.subtotal) - parseFloat(deposit);
+
+        }
+
+        return total;
+
+      },
+      preventInvalidDecimal(event) {
+        const key = event.key;
+        const value = event.target.value;
+        const selectionStart = event.target.selectionStart;
+        const selectionEnd = event.target.selectionEnd;
+
+        // Permitir sobrescribir el contenido seleccionado sin bloquear por largo de la cadena
+        const isReplacing = selectionStart !== selectionEnd;
+
+        // Permite solo números, un solo punto decimal, y teclas útiles como Retroceso, Suprimir, etc.
+        if (!/^[0-9]$/.test(key) && key !== '.' && !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(key)) {
+          event.preventDefault();
+          return;
+        }
+
+        // Permitir borrar (Backspace, Delete) y escribir nuevamente en la parte entera
+        if (['Backspace', 'Delete'].includes(key)) {
+          return; // Permite borrar sin restricciones
+        }
+
+        // Asegura que solo se permita un punto decimal
+        if (key === '.' && value.includes('.')) {
+          event.preventDefault();
+          return;
+        }
+
+        // Si estamos reemplazando texto, permite que se complete la sobrescritura
+        if (isReplacing) {
+          return;
+        }
+
+        // Limitar la parte entera a 8 dígitos si ya hay un punto decimal
+        const [integerPart, decimalPart] = value.split('.');
+
+        // Si no hay parte entera, permite seguir escribiendo (por si se borró todo)
+        if (!integerPart && key !== '.') {
+          return;
+        }
+
+        // Limitar la parte entera a 8 dígitos si ya hay un punto decimal o aún no se ha ingresado
+        if (integerPart && integerPart.length >= 8 && key !== '.' && !value.includes('.')) {
+          event.preventDefault();
+          return;
+        }
+
+        // Limitar la parte decimal a 2 dígitos
+        if (decimalPart && decimalPart.length >= 2 && value.includes('.')) {
+          event.preventDefault();
+        }
+      },
+    }
+  }
+
+</script>

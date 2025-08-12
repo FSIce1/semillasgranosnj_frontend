@@ -1,0 +1,36 @@
+.DS_Store
+node_modules
+package-lock.json
+
+/coverage
+
+/tests/e2e/reports/
+selenium-debug.log
+chromedriver.log
+
+# local env files
+.env.local
+.env.*.local
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw*
+
+# release
+/coreui-pro-vue-admin-template*.zip
+
+# Ignore build folder
+build/
+dist/
+dist/**/*.js.map
+dist/**/*.css
