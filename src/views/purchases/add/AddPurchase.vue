@@ -114,6 +114,7 @@
                 <CIcon name="cil-grid"/> Listado de Productos seleccionados
               </template>
             </CTableProductsSelected>
+
             <CRow>
               <CCol md="6">
               </CCol>
