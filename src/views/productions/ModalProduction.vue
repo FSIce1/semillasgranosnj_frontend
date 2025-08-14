@@ -61,6 +61,9 @@
                   label="name"
                   @input="selectFormula"
                   track-by="id"
+                  select-label="Presiona para seleccionar"
+                  selected-label="Seleccionado"
+                  deselect-label="Presiona para quitar"
                 />
                 <br>
               </div>
@@ -84,6 +87,10 @@
             :items="production.productsFormula"
             :fields="fieldsFormulas"
             :items-per-page="5"
+            :no-items-view="{
+              noItems: 'No hay registros',
+              noResults: 'No se encontraron resultados'
+            }"
             hover
           >
 
@@ -112,6 +119,10 @@
             :items="production.productsNucleo"
             :fields="fieldsFormulas"
             :items-per-page="5"
+            :no-items-view="{
+              noItems: 'No hay registros',
+              noResults: 'No se encontraron resultados'
+            }"
             hover
           >
 

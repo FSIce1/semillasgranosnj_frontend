@@ -12,10 +12,6 @@ const Purchases = () => import('@/views/purchases/list/Purchases')
 const Purchase = () => import('@/views/purchases/details/Purchase')
 const AddPurchase = () => import('@/views/purchases/add/AddPurchase')
 
-// Fórmulas
-const ListFormula = () => import('@/views/formulas/list/Formulas')
-const AddFormula = () => import('@/views/formulas/add/AddFormula')
-
 // Maestras
 const Presentations = () => import('@/views/maestras/presentations/Presentations')
 const Processes = () => import('@/views/maestras/process/Processes')
@@ -28,10 +24,6 @@ const Users = () => import('@/views/administrable/users/Users')
 const Clients = () => import('@/views/administrable/clients/Clients')
 const Providers = () => import('@/views/administrable/providers/Providers')
 const RolesProfiles = () => import('@/views/administrable/roles/RolesProfiles')
-
-// Producciones
-const Productions = () => import('@/views/productions/Productions')
-const PreparadasClient = () => import('@/views/preparadas/Preparadas')
 
 // Productos
 const Products = () => import('@/views/products/Products')
@@ -125,40 +117,6 @@ export default new Router({
           ]
         },
 
-        // Producción
-        {
-          path: 'produccion',
-          redirect: '/produccion/listado',
-          name: 'Produccion',
-          component: {
-            render (c) { return c('router-view') }
-          },
-          children: [
-            {
-              path: 'listado',
-              name: 'Listado producciones',
-              component: Productions
-            }
-          ]
-        },
-
-        // Producción
-        {
-          path: 'preparadas',
-          redirect: '/preparadas/listado',
-          name: 'Preparadas',
-          component: {
-            render (c) { return c('router-view') }
-          },
-          children: [
-            {
-              path: 'listado',
-              name: 'Preparadas del Cliente',
-              component: PreparadasClient
-            }
-          ]
-        },
-
         // Caja
         {
           path: 'caja',
@@ -190,28 +148,6 @@ export default new Router({
               name: 'Listado Productos',
               component: Products
             }
-          ]
-        },
-
-        // Fórmulas
-        {
-          path: 'formulas',
-          redirect: '/formulas/listado',
-          name: 'Formulas',
-          component: {
-            render (c) { return c('router-view') }
-          },
-          children: [
-            {
-              path: 'listado',
-              name: 'Listado Fórmulas',
-              component: ListFormula
-            },
-            {
-              path: 'add-formula',
-              name: 'Agregar Fórmula',
-              component: AddFormula
-            },
           ]
         },
 

@@ -96,6 +96,10 @@
           :fields="fields"
           :dark="dark"
           :items-per-page="10"
+          :no-items-view="{
+            noItems: 'No hay registros',
+            noResults: 'No se encontraron resultados'
+          }"
           pagination
         >
         

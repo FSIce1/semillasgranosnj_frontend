@@ -43,6 +43,8 @@
             to: '/inicio',
             icon: 'cil-speedometer',
           },
+
+          //? COMPRAS
           {
             _name: 'CSidebarNavTitle',
             name: 'Compras',
@@ -60,6 +62,8 @@
             to: '/compras/add-compra',
             icon: 'cil-list',
           },
+
+          //? VENTAS
           {
             _name: 'CSidebarNavTitle',
             name: 'Ventas',
@@ -77,22 +81,12 @@
             to: '/ventas/add-venta',
             icon: 'cil-list',
           },
+
+          //? OTROS
           {
             _name: 'CSidebarNavTitle',
-            name: 'Producción',
-            _children: ['Producción']
-          },
-          {
-            _name: 'CSidebarNavItem',
-            name: 'Listado producciones',
-            to: '/produccion/listado',
-            icon: 'cil-list',
-          },
-          {
-            _name: 'CSidebarNavItem',
-            name: 'Preparadas del Cliente',
-            to: '/preparadas/listado',
-            icon: 'cil-list',
+            name: 'Otros',
+            _children: ['Otros']
           },
           {
             _name: 'CSidebarNavItem',
@@ -109,25 +103,6 @@
             name: 'Productos',
             to: '/productos/listado',
             icon: 'cil-list',
-          },
-          {
-            _name: 'CSidebarNavDropdown',
-            name: 'Formulas',
-            route: '/formulas',
-            icon: 'cil-list',
-            items: [
-              {
-                _name: 'ListFormulas',
-                name: 'Listado Fórmulas',
-                to: '/formulas/listado',
-                icon: 'cil-list',
-              },
-              {
-                name: 'Agregar Fórmula',
-                to: '/formulas/add-formula',
-                icon: 'cil-list',
-              },
-            ]
           },
           {
             _name: 'CSidebarNavDropdown',
@@ -230,9 +205,9 @@
                 return item;
               } else if(item.name == "Ventas" && (permissionsArray.includes("Listado Ventas") || permissionsArray.includes("Agregar Venta"))){
                 return item
-              } else if(item.name == "Compras" && (permissionsArray.includes("Listado Compras") || permissionsArray.includes("Agregar Compra"))){
+              } else if(item.name == "Otros"){
                 return item
-              } else if(item.name == "Producción" && permissionsArray.includes("Listado producciones")){
+              }else if(item.name == "Compras" && (permissionsArray.includes("Listado Compras") || permissionsArray.includes("Agregar Compra"))){
                 return item
               }
 

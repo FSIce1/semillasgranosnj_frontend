@@ -16,6 +16,10 @@
           :items="items"
           :fields="fields"
           :hover="hover"
+          :no-items-view="{
+            noItems: 'No hay registros',
+            noResults: 'No se encontraron resultados'
+          }"
           :striped="striped"
           :border="border"
           :small="small"

@@ -12,6 +12,10 @@
             :items="items"
             :fields="fields"
             :items-per-page="5"
+            :no-items-view="{
+              noItems: 'No hay registros',
+              noResults: 'No se encontraron resultados'
+            }"
             clickable-rows
             :active-page="activePage"
             @row-clicked="rowClicked"

@@ -73,6 +73,10 @@
               small
               fixed
               :items-per-page="5"
+              :no-items-view="{
+                noItems: 'No hay registros',
+                noResults: 'No se encontraron resultados'
+              }"
               pagination
             >
 

@@ -9,8 +9,8 @@
       <CHeaderNavLink>
         <div class="c-avatar">
           <img
-            src="img/avatars/pencaspampa-logo-50px.png"
-            class="c-avatar-img "
+            src="img/logo.png"
+            class="c-avatar-img"
           />
         </div>
       </CHeaderNavLink>

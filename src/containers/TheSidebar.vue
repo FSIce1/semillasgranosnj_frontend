@@ -6,7 +6,7 @@
     @update:show="(value) => $store.commit('set', ['sidebarShow', value])"
   >
     <CSidebarBrand class="d-md-down-none" to="/">
-      <img src="img/avatars/pencaspampa-logo.png" width="200" height="80" style="margin: 10px 0px;"/>
+      <img src="img/logo.png" width="100" height="80" style="margin: 10px 0px;"/>
     </CSidebarBrand>
     <CRenderFunction flat :contentToRender="sidebarItems"/>
     <CSidebarMinimizer

@@ -22,6 +22,7 @@
           :fixed="fixed"
           :dark="dark"
         >
+
           <template #index="{ index }">
             <td>{{ index + 1 }}</td>
           </template>

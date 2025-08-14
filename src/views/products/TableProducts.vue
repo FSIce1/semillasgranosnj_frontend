@@ -216,6 +216,10 @@
           :items="products"
           :fields="fields"
           :items-per-page="10"
+          :no-items-view="{
+            noItems: 'No hay registros',
+            noResults: 'No se encontraron resultados'
+          }"
           :hover="hover"
           :striped="striped"
           :border="border"

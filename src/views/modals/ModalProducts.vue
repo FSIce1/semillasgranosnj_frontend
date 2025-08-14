@@ -39,6 +39,10 @@
           <CDataTable
             :items="products"
             :fields="fields"
+            :no-items-view="{
+              noItems: 'No hay registros',
+              noResults: 'No se encontraron resultados'
+            }"
             hover
             striped
             border

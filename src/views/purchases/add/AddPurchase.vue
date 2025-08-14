@@ -24,6 +24,9 @@
                       placeholder="Selecciona el proveedor"
                       label="name"
                       track-by="id"
+                      select-label="Presiona para seleccionar"
+                      selected-label="Seleccionado"
+                      deselect-label="Presiona para quitar"
                     />
                     <br>
                   </div>

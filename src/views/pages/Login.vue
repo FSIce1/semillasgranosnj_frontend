@@ -11,7 +11,7 @@
 
     <!-- Fondo de Imagen -->
     <div 
-      style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: url('img/avatars/imagen 2.JPG'); background-size: cover; background-position: center center; z-index: 1;"
+      style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: url('img/nj.jpg'); background-size: cover; background-position: center center; z-index: 1;"
     ></div>
 
     <CContainer>
@@ -63,7 +63,7 @@
                         </div>
                       </template>
                       <template v-else>
-                        <CButton class="px-4 text-white pescanpampa-color" @click="signIn()">Login</CButton>
+                        <CButton class="px-4 text-white login-color" @click="signIn()">Login</CButton>
                       </template>
                     </CCol>
                   </CRow>
@@ -73,41 +73,17 @@
 
             <CCard
               text-color="white"
-              class="text-center py-5 d-md-down-none shadow pescanpampa-color"
+              class="text-center py-5 d-md-down-none shadow login-color"
               style="position: relative; z-index: 4;"
               body-wrapper
             >
               <CCardBody>
-                <h2 class="mt-4">Pencaspampa</h2>
+                <h2 class="mt-4">Granos & Semillas NJ</h2>
                 <p>Bienvenido al sistema.</p>
               </CCardBody>
             </CCard>
 
           </CCardGroup>
-        </CCol>
-        
-        <CCol lg="10" xl="8" class="text-center">
-          <a 
-            href="https://caldelperu.com/"
-            target="_blank"
-            class = "pescanpampa-color mt-4"
-            style="
-              position: relative; 
-              z-index: 5; 
-              display: inline-block;  
-              color: white; 
-              padding: 12px 24px; 
-              font-size: 16px; 
-              text-align: center; 
-              border-radius: 25px; 
-              text-decoration: none; 
-              transition: background-color 0.3s, transform 0.3s;
-            "
-            @mouseover="event.target.style.backgroundColor = '#0056b3'; event.target.style.transform = 'scale(1.05)';"
-            @mouseleave="event.target.style.backgroundColor = '#007bff'; event.target.style.transform = 'scale(1)';"
-          >
-            Ir a la página web
-          </a>
         </CCol>
 
       </CRow>
