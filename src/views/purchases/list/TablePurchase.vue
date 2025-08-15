@@ -6,61 +6,55 @@
       </slot>
     </CCardHeader>
     <CCardBody>
-      
+
+      <!-- FILTROS -->
+      <CRow>
+        <CCol md="3">
+          <CInput label="Consecutivo" v-model="filters.consecutive" />
+        </CCol>
+        <CCol md="3">
+          <CInput type="date" label="Fecha de creación" v-model="filters.date" />
+        </CCol>
+        <CCol md="3">
+          <CInput type="date" label="Fecha inicio" v-model="filters.start_date" @change="validateDates" />
+        </CCol>
+        <CCol md="3">
+          <CInput type="date" label="Fecha fin" v-model="filters.end_date" @change="validateDates" />
+        </CCol>
+        <CCol md="3">
+          <CInput label="Proveedor" v-model="filters.provider" />
+        </CCol>
+        <CCol md="3">
+          <CInput label="Usuario Creador" v-model="filters.user" />
+        </CCol>
+        <CCol md="3">
+          <CSelect
+            :value.sync="filters.type"
+            :options=types
+            label="Tipo de Venta"
+          />
+        </CCol>
+      </CRow>
+      <CRow>
+        <CCol md="6" class="d-flex align-items-center">
+          <CButton color="primary" @click="getPurchases" class="mr-2" style="width: auto;">
+            <CIcon name="cil-share" /> Buscar
+          </CButton>
+          <CButton color="info" @click="cleanFilters" class="mr-2" style="width: auto;">
+            <CIcon name="cil-share" /> Limpiar filtros
+          </CButton>
+          <CButton color="success" @click="downloadExcelPurchase" style="width: auto;">
+            <CIcon name="cil-cloud-download" /> Generar Excel
+          </CButton>
+        </CCol>
+      </CRow>
+      <br />
+
       <!-- LIST -->
-      <div v-if="loading" class="text-center">
-        
-        <CSpinner color="primary" />
-        <p>Cargando...</p>
-      
-      </div>
-      <div v-else>
-        
-        <!-- FILTROS -->
-        <CRow>
-          <CCol md="3">
-            <CInput label="Consecutivo" v-model="filters.consecutive" />
-          </CCol>
-          <CCol md="3">
-            <CInput type="date" label="Fecha de creación" v-model="filters.date" />
-          </CCol>
-          <CCol md="3">
-            <CInput type="date" label="Fecha inicio" v-model="filters.start_date" @change="validateDates" />
-          </CCol>
-          <CCol md="3">
-            <CInput type="date" label="Fecha fin" v-model="filters.end_date" @change="validateDates" />
-          </CCol>
-          <CCol md="3">
-            <CInput label="Proveedor" v-model="filters.provider" />
-          </CCol>
-          <CCol md="3">
-            <CInput label="Usuario Creador" v-model="filters.user" />
-          </CCol>
-          <CCol md="3">
-            <CSelect
-              :value.sync="filters.type"
-              :options=types
-              label="Tipo de Venta"
-            />
-          </CCol>
-        </CRow>
-        <CRow>
-          <CCol md="6" class="d-flex align-items-center">
-            <CButton color="primary" @click="getPurchases" class="mr-2" style="width: auto;">
-              <CIcon name="cil-share" /> Buscar
-            </CButton>
-            <CButton color="info" @click="cleanFilters" class="mr-2" style="width: auto;">
-              <CIcon name="cil-share" /> Limpiar filtros
-            </CButton>
-            <CButton color="success" @click="downloadExcelPurchase" style="width: auto;">
-              <CIcon name="cil-cloud-download" /> Generar Excel
-            </CButton>
-          </CCol>
-        </CRow>
-        <br />
+      <div>
 
         <CDataTable
-          :items="purchases"
+          :items="tableItems"
           :fields="fields"
           :items-per-page="10"
           :no-items-view="{
@@ -74,7 +68,15 @@
           :fixed="fixed"
           :dark="dark"
           pagination
+          :loading="loading"
         >
+
+          <template #loading>
+            <div class="text-center p-4">
+              <CSpinner color="primary" />
+              <p>Cargando...</p>
+            </div>
+          </template>
 
           <template #index="{ index }">
             <td>{{ index + 1 }}</td>
@@ -197,12 +199,11 @@
             { key: 'consecutive', label: 'Número de Compra' },
             { key: 'date', label: 'Día de creación' },
             { key: 'provider', label: 'Proveedor' },
-            { key: 'user_creator', label: 'Usuario Creador' },
+            { key: 'user_creator', label: 'Usuario Creador', _style:'min-width:30px;' },
             { key: 'type', label: 'Modo' },
             { key: 'boleta_factura', label: 'Tipo' },
             { key: 'subtotal', label: 'Subtotal (S/.)' },
             { key: 'deposit', label: 'Depositó (S/.)' },
-            // { key: 'consumption', label: 'Consumo' },
             { key: 'total', label: 'Total (S/.)' },
             { key: 'buttonTicket', label: 'Ticket', _style:'min-width:20%;' },
             { key: 'buttonView', label: 'Ver', _style:'min-width:20%;' },
@@ -220,6 +221,11 @@
     },
     mounted() {
       this.getPurchases();
+    },
+    computed: {
+      tableItems () {
+        return this.loading ? [] : this.purchases
+      }
     },
     data () {
       return {
@@ -252,11 +258,11 @@
     },
     methods: {
       async getPurchases(){
-        
+
         this.loading = true;
 
         try {
-          
+
           const url = this.$store.state.url;
           const response = await list(url + this.prefix_list, this.filters);
 
@@ -273,9 +279,9 @@
           }
 
         } finally {
-          
+
           this.loading = false;
-        
+
         }
 
       },
@@ -300,16 +306,16 @@
 
               const url = el.$store.state.url;
               const response = await destroy(url+el.prefix+`/${id}`);
-              
+
               if (response.status === 200) {
 
                 el.getPurchases();
                 Swal.fire("Alerta", response.data.message, "success");
-                
+
               }
 
             } catch (errors) {
-              
+
               if (errors.length > 0) {
                 Swal.fire("Alerta", errors[0], "warning");
               } else {
