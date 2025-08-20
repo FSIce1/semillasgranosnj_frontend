@@ -29,97 +29,89 @@
             </CCol>
             <CCol md="4">
               <CButton color="primary" @click="getProviderByPurchases" class="mr-1 mb-3">
-                <CIcon name="cil-share" /> Buscar
+                <CIcon name="cil-magnifying-glass" /> Buscar
               </CButton>
             </CCol>
           </CRow>
 
           <!-- LISTADO -->
-          <template v-if="loading">
-            <div class="sk-chase" style="margin-top: 10px; text-align: center">
-              <div class="sk-chase-dot"></div>
-              <div class="sk-chase-dot"></div>
-              <div class="sk-chase-dot"></div>
-              <div class="sk-chase-dot"></div>
-              <div class="sk-chase-dot"></div>
-              <div class="sk-chase-dot"></div>
-            </div>
-          </template>
-          <template v-else>
-            <CDataTable
-              :items="purchases"
-              :fields="fields"
-              hover
-              striped
-              border
-              small
-              fixed
-              :items-per-page="5"
-              :no-items-view="{
-                noItems: 'No hay registros',
-                noResults: 'No se encontraron resultados'
-              }"
-              pagination
-            >
-              <template #index="{ index }">
-                <td>{{ index + 1 }}</td>
-              </template>
+          <CDataTable
+            :items="tableItems"
+            :fields="fields"
+            :items-per-page="5"
+            :no-items-view="{
+              noItems: 'No hay registros',
+              noResults: 'No se encontraron resultados'
+            }"
+            hover
+            striped
+            border
+            small
+            fixed
+            pagination
+            :loading="loading"
+          >
 
-              <template #subtotal="{ item }">
-                <td>S/. {{ item.subtotal }}</td>
-              </template>
+            <template #loading>
+              <div class="text-center p-4">
+                <CSpinner color="primary" />
+                <p>Cargando...</p>
+              </div>
+            </template>
 
-              <template #deposit="{ item }">
-                <td>S/. {{ item.deposit }}</td>
-              </template>
+            <template #index="{ index }">
+              <td>{{ index + 1 }}</td>
+            </template>
 
-              <!-- <template #total="{ item }">
-                <td>S/. {{ item.total }}</td>
-              </template> -->
+            <template #subtotal="{ item }">
+              <td>S/. {{ item.subtotal }}</td>
+            </template>
 
-              <template #debt="{ item }">
-                <td>S/. {{ (item.subtotal - item.deposit).toFixed(4) }}</td>
-              </template>
+            <template #deposit="{ item }">
+              <td>S/. {{ item.deposit }}</td>
+            </template>
 
-              <!-- BUTTON VIEW -->
-              <template #buttonView="{item}">
-                <td>
-                  <CButton
-                    :name="item.id"
-                    size="sm"
-                    :key="item.id"
-                    color="twitter"
-                    @click="sendViewPurchase(item)"
-                  >
-                    <CIcon size="sm" name="cil-share"/>
-                  </CButton>
-                </td>
-              </template>
+            <template #debt="{ item }">
+              <td>S/. {{ (item.subtotal - item.deposit).toFixed(4) }}</td>
+            </template>
 
-              <!-- BUTTON SELECT -->
-              <template #buttonSelect="{ item }">
-                <td style="text-align: center">
-                  <CButton
-                    :name="item.id"
-                    size="sm"
-                    :key="item.id"
-                    color="facebook"
-                    @click="openModalDepositsPurchase(item)"
-                  >
-                    <CIcon size="sm" name="cil-share" />
-                  </CButton>
-                </td>
-              </template>
+            <!-- BUTTON VIEW -->
+            <template #buttonView="{item}">
+              <td class="text-center">
+                <CButton
+                  :name="item.id"
+                  size="sm"
+                  :key="item.id"
+                  color="twitter"
+                  @click="sendViewPurchase(item)"
+                >
+                  <CIcon size="sm" name="cil-magnifying-glass"/>
+                </CButton>
+              </td>
+            </template>
 
-            </CDataTable>
+            <!-- BUTTON SELECT -->
+            <template #buttonSelect="{ item }">
+              <td class="text-center">
+                <CButton
+                  :name="item.id"
+                  size="sm"
+                  :key="item.id"
+                  color="facebook"
+                  @click="openModalDepositsPurchase(item)"
+                >
+                  <CIcon size="sm" name="cil-magnifying-glass" />
+                </CButton>
+              </td>
+            </template>
 
-            <!-- Fila de sumas al final -->
-            <div style="text-align: right; padding: 10px; font-weight: bold;">
-              <span>Último Depósito: S/. {{ lastDeposit }}</span><br>
-              <span>Deuda Total: S/. {{ grandTotal }}</span><br>
-            </div>
+          </CDataTable>
 
-          </template>
+          <!-- Fila de sumas al final -->
+          <div style="text-align: right; padding: 10px; font-weight: bold;">
+            <span>Último Depósito: S/. {{ lastDeposit }}</span><br>
+            <span>Deuda Total: S/. {{ grandTotal }}</span><br>
+          </div>
 
         </CCardBody>
       </template>
@@ -201,6 +193,9 @@ export default {
   computed: {
     grandTotal() {
       return this.formatFloat(this.purchases.reduce((sum, item) => sum + (parseFloat(item.subtotal) - parseFloat(item.deposit)) || 0, 0));
+    },
+    tableItems () {
+      return this.loading ? [] : this.purchases
     }
   },
   async mounted() {

@@ -167,167 +167,149 @@
         @close-modal-stock-history="closeModalStockHistory"
       />
 
-      <!-- LIST -->
-      <div v-if="loading" class="text-center">
-        
-        <CSpinner color="primary" />
-        <p>Cargando...</p>
-      
-      </div>
-      <div v-else>
-      
-        <!-- FILTROS -->
-        <CRow>
-          <!-- <CCol md="3">
-            <CInput label="Código" v-model="filters.cod_product" />
-          </CCol> -->
-          <CCol md="3">
-            <CInput label="Nombre" v-model="filters.name" />
-          </CCol>
-          <!-- <CCol md="3">
-            <CInput label="Proceso" v-model="filters.process" />
-          </CCol> -->
-          <!-- <CCol md="3">
-            <CSelect
-              :value.sync="filters.type"
-              :options=types
-              @keyup.enter="getProductsWithFilters"
-              label="Tipo"
-              placeholder="Seleccione un tipo"
-            />
-          </CCol> -->
-        </CRow>
-        <CRow>
-          <CCol md="6" class="d-flex align-items-center">
-            <CButton color="primary" @click="getProductsWithFilters" class="mr-2" style="width: auto;">
-              <CIcon name="cil-share" /> Buscar
+      <!-- FILTROS -->
+      <CRow>
+        <CCol md="3">
+          <CInput label="Nombre" v-model="filters.name" />
+        </CCol>
+      </CRow>
+      <CRow>
+        <CCol md="6" class="d-flex align-items-center">
+          <CButton color="primary" @click="getProductsWithFilters" class="mr-2" style="width: auto;">
+            <CIcon name="cil-magnifying-glass" /> Buscar
+          </CButton>
+          <CButton color="info" @click="cleanFilters" class="mr-2" style="width: auto;">
+            <CIcon name="cil-share" /> Limpiar filtros
+          </CButton>
+          <CButton color="success" @click="downloadProducts" style="width: auto;">
+            <CIcon name="cil-spreadsheet" /> Generar Excel
+          </CButton>
+        </CCol>
+      </CRow>
+      <br />
+
+      <CDataTable
+        :items="tableItems"
+        :fields="fields"
+        :items-per-page="10"
+        :no-items-view="{
+          noItems: 'No hay registros',
+          noResults: 'No se encontraron resultados'
+        }"
+        :hover="hover"
+        :striped="striped"
+        :border="border"
+        :small="small"
+        :fixed="fixed"
+        :dark="dark"
+        pagination
+        :loading="loading"
+      >
+
+        <template #loading>
+          <div class="text-center p-4">
+            <CSpinner color="primary" />
+            <p>Cargando...</p>
+          </div>
+        </template>
+
+        <template #index="{ index }">
+          <td>{{ index + 1 }}</td>
+        </template>
+
+        <template #cod_product="{ item }">
+          <td>{{ item.cod_product }}</td>
+        </template>
+
+        <template #name="{ item }">
+          <td class="text-center">{{ item.name }}</td>
+        </template>
+
+        <template #price="{ item }">
+          <td class="text-center">S/. {{ item.price }}</td>
+        </template>
+
+        <template #price_purchase="{ item }">
+          <td class="text-center">S/. {{ item.price_purchase }}</td>
+        </template>
+
+        <!-- BUTTON STOCK -->
+        <template #buttonStock="{item}">
+          <td class="text-center">
+            <CButton
+              :name="item.id"
+              size="sm"
+              :key="item.id"
+              color="success"
+              @click="openModalStock(item)"
+            >
+              <CIcon size="sm" name="cil-pencil"/>
             </CButton>
-            <CButton color="info" @click="cleanFilters" class="mr-2" style="width: auto;">
-              <CIcon name="cil-share" /> Limpiar filtros
+          </td>
+        </template>
+
+        <!-- BUTTON HISTORIAL -->
+        <template #buttonHistory="{item}">
+          <td class="text-center">
+            <CButton
+              :name="item.id"
+              size="sm"
+              :key="item.id"
+              color="info"
+              @click="openModalStockHistory(item)"
+            >
+              <CIcon size="sm" name="cil-magnifying-glass"/>
             </CButton>
-            <CButton color="success" @click="downloadProducts" style="width: auto;">
-              <CIcon name="cil-cloud-download" /> Generar Excel
-            </CButton>
-          </CCol>
-        </CRow>
-        <br />
-        
-        <CDataTable
-          :items="products"
-          :fields="fields"
-          :items-per-page="10"
-          :no-items-view="{
-            noItems: 'No hay registros',
-            noResults: 'No se encontraron resultados'
-          }"
-          :hover="hover"
-          :striped="striped"
-          :border="border"
-          :small="small"
-          :fixed="fixed"
-          :dark="dark"
-          pagination
-        >
+          </td>
+        </template>
 
-          <template #index="{ index }">
-            <td>{{ index + 1 }}</td>
-          </template>
-
-          <template #cod_product="{ item }">
-            <td>{{ item.cod_product }}</td>
-          </template>
-
-          <template #name="{ item }">
-            <td>{{ item.name }}</td>
-          </template>
-
-          <template #price="{ item }">
-            <td>S/. {{ item.price }}</td>
-          </template>
-
-          <template #price_purchase="{ item }">
-            <td>S/. {{ item.price_purchase }}</td>
-          </template>
-
-          <!-- BUTTON STOCK -->
-          <template #buttonStock="{item}">
-            <td>
+        <!-- BUTTON EDIT -->
+        <template #buttonEdit="{item}">
+          <td class="text-center">
+            <template v-if="!loadingButtonEdit">
+              <CCardBody>
+                <div class="sk-chase">
+                  <div class="sk-chase-dot"></div>
+                  <div class="sk-chase-dot"></div>
+                  <div class="sk-chase-dot"></div>
+                  <div class="sk-chase-dot"></div>
+                  <div class="sk-chase-dot"></div>
+                  <div class="sk-chase-dot"></div>
+                </div>
+              </CCardBody>
+            </template>
+            <template v-else>
               <CButton
                 :name="item.id"
                 size="sm"
                 :key="item.id"
-                color="success"
-                @click="openModalStock(item)"
+                color="facebook"
+                @click="editModal(item.id)"
               >
                 <CIcon size="sm" name="cil-pencil"/>
               </CButton>
-            </td>
-          </template>
+            </template>
 
-          <!-- BUTTON HISTORIAL -->
-          <template #buttonHistory="{item}">
-            <td>
-              <CButton
-                :name="item.id"
-                size="sm"
-                :key="item.id"
-                color="info"
-                @click="openModalStockHistory(item)"
-              >
-                <CIcon size="sm" name="cil-share"/>
-              </CButton>
-            </td>
-          </template>
+          </td>
+        </template>
 
-          <!-- BUTTON EDIT -->
-          <template #buttonEdit="{item}">
-            <td>
-              <template v-if="!loadingButtonEdit">
-                <CCardBody>
-                  <div class="sk-chase">
-                    <div class="sk-chase-dot"></div>
-                    <div class="sk-chase-dot"></div>
-                    <div class="sk-chase-dot"></div>
-                    <div class="sk-chase-dot"></div>
-                    <div class="sk-chase-dot"></div>
-                    <div class="sk-chase-dot"></div>
-                  </div>
-                </CCardBody>
-              </template>
-              <template v-else>
-                <CButton
-                  :name="item.id"
-                  size="sm"
-                  :key="item.id"
-                  color="facebook"
-                  @click="editModal(item.id)"
-                >
-                  <CIcon size="sm" name="cil-comment-square"/>
-                </CButton>
-              </template>
+        <!-- BUTTON DELETE -->
+        <template #buttonDelete="{item}">
+          <td class="text-center">
+            <CButton
+              :name="item.id"
+              size="sm"
+              :key="item.id"
+              color="youtube"
+              @click="deleteProduct(item.id, item.name)"
+            >
+              <CIcon size="sm" name="cil-trash"/>
+            </CButton>
+          </td>
+        </template>
 
-            </td>
-          </template>
+      </CDataTable>
 
-          <!-- BUTTON DELETE -->
-          <template #buttonDelete="{item}">
-            <td>
-              <CButton
-                :name="item.id"
-                size="sm"
-                :key="item.id"
-                color="youtube"
-                @click="deleteProduct(item.id, item.name)"
-              >
-                <CIcon size="sm" name="cil-ban"/>
-              </CButton>
-            </td>
-          </template>
-
-        </CDataTable>
-      
-      </div>
-      
     </CCardBody>
   </CCard>
 </template>
@@ -352,21 +334,18 @@
         type: Array,
         default () {
           return [
-            { key: 'index', label: '#' },
-            // { key: 'cod_product', label: 'Código' },
-            { key: 'name', label: 'Nombre' },
-            // { key: 'type', label: 'Tipo' },
-            // { key: 'process', label: 'Proceso' },
-            { key: 'price', label: 'Precio de venta' },
-            { key: 'price_purchase', label: 'Precio de compra' },
-            { key: 'stock', label: 'Stock' },
-            // { key: 'stock_converted', label: 'Stock (SACO)' },
-            { key: 'unit_measure', label: 'UM' },
-            // { key: 'presentation', label: 'Presentación' },
-            { key: 'buttonStock', label: 'Stock', _style:'min-width:20%;' },
-            { key: 'buttonHistory', label: 'Historial', _style:'min-width:20%;' },
-            { key: 'buttonEdit', label: 'Editar', _style:'min-width:20%;' },
-            { key: 'buttonDelete', label: 'Eliminar', _style:'min-width:20%;' },
+            { key: 'index',           label: '#' },
+            { key: 'name',            label: 'Nombre',            _classes: 'text-center' },
+            { key: 'price',           label: 'Precio de venta',   _classes: 'text-center' },
+            { key: 'price_purchase',  label: 'Precio de compra',  _classes: 'text-center' },
+            { key: 'stock',           label: 'Stock',             _classes: 'text-center' },
+            { key: 'unit_measure',    label: 'UM',                _classes: 'text-center' },
+
+            // Botones de acción
+            { key: 'buttonStock',     label: 'Stock',     _classes: 'text-center', _style:'min-width:20%;' },
+            { key: 'buttonHistory',   label: 'Historial', _classes: 'text-center', _style:'min-width:20%;' },
+            { key: 'buttonEdit',      label: 'Editar',    _classes: 'text-center', _style:'min-width:20%;' },
+            { key: 'buttonDelete',    label: 'Eliminar',  _classes: 'text-center', _style:'min-width:20%;' },
           ]
         }
       },
@@ -389,6 +368,9 @@
     computed: {
       permissionStock (id) {
         return id && (sessionStorage.getItem("slug_role") == "admin");
+      },
+      tableItems () {
+        return this.loading ? [] : this.products
       }
     },
     data () {

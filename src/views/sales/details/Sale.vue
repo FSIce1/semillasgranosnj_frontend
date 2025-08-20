@@ -8,14 +8,14 @@
           class="btn btn-sm btn-youtube ml-1" 
           @click="downloadReport('sale_pdf', 'ticket', '.pdf')"
         >
-          <CIcon name="cil-print" class="mr-1"/> Imprimir ticket
+          <CIcon name="cil-spreadsheet" class="mr-1"/> Imprimir ticket
         </a>
         <a 
           href="#" 
           class="btn btn-sm btn-success ml-1"
           @click="downloadReport('sale_excel', 'excel', '.xlsx')"
         >
-          <CIcon name="cil-print" class="mr-1"/> Generar excel
+          <CIcon name="cil-spreadsheet" class="mr-1"/> Generar excel
         </a>
       </div>
     </CCardHeader>

@@ -1,14 +1,14 @@
 
 <template>
   <CModal title="Listado de Insumos" size="lg" :show="isVisible">
-    
+
     <slot name="header">
-      <CIcon name="cil-grid"/> Listado de Insumos 
+      <CIcon name="cil-grid"/> Listado de Productos 
     </slot>
-    
+
     <template>
       <CCardBody>
-  
+
         <!-- FILTROS -->
         <CRow class="align-items-end">
           <CCol md="4">
@@ -19,66 +19,55 @@
           </CCol>
           <CCol md="4">
             <CButton color="primary" @click="searchProducts" class="mr-1 mb-3">
-              <CIcon name="cil-share" /> Buscar
+              <CIcon name="cil-magnifying-glass" /> Buscar
             </CButton>
           </CCol>
         </CRow>
-  
+
         <!-- LISTADO -->
-        <template v-if="loadingProducts">
-          <div class="sk-chase" style="margin-top: 10px; text-align: center">
-            <div class="sk-chase-dot"></div>
-            <div class="sk-chase-dot"></div>
-            <div class="sk-chase-dot"></div>
-            <div class="sk-chase-dot"></div>
-            <div class="sk-chase-dot"></div>
-            <div class="sk-chase-dot"></div>
-          </div>
-        </template>
-        <template v-else>
-          <CDataTable
-            :items="products"
-            :fields="fields"
-            :no-items-view="{
-              noItems: 'No hay registros',
-              noResults: 'No se encontraron resultados'
-            }"
-            hover
-            striped
-            border
-            small
-            fixed
-            :items-per-page="5"
-            pagination
-          >
-            <template #index="{ index }">
-              <td>{{ index + 1 }}</td>
-            </template>
+        <CDataTable
+          :items="tableItems"
+          :fields="fields"
+          :items-per-page="5"
+          :no-items-view="{
+            noItems: 'No hay registros',
+            noResults: 'No se encontraron resultados'
+          }"
+          hover
+          striped
+          border
+          small
+          fixed
+          pagination
+          :loading="loadingProducts"
+        >
 
-            <!-- <template #stock="{ item }">
-              <td>{{ item.unit_measure_data.slug == "kg" ? item.stock : item.converted_stock }}</td>
-            </template>
+          <template #loading>
+            <div class="text-center p-4">
+              <CSpinner color="primary" />
+              <p>Cargando...</p>
+            </div>
+          </template>
 
-            <template #stock_converted="{ item }">
-              <td>{{ item.unit_measure_data.slug == "kg" ? item.converted_stock : item.stock }}</td>
-            </template> -->
-            
-            <template #buttonSelect="{ item }">
-              <td style="text-align: center">
-                <CButton
-                  :name="item.id"
-                  size="sm"
-                  :key="item.id"
-                  color="facebook"
-                  @click="selectProduct(item)"
-                >
-                  <CIcon size="sm" name="cil-share" />
-                </CButton>
-              </td>
-            </template>
-          </CDataTable>
-        </template>
-  
+          <template #index="{ index }">
+            <td>{{ index + 1 }}</td>
+          </template>
+
+          <template #buttonSelect="{ item }">
+            <td style="text-align: center">
+              <CButton
+                :name="item.id"
+                size="sm"
+                :key="item.id"
+                color="facebook"
+                @click="selectProduct(item)"
+              >
+                <CIcon size="sm" name="cil-magnifying-glass" />
+              </CButton>
+            </td>
+          </template>
+
+        </CDataTable>
       </CCardBody>
     </template>
     
@@ -124,12 +113,9 @@ export default {
             { key: "index", label: "#" },
             { key: "cod_product", label: "Código" },
             { key: "name", label: "Nombre" },
-            //{ key: "process", label: "Proceso" },
-            // { key: 'presentation', label: 'Presentación' },
             { key: "price", label: "Precio de venta (S/.)" },
             { key: "price_purchase", label: "Precio de compra (S/.)" },
             { key: 'stock', label: 'Stock' },
-            // { key: 'stock_converted', label: 'Stock (SACO)' },
             { key: "unit_measure", label: "UM" },
             {
                 key: "buttonSelect",
@@ -158,6 +144,11 @@ export default {
     this.filters.unit_measure = this.unitMeasure;
     this.filters.type         = this.type;
     await this.getProducts();
+  },
+  computed: {
+    tableItems () {
+      return this.loading ? [] : this.products
+    }
   },
   watch: {
     async isVisible(newValue) {

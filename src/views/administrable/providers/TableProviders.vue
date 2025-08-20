@@ -122,130 +122,82 @@
         @close-modal-purchases-by-provider="closeModalPurchasesByProvider"
       />
 
-      <!-- LIST -->
-      <div v-if="loading" class="text-center">
-        
-        <CSpinner color="primary" />
-        <p>Cargando...</p>
-      
-      </div>
-      <div v-else>
-      
-        <!-- FILTROS -->
-        <CRow>
-          <CCol md="3">
-            <CInput type="text" label="RUC" v-model="filters.document" />
-          </CCol>
-          <CCol md="3">
-            <CInput type="text" label="Nombre" v-model="filters.name" />
-          </CCol>
-          <CCol md="3">
-            <CSelect
-              :value.sync="filters.type"
-              :options=types
-              label="Tipo Compra"
-            />
-          </CCol>
-        </CRow>
-        <CRow>
-          <CCol md="6" class="d-flex align-items-center">
-            <CButton color="primary" @click="getProviders" class="mr-2" style="width: auto;">
-              <CIcon name="cil-share" /> Buscar
-            </CButton>
-            <CButton color="info" @click="cleanFilters" class="mr-2" style="width: auto;">
-              <CIcon name="cil-share" /> Limpiar filtros
-            </CButton>
-            <CButton color="success" @click="downloadExcelProviders" style="width: auto;">
-              <CIcon name="cil-cloud-download" /> Generar Excel
-            </CButton>
-          </CCol>
-        </CRow>
-        <br />
+      <!-- FILTROS -->
+      <CRow>
+        <CCol md="3">
+          <CInput type="text" label="RUC" v-model="filters.document" />
+        </CCol>
+        <CCol md="3">
+          <CInput type="text" label="Nombre" v-model="filters.name" />
+        </CCol>
+        <CCol md="3">
+          <CSelect
+            :value.sync="filters.type"
+            :options=types
+            label="Tipo Compra"
+          />
+        </CCol>
+      </CRow>
+      <CRow>
+        <CCol md="6" class="d-flex align-items-center">
+          <CButton color="primary" @click="getProviders" class="mr-2" style="width: auto;">
+            <CIcon name="cil-magnifying-glass" /> Buscar
+          </CButton>
+          <CButton color="info" @click="cleanFilters" class="mr-2" style="width: auto;">
+            <CIcon name="cil-share" /> Limpiar filtros
+          </CButton>
+          <CButton color="success" @click="downloadExcelProviders" style="width: auto;">
+            <CIcon name="cil-spreadsheet" /> Generar Excel
+          </CButton>
+        </CCol>
+      </CRow>
+      <br />
 
-        <CDataTable
-          :items="providers"
-          :fields="fields"
-          :items-per-page="10"
-          :no-items-view="{
-            noItems: 'No hay registros',
-            noResults: 'No se encontraron resultados'
-          }"
-          :hover="hover"
-          :striped="striped"
-          :border="border"
-          :small="small"
-          :fixed="fixed"
-          :dark="dark"
-          pagination
-        >
+      <CDataTable
+        :items="tableItems"
+        :fields="fields"
+        :items-per-page="10"
+        :no-items-view="{
+          noItems: 'No hay registros',
+          noResults: 'No se encontraron resultados'
+        }"
+        :hover="hover"
+        :striped="striped"
+        :border="border"
+        :small="small"
+        :fixed="fixed"
+        :dark="dark"
+        pagination
+        :loading="loading"
+      >
 
-          <template #index="{ index }">
-            <td>{{ index + 1 }}</td>
-          </template>
+        <template #loading>
+          <div class="text-center p-4">
+            <CSpinner color="primary" />
+            <p>Cargando...</p>
+          </div>
+        </template>
 
-          <!-- BUTTON VIEW -->
-          <template #buttonViewSales="{item}">
-            <td>
-              <CButton
-                :name="item.id"
-                size="sm"
-                :key="item.id"
-                color="twitter"
-                @click="openModalPurchasesByProvider(item)"
-              >
-                <CIcon size="sm" name="cil-share"/>
-              </CButton>
-            </td>
-          </template>
+        <template #index="{ index }">
+          <td>{{ index + 1 }}</td>
+        </template>
 
-          <!-- BUTTON EDIT -->
-          <template #buttonEdit="{item}">
-            <td>
-              <template v-if="!loadingButtonEdit">
-                <CCardBody>
-                  <div class="sk-chase">
-                    <div class="sk-chase-dot"></div>
-                    <div class="sk-chase-dot"></div>
-                    <div class="sk-chase-dot"></div>
-                    <div class="sk-chase-dot"></div>
-                    <div class="sk-chase-dot"></div>
-                    <div class="sk-chase-dot"></div>
-                  </div>
-                </CCardBody>
-              </template>
-              <template v-else>
-                <CButton
-                  :name="item.id"
-                  size="sm"
-                  :key="item.id"
-                  color="facebook"
-                  @click="editModal(item.id)"
-                >
-                  <CIcon size="sm" name="cil-comment-square"/>
-                </CButton>
-              </template>
-  
-            </td>
-          </template>
+        <!-- BUTTON VIEW -->
+        <template #buttonViewSales="{item}">
+          <BaseButton :modo="'ver'" @click="openModalPurchasesByProvider(item)" />
+        </template>
 
-          <!-- BUTTON DELETE -->
-          <template #buttonDelete="{item}">
-            <td>
-              <CButton
-                :name="item.id"
-                size="sm"
-                :key="item.id"
-                color="youtube"
-                @click="deleteProvider(item.id, item.name)"
-              >
-                <CIcon size="sm" name="cil-ban"/>
-              </CButton>
-            </td>
-          </template>
+        <!-- BUTTON EDIT -->
+        <template #buttonEdit="{item}">
+          <BaseButton :modo="'editar'" :loading="loadingButtonEdit[item.id]" @click="editModal(item.id)"></BaseButton>
+        </template>
 
-        </CDataTable>
+        <!-- BUTTON DELETE -->
+        <template #buttonDelete="{item}">
+          <BaseButton :modo="'eliminar'" @click="deleteProvider(item.id, item.name)"></BaseButton>
+        </template>
 
-      </div>
+      </CDataTable>
 
     </CCardBody>
   </CCard>
@@ -269,15 +221,15 @@
         type: Array,
         default () {
           return [
-            { key: 'index', label: '#' },
-            { key: 'document', label: 'RUC' },
-            { key: 'name', label: 'Nombre' },
-            { key: 'phone', label: 'Teléfono' },
-            { key: 'address', label: 'Dirección' },
-            { key: 'description', label: 'Descripción' },
-            { key: 'buttonViewSales', label: 'Ver', _style:'min-width:20%;' },
-            { key: 'buttonEdit', label: 'Editar', _style:'min-width:20%;' },
-            { key: 'buttonDelete', label: 'Eliminar', _style:'min-width:20%;' },
+            { key: 'index',           label: '#' },
+            { key: 'document',        label: 'RUC' },
+            { key: 'name',            label: 'Nombre' },
+            { key: 'phone',           label: 'Teléfono' },
+            { key: 'address',         label: 'Dirección' },
+            { key: 'description',     label: 'Descripción' },
+            { key: 'buttonViewSales', label: 'Ver',      _classes: 'text-center', _style:'min-width:20%;' },
+            { key: 'buttonEdit',      label: 'Editar',   _classes: 'text-center', _style:'min-width:20%;' },
+            { key: 'buttonDelete',    label: 'Eliminar', _classes: 'text-center', _style:'min-width:20%;' },
           ]
         }
       },
@@ -294,6 +246,11 @@
     },
     mounted() {
       this.getProviders();
+    },
+    computed: {
+      tableItems () {
+        return this.loading ? [] : this.providers
+      }
     },
     data () {
       return {

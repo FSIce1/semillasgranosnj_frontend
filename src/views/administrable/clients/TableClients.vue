@@ -121,129 +121,129 @@
         @get-clients="getClients"
       />
 
-      <!-- LIST -->
-      <div v-if="loading" class="text-center">
-        
-        <CSpinner color="primary" />
-        <p>Cargando...</p>
-      
-      </div>
-      <div v-else>
+      <!-- FILTROS -->
+      <CRow>
+        <CCol md="3">
+          <CInput type="text" label="DNI" v-model="filters.document" />
+        </CCol>
+        <CCol md="3">
+          <CInput type="text" label="Nombre" v-model="filters.name" />
+        </CCol>
+        <CCol md="3">
+          <CSelect
+            :value.sync="filters.type"
+            :options=types
+            label="Tipo Venta"
+          />
+        </CCol>
+      </CRow>
+      <CRow>
+        <CCol md="6" class="d-flex align-items-center">
+          <CButton color="primary" @click="getClients" class="mr-2" style="width: auto;">
+            <CIcon name="cil-magnifying-glass" /> Buscar
+          </CButton>
+          <CButton color="info" @click="cleanFilters" class="mr-2" style="width: auto;">
+            <CIcon name="cil-share" /> Limpiar filtros
+          </CButton>
+          <CButton color="success" @click="downloadExcelClients" style="width: auto;">
+            <CIcon name="cil-spreadsheet" /> Generar Excel
+          </CButton>
+        </CCol>
+      </CRow>
+      <br />
 
-        <!-- FILTROS -->
-        <CRow>
-          <CCol md="3">
-            <CInput type="text" label="DNI" v-model="filters.document" />
-          </CCol>
-          <CCol md="3">
-            <CInput type="text" label="Nombre" v-model="filters.name" />
-          </CCol>
-          <CCol md="3">
-            <CSelect
-              :value.sync="filters.type"
-              :options=types
-              label="Tipo Venta"
-            />
-          </CCol>
-        </CRow>
-        <CRow>
-          <CCol md="6" class="d-flex align-items-center">
-            <CButton color="primary" @click="getClients" class="mr-2" style="width: auto;">
-              <CIcon name="cil-share" /> Buscar
+      <CDataTable
+        :items="tableItems"
+        :fields="fields"
+        :items-per-page="10"
+        :no-items-view="{
+          noItems: 'No hay registros',
+          noResults: 'No se encontraron resultados'
+        }"
+        :hover="hover"
+        :striped="striped"
+        :border="border"
+        :small="small"
+        :fixed="fixed"
+        :dark="dark"
+        pagination
+        :loading="loading"
+      >
+
+        <template #loading>
+          <div class="text-center p-4">
+            <CSpinner color="primary" />
+            <p>Cargando...</p>
+          </div>
+        </template>
+
+        <template #index="{ index }">
+          <td>{{ index + 1 }}</td>
+        </template>
+
+        <!-- BUTTON VIEW -->
+        <template #buttonViewSales="{item}">
+          <td class="text-center">
+            <CButton
+              :name="item.id"
+              size="sm"
+              :key="item.id"
+              color="twitter"
+              variant="outline"
+              @click="openModalSalesByClient(item)"
+            >
+              <CIcon size="sm" name="cil-magnifying-glass"/>
             </CButton>
-            <CButton color="info" @click="cleanFilters" class="mr-2" style="width: auto;">
-              <CIcon name="cil-share" /> Limpiar filtros
-            </CButton>
-            <CButton color="success" @click="downloadExcelClients" style="width: auto;">
-              <CIcon name="cil-cloud-download" /> Generar Excel
-            </CButton>
-          </CCol>
-        </CRow>
-        <br />
+          </td>
+        </template>
 
-        <CDataTable
-          :items="clients"
-          :fields="fields"
-          :items-per-page="10"
-          :no-items-view="{
-            noItems: 'No hay registros',
-            noResults: 'No se encontraron resultados'
-          }"
-          :hover="hover"
-          :striped="striped"
-          :border="border"
-          :small="small"
-          :fixed="fixed"
-          :dark="dark"
-          pagination
-        >
-
-          <template #index="{ index }">
-            <td>{{ index + 1 }}</td>
-          </template>
-
-          <!-- BUTTON VIEW -->
-          <template #buttonViewSales="{item}">
-            <td>
+        <!-- BUTTON EDIT -->
+        <template #buttonEdit="{item}">
+          <td class="text-center">
+            <template v-if="!loadingButtonEdit">
+              <CCardBody>
+                <div class="sk-chase">
+                  <div class="sk-chase-dot"></div>
+                  <div class="sk-chase-dot"></div>
+                  <div class="sk-chase-dot"></div>
+                  <div class="sk-chase-dot"></div>
+                  <div class="sk-chase-dot"></div>
+                  <div class="sk-chase-dot"></div>
+                </div>
+              </CCardBody>
+            </template>
+            <template v-else>
               <CButton
                 :name="item.id"
                 size="sm"
                 :key="item.id"
-                color="twitter"
-                @click="openModalSalesByClient(item)"
+                color="facebook"
+                variant="outline"
+                @click="editModal(item.id)"
               >
-                <CIcon size="sm" name="cil-share"/>
+                <CIcon size="sm" name="cil-comment-square"/>
               </CButton>
-            </td>
-          </template>
+            </template>
+          </td>
+        </template>
 
-          <!-- BUTTON EDIT -->
-          <template #buttonEdit="{item}">
-            <td>
-              <template v-if="!loadingButtonEdit">
-                <CCardBody>
-                  <div class="sk-chase">
-                    <div class="sk-chase-dot"></div>
-                    <div class="sk-chase-dot"></div>
-                    <div class="sk-chase-dot"></div>
-                    <div class="sk-chase-dot"></div>
-                    <div class="sk-chase-dot"></div>
-                    <div class="sk-chase-dot"></div>
-                  </div>
-                </CCardBody>
-              </template>
-              <template v-else>
-                <CButton
-                  :name="item.id"
-                  size="sm"
-                  :key="item.id"
-                  color="facebook"
-                  @click="editModal(item.id)"
-                >
-                  <CIcon size="sm" name="cil-comment-square"/>
-                </CButton>
-              </template>
-            </td>
-          </template>
+        <!-- BUTTON DELETE -->
+        <template #buttonDelete="{item}">
+          <td class="text-center">
+            <CButton
+              :name="item.id"
+              size="sm"
+              :key="item.id"
+              color="danger"
+              variant="outline"
+              @click="deleteClient(item.id, item.name)"
+            >
+              <CIcon size="sm" name="cil-trash"/>
+            </CButton>
+          </td>
+        </template>
 
-          <!-- BUTTON DELETE -->
-          <template #buttonDelete="{item}">
-            <td>
-              <CButton
-                :name="item.id"
-                size="sm"
-                :key="item.id"
-                color="youtube"
-                @click="deleteClient(item.id, item.name)"
-              >
-                <CIcon size="sm" name="cil-ban"/>
-              </CButton>
-            </td>
-          </template>
-
-        </CDataTable>
-        
-      </div>
+      </CDataTable>
 
     </CCardBody>
   </CCard>
@@ -267,15 +267,17 @@
         type: Array,
         default () {
           return [
-            { key: 'index', label: '#' },
-            { key: 'document', label: 'DNI' },
-            { key: 'name', label: 'Nombre' },
-            { key: 'phone', label: 'Teléfono' },
-            { key: 'address', label: 'Dirección' },
-            { key: 'description', label: 'Descripción' },
-            { key: 'buttonViewSales', label: 'Ver', _style:'min-width:20%;' },
-            { key: 'buttonEdit', label: 'Editar', _style:'min-width:20%;' },
-            { key: 'buttonDelete', label: 'Eliminar', _style:'min-width:20%;' },
+            { key: 'index',           label: '#' },
+            { key: 'document',        label: 'DNI' },
+            { key: 'name',            label: 'Nombre' },
+            { key: 'phone',           label: 'Teléfono' },
+            { key: 'address',         label: 'Dirección' },
+            { key: 'description',     label: 'Descripción' },
+
+            // Botones de acción
+            { key: 'buttonViewSales', label: 'Ver',      _classes: 'text-center', _style:'min-width:20%;' },
+            { key: 'buttonEdit',      label: 'Editar',   _classes: 'text-center', _style:'min-width:20%;' },
+            { key: 'buttonDelete',    label: 'Eliminar', _classes: 'text-center', _style:'min-width:20%;' },
           ]
         }
       },
@@ -292,6 +294,11 @@
     },
     mounted() {
       this.getClients();
+    },
+    computed: {
+      tableItems () {
+        return this.loading ? [] : this.clients
+      }
     },
     data () {
       return {
@@ -326,7 +333,7 @@
     },
     methods: {
       async getClients(){
-        
+
         this.loading = true;
 
         try {

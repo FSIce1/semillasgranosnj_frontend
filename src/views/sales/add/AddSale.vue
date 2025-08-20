@@ -171,6 +171,7 @@
                 </template>
                 <template v-else>
                   <CButton color="primary" @click="saveSale()" class="mr-1 mb-3">
+                    <CIcon name="cil-save" class="mr-1"/>
                     <span v-text="btnSaveSale"></span>
                   </CButton>
                 </template>

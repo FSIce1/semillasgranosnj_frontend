@@ -57,9 +57,9 @@
     },
     methods: {
       async home(){
-        this.$router.push({ 
-          name: 'Inicio', 
-        });
+        if (this.$route.name !== 'Inicio') {
+          this.$router.push({ name: 'Inicio' })
+        }
       },
       async logout(){
                         

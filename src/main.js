@@ -8,9 +8,11 @@ import { iconsSet as icons } from './assets/icons/icons.js'
 import store from './store'
 import i18n from './i18n.js'
 import '@babel/polyfill';
+import BaseButton from './views/components/BaseButton.vue'
 
 Vue.use(CoreuiVuePro)
 Vue.prototype.$log = console.log.bind(console)
+Vue.component('BaseButton', BaseButton)
 
 new Vue({
   el: '#app',

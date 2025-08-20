@@ -10,41 +10,35 @@
 
       <template>
         <CCardBody>
+          <CDataTable
+            :items="tableItems"
+            :fields="fields"
+            :items-per-page="5"
+            :no-items-view="{
+              noItems: 'No hay registros',
+              noResults: 'No se encontraron resultados'
+            }"
+            hover
+            striped
+            border
+            small
+            fixed
+            pagination
+            :loading="loading"
+          >
 
-          <!-- LISTADO -->
-          <template v-if="loading">
-            <div class="sk-chase" style="margin-top: 10px; text-align: center">
-              <div class="sk-chase-dot"></div>
-              <div class="sk-chase-dot"></div>
-              <div class="sk-chase-dot"></div>
-              <div class="sk-chase-dot"></div>
-              <div class="sk-chase-dot"></div>
-              <div class="sk-chase-dot"></div>
-            </div>
-          </template>
-          <template v-else>
-            <CDataTable
-              :items="history"
-              :fields="fields"
-              :no-items-view="{
-                noItems: 'No hay registros',
-                noResults: 'No se encontraron resultados'
-              }"
-              hover
-              striped
-              border
-              small
-              fixed
-              :items-per-page="5"
-              pagination
-            >
-              <template #index="{ index }">
-                <td>{{ index + 1 }}</td>
-              </template>
-            </CDataTable>
+            <template #loading>
+              <div class="text-center p-4">
+                <CSpinner color="primary" />
+                <p>Cargando...</p>
+              </div>
+            </template>
 
-          </template>
+            <template #index="{ index }">
+              <td>{{ index + 1 }}</td>
+            </template>
 
+          </CDataTable>
         </CCardBody>
       </template>
 
@@ -80,10 +74,10 @@ export default {
       type: Array,
       default() {
         return [
-            { key: "index", label: "#" },
-            { key: "date", label: "Día" },
-            { key: 'stock', label: 'Stock' },
-            { key: "type", label: "Tipo" },
+            { key: "index",       label: "#" },
+            { key: "date",        label: "Día" },
+            { key: 'stock',       label: 'Stock' },
+            { key: "type",        label: "Tipo" },
             { key: "description", label: "Descripción" },
         ];
       },
@@ -102,6 +96,11 @@ export default {
   },
   async mounted() {
     await this.getProductStockHistory();
+  },
+  computed: {
+    tableItems () {
+      return this.loading ? [] : this.history
+    }
   },
   watch: {
     async isVisibleModalHistory(newValue) {

@@ -7,7 +7,7 @@
       <CRow>
         <CCol lg="12">
           <CForm>
-            
+
             <CRow>
               <CCol md="4">
                 <template v-if="loadingProviders">
@@ -172,6 +172,7 @@
                 </template>
                 <template v-else>
                   <CButton color="primary" @click="savePurchase()" class="mr-1 mb-3">
+                    <CIcon name="cil-save" class="mr-1"/>
                     <span v-text="btnSaveSale"></span>
                   </CButton>
                 </template>

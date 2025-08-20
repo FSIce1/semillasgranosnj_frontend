@@ -117,115 +117,112 @@
 
       </CModal>
 
-      <!-- LIST -->
-      <div v-if="loading" class="text-center">
-        
-        <CSpinner color="primary" />
-        <p>Cargando...</p>
-      
-      </div>
-      <div v-else>
-        
-        <!-- FILTROS -->
-        <CRow>
-          <CCol md="3">
-            <CInput type="text" label="Usuario" v-model="filters.username" />
-          </CCol>
-          <CCol md="3">
-            <CInput type="text" label="Nombre" v-model="filters.name" />
-          </CCol>
-          <CCol md="3">
-            <CInput type="text" label="Email" v-model="filters.email" />
-          </CCol>
-          <CCol md="3">
-            <CInput type="text" label="Rol" v-model="filters.role" />
-          </CCol>
-        </CRow>
-        <CRow>
-          <CCol md="6" class="d-flex align-items-center">
-            <CButton color="primary" @click="getUsers" class="mr-2" style="width: auto;">
-              <CIcon name="cil-share" /> Buscar
-            </CButton>
-            <CButton color="info" @click="cleanFilters" class="mr-2" style="width: auto;">
-              <CIcon name="cil-share" /> Limpiar filtros
-            </CButton>
-            <CButton color="success" @click="downloadExcelUsers" style="width: auto;">
-              <CIcon name="cil-cloud-download" /> Generar Excel
-            </CButton>
-          </CCol>
-        </CRow>
-        <br />
+      <!-- FILTROS -->
+      <CRow>
+        <CCol md="3">
+          <CInput type="text" label="Usuario" v-model="filters.username" />
+        </CCol>
+        <CCol md="3">
+          <CInput type="text" label="Nombre" v-model="filters.name" />
+        </CCol>
+        <CCol md="3">
+          <CInput type="text" label="Email" v-model="filters.email" />
+        </CCol>
+        <CCol md="3">
+          <CInput type="text" label="Rol" v-model="filters.role" />
+        </CCol>
+      </CRow>
+      <CRow>
+        <CCol md="6" class="d-flex align-items-center">
+          <CButton color="primary" @click="getUsers" class="mr-2" style="width: auto;">
+            <CIcon name="cil-magnifying-glass" /> Buscar
+          </CButton>
+          <CButton color="info" @click="cleanFilters" class="mr-2" style="width: auto;">
+            <CIcon name="cil-share" /> Limpiar filtros
+          </CButton>
+          <CButton color="success" @click="downloadExcelUsers" style="width: auto;">
+            <CIcon name="cil-spreadsheet" /> Generar Excel
+          </CButton>
+        </CCol>
+      </CRow>
+      <br />
 
-        <CDataTable
-          :items="users"
-          :fields="fields"
-          :items-per-page="10"
-          :no-items-view="{
-            noItems: 'No hay registros',
-            noResults: 'No se encontraron resultados'
-          }"
-          :hover="hover"
-          :striped="striped"
-          :border="border"
-          :small="small"
-          :fixed="fixed"
-          :dark="dark"
-          pagination
-        >
-  
-          <template #index="{ index }">
-            <td>{{ index + 1 }}</td>
-          </template>
-          
-          <!-- BUTTON EDIT -->
-          <template #buttonEdit="{item}">
-            <td>
-              <template v-if="!loadingButtonEdit">
-                <CCardBody>
-                  <div class="sk-chase">
-                    <div class="sk-chase-dot"></div>
-                    <div class="sk-chase-dot"></div>
-                    <div class="sk-chase-dot"></div>
-                    <div class="sk-chase-dot"></div>
-                    <div class="sk-chase-dot"></div>
-                    <div class="sk-chase-dot"></div>
-                  </div>
-                </CCardBody>
-              </template>
-              <template v-else>
-                <CButton
-                  :name="item.id"
-                  size="sm"
-                  :key="item.id"
-                  color="facebook"
-                  @click="editModal(item.id)"
-                >
-                  <CIcon size="sm" name="cil-comment-square"/>
-                </CButton>
-              </template>
-  
-            </td>
-          </template>
-  
-          <!-- BUTTON DELETE -->
-          <template #buttonDelete="{item}">
-            <td>
+      <CDataTable
+        :items="tableItems"
+        :fields="fields"
+        :items-per-page="10"
+        :no-items-view="{
+          noItems: 'No hay registros',
+          noResults: 'No se encontraron resultados'
+        }"
+        :hover="hover"
+        :striped="striped"
+        :border="border"
+        :small="small"
+        :fixed="fixed"
+        :dark="dark"
+        pagination
+        :loading="loading"
+      >
+
+        <template #loading>
+          <div class="text-center p-4">
+            <CSpinner color="primary" />
+            <p>Cargando...</p>
+          </div>
+        </template>
+
+        <template #index="{ index }">
+          <td>{{ index + 1 }}</td>
+        </template>
+
+        <!-- BUTTON EDIT -->
+        <template #buttonEdit="{item}">
+          <td class="text-center">
+            <template v-if="!loadingButtonEdit">
+              <CCardBody>
+                <div class="sk-chase">
+                  <div class="sk-chase-dot"></div>
+                  <div class="sk-chase-dot"></div>
+                  <div class="sk-chase-dot"></div>
+                  <div class="sk-chase-dot"></div>
+                  <div class="sk-chase-dot"></div>
+                  <div class="sk-chase-dot"></div>
+                </div>
+              </CCardBody>
+            </template>
+            <template v-else>
               <CButton
                 :name="item.id"
                 size="sm"
                 :key="item.id"
-                color="youtube"
-                @click="deleteUser(item.id, item.name)"
+                color="facebook"
+                @click="editModal(item.id)"
               >
-                <CIcon size="sm" name="cil-ban"/>
+                <CIcon size="sm" name="cil-pencil"/>
               </CButton>
-            </td>
-          </template>
-  
-        </CDataTable>
+            </template>
 
-      </div>
-      
+          </td>
+        </template>
+
+        <!-- BUTTON DELETE -->
+        <template #buttonDelete="{item}">
+          <td class="text-center">
+            <CButton
+              :name="item.id"
+              size="sm"
+              :key="item.id"
+              color="youtube"
+              @click="deleteUser(item.id, item.name)"
+            >
+              <CIcon size="sm" name="cil-trash"/>
+            </CButton>
+          </td>
+        </template>
+
+      </CDataTable>
+
     </CCardBody>
   </CCard>
 </template>
@@ -244,14 +241,14 @@
         type: Array,
         default () {
           return [
-            { key: 'index', label: '#' },
-            { key: 'username', label: 'Usuario' },
-            { key: 'name', label: 'Nombre' },
-            { key: 'email', label: 'Email' },
-            { key: 'phone', label: 'Teléfono' },
-            { key: 'role', label: 'Tipo de Usuario' },
-            { key: 'buttonEdit', label: 'Editar', _style:'min-width:20%;' },
-            { key: 'buttonDelete', label: 'Eliminar', _style:'min-width:20%;' },
+            { key: 'index',         label: '#' },
+            { key: 'username',      label: 'Usuario',         _classes: 'text-center' },
+            { key: 'name',          label: 'Nombre',          _classes: 'text-center' },
+            { key: 'email',         label: 'Email',           _classes: 'text-center' },
+            { key: 'phone',         label: 'Teléfono',        _classes: 'text-center' },
+            { key: 'role',          label: 'Tipo de Usuario', _classes: 'text-center' },
+            { key: 'buttonEdit',    label: 'Editar',          _classes: 'text-center', _style:'min-width:20%;' },
+            { key: 'buttonDelete',  label: 'Eliminar',        _classes: 'text-center', _style:'min-width:20%;' },
           ]
         }
       },
@@ -269,6 +266,11 @@
     async mounted() {
       await this.getRoles();
       await this.getUsers();
+    },
+    computed: {
+      tableItems () {
+        return this.loading ? [] : this.users
+      }
     },
     data () {
       return {
@@ -305,11 +307,11 @@
     },
     methods: {
       async getUsers(){
-        
+
         this.loading = true;
 
         try {
-                    
+
           const url = this.$store.state.url;
           const response = await list(url + this.prefix_list, this.filters);
 

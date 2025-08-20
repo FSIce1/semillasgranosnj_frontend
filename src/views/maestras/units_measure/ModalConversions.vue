@@ -11,93 +11,88 @@
       <template>
         <CCardBody>
 
-          <!-- LISTADO -->
-          <template v-if="loading">
-            <div class="sk-chase" style="margin-top: 10px; text-align: center">
-              <div class="sk-chase-dot"></div>
-              <div class="sk-chase-dot"></div>
-              <div class="sk-chase-dot"></div>
-              <div class="sk-chase-dot"></div>
-              <div class="sk-chase-dot"></div>
-              <div class="sk-chase-dot"></div>
-            </div>
-          </template>
-          <template v-else>
+          <!-- FILTROS -->
+          <CRow class="align-items-end">
+            <CCol md="4">
+              <CSelect
+                :value.sync="filters.unitMeasure"
+                :disabled="loadingUnitMeasure"
+                :options=units_measure
+                @keyup.enter="saveConvertion()"
+                label="Unidad de Medida"
+                placeholder="Seleccione una unidad de medida"
+                required
+              />
+            </CCol>
+            <CCol md="4">
+              <CInput
+                :value.sync="filters.amount"
+                @keyup.enter="saveConvertion()"
+                @keydown="preventInvalidDecimal($event)"
+                label="Factor de conversión"
+                placeholder="Ingresa una cantidad"
+              />
+            </CCol>
+            <CCol md="4">
+              <CSelect
+                :value.sync="filters.unitMeasureConvert"
+                :disabled="loadingUnitMeasure"
+                :options=units_measure
+                @keyup.enter="saveConvertion()"
+                label="Unidad de Medida 2"
+                placeholder="Seleccione una unidad de medida"
+                required
+              />
+            </CCol>
+            <CCol md="4">
+              <CButton color="primary" @click="saveConvertion()" class="mr-1 mb-3"><CIcon name="cil-save"/> Guardar</CButton>
+            </CCol>
+          </CRow>
 
-            <!-- FILTROS -->
-            <CRow class="align-items-end">
-              <CCol md="4">
-                <CSelect
-                  :value.sync="filters.unitMeasure"
-                  :disabled="loadingUnitMeasure"
-                  :options=units_measure
-                  @keyup.enter="saveConvertion()"
-                  label="Unidad de Medida"
-                  placeholder="Seleccione una unidad de medida"
-                  required
-                />
-              </CCol>
-              <CCol md="4">
-                <CInput
-                  :value.sync="filters.amount"
-                  @keyup.enter="saveConvertion()"
-                  @keydown="preventInvalidDecimal($event)"
-                  label="Factor de conversión"
-                  placeholder="Ingresa una cantidad"
-                />
-              </CCol>
-              <CCol md="4">
-                <CSelect
-                  :value.sync="filters.unitMeasureConvert"
-                  :disabled="loadingUnitMeasure"
-                  :options=units_measure
-                  @keyup.enter="saveConvertion()"
-                  label="Unidad de Medida 2"
-                  placeholder="Seleccione una unidad de medida"
-                  required
-                />
-              </CCol>
-              <CCol md="4">
-                <CButton color="primary" @click="saveConvertion()" class="mr-1 mb-3"><CIcon name="cil-save"/> Guardar</CButton>
-              </CCol>
-            </CRow>
+          <CDataTable
+            :items="tableItems"
+            :fields="fields"
+            :items-per-page="5"
+            :no-items-view="{
+              noItems: 'No hay registros',
+              noResults: 'No se encontraron resultados'
+            }"
+            hover
+            striped
+            border
+            small
+            fixed
+            pagination
+            :loading="loading"
+          >
 
-            <CDataTable
-              :items="convertions"
-              :fields="fields"
-              :no-items-view="{
-                noItems: 'No hay registros',
-                noResults: 'No se encontraron resultados'
-              }"
-              hover
-              striped
-              border
-              small
-              fixed
-              :items-per-page="5"
-              pagination
-            >
-              <template #index="{ index }">
-                <td>{{ index + 1 }}</td>
-              </template>
+            <template #loading>
+              <div class="text-center p-4">
+                <CSpinner color="primary" />
+                <p>Cargando...</p>
+              </div>
+            </template>
 
-              <!-- BUTTON DELETE -->
-              <template #buttonDelete="{item}">
-                <td>
-                  <CButton
-                    :name="item.id"
-                    size="sm"
-                    :key="item.id"
-                    color="youtube"
-                    @click="deleteConvertion(item.id)"
-                  >
-                    <CIcon size="sm" name="cil-ban"/>
-                  </CButton>
-                </td>
-              </template>
+            <template #index="{ index }">
+              <td>{{ index + 1 }}</td>
+            </template>
 
-            </CDataTable>
-          </template>
+            <!-- BUTTON DELETE -->
+            <template #buttonDelete="{item}">
+              <td>
+                <CButton
+                  :name="item.id"
+                  size="sm"
+                  :key="item.id"
+                  color="youtube"
+                  @click="deleteConvertion(item.id)"
+                >
+                  <CIcon size="sm" name="cil-trash"/>
+                </CButton>
+              </td>
+            </template>
+
+          </CDataTable>
 
         </CCardBody>
       </template>
@@ -164,6 +159,11 @@
     },
     async mounted() {
       await this.getConvertionsByUnit();
+    },
+    computed: {
+      tableItems () {
+        return this.loading ? [] : this.convertions
+      }
     },
     watch: {
       async isVisible(newValue) {

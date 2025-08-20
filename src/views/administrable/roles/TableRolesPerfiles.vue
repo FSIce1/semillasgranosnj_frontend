@@ -60,70 +60,70 @@
 
       </CModal>
 
+      <!-- FILTROS -->
+      <CRow>
+        <CCol md="3">
+          <template v-if="loadingRoles">
+            <div class="spinner-border m-4" role="status">
+              <span class="visually-hidden"></span>
+            </div>
+          </template>
+          <template v-else>
+            <CSelect
+              :value.sync="role_id"
+              :options="roles"
+              label="Perfiles"
+              @change="getFunctions"
+            />
+          </template>
+        </CCol>
+      </CRow>
+
       <!-- LIST -->
-      <div v-if="loading" class="text-center">
-        <CSpinner color="primary" />
-        <p>Cargando...</p>
-      </div>
-      <div v-else>
+      <CDataTable
+        :items="tableItems"
+        :fields="fields"
+        :items-per-page="10"
+        :no-items-view="{
+          noItems: 'No hay registros',
+          noResults: 'No se encontraron resultados'
+        }"
+        :hover="hover"
+        :striped="striped"
+        :border="border"
+        :small="small"
+        :fixed="fixed"
+        :dark="dark"
+        pagination
+        :loading="loading"
+      >
 
-        <!-- FILTROS -->
-        <CRow>
-          <CCol md="3">
-            <template v-if="loadingRoles">
-              <div class="spinner-border m-4" role="status">
-                <span class="visually-hidden"></span>
-              </div>
-            </template>
-            <template v-else>
-              <CSelect
-                :value.sync="role_id"
-                :options="roles"
-                label="Perfiles"
-                @change="getFunctions"
+        <template #loading>
+          <div class="text-center p-4">
+            <CSpinner color="primary" />
+            <p>Cargando...</p>
+          </div>
+        </template>
+
+        <template #index="{ index }">
+          <td>{{ index + 1 }}</td>
+        </template>
+
+        <template #buttonChange="{item}">
+          <td>
+            <label class="custom-checkbox">
+              <input
+                type="checkbox"
+                v-model="item.checked"
+                @change="changePermission(item)"
               />
-            </template>
-          </CCol>
-        </CRow>
+              <span class="checkmark"></span>
+            </label>
+          </td>
+        </template>
 
-        <CDataTable
-          :items="functions"
-          :hover="hover"
-          :striped="striped"
-          :border="border"
-          :small="small"
-          :fixed="fixed"
-          :fields="fields"
-          :dark="dark"
-          :items-per-page="10"
-          :no-items-view="{
-            noItems: 'No hay registros',
-            noResults: 'No se encontraron resultados'
-          }"
-          pagination
-        >
-        
-          <template #index="{ index }">
-            <td>{{ index + 1 }}</td>
-          </template>
-          
-          <template #buttonChange="{item}">
-            <td>
-              <!-- <CSwitch class="mx-1" color="success" shape="pill" @change="changePermission(item)" v-model="item.checked" /> -->
-              <label class="custom-checkbox">
-                <input
-                  type="checkbox"
-                  v-model="item.checked"
-                  @change="changePermission(item)"
-                />
-                <span class="checkmark"></span>
-              </label>
-            </td>
-          </template>
+      </CDataTable>
 
-        </CDataTable>
-
-      </div>
     </CCardBody>
   </CCard>
 </template>
@@ -184,20 +184,25 @@
         loadingRoles: false,
       }
     },
+    computed: {
+      tableItems () {
+        return this.loading ? [] : this.functions
+      }
+    },
     methods: {
       async saveRole(){
-        
+
         this.loadingModal = true;
-        
+
         try {
-        
+
           const url = this.$store.state.url;
           const response = await save(url + this.prefix_rol, this.role);
-                    
+
           if (response.status === 200) {
-            
+
             this.getRoles();
-            
+
             Swal.fire("Alerta", response.data.message, "success");
             this.flagModal = false;
 
@@ -212,7 +217,7 @@
           }
 
         } finally {
- 
+
           this.loadingModal = false;
         
         }

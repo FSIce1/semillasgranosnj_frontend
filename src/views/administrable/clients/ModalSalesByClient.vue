@@ -29,7 +29,7 @@
             </CCol>
             <CCol md="3">
               <CButton color="primary" @click="getClientBySales" class="mr-1 mb-3">
-                <CIcon name="cil-share" /> Buscar
+                <CIcon name="cil-magnifying-glass" /> Buscar
               </CButton>
             </CCol>
           </CRow>
@@ -91,7 +91,7 @@
                     color="twitter"
                     @click="sendViewSale(item)"
                   >
-                    <CIcon size="sm" name="cil-share"/>
+                    <CIcon size="sm" name="cil-magnifying-glass"/>
                   </CButton>
                 </td>
               </template>
@@ -106,7 +106,7 @@
                     color="facebook"
                     @click="openModalDepositsSale(item)"
                   >
-                    <CIcon size="sm" name="cil-share" />
+                    <CIcon size="sm" name="cil-magnifying-glass" />
                   </CButton>
                 </td>
               </template>

@@ -13,10 +13,6 @@ const Purchase = () => import('@/views/purchases/details/Purchase')
 const AddPurchase = () => import('@/views/purchases/add/AddPurchase')
 
 // Maestras
-const Presentations = () => import('@/views/maestras/presentations/Presentations')
-const Processes = () => import('@/views/maestras/process/Processes')
-const Machines = () => import('@/views/maestras/machines/Machines')
-const Shifts = () => import('@/views/maestras/shifts/Shifts')
 const UnitsMeasure = () => import('@/views/maestras/units_measure/UnitsMeasure')
 
 // Administrable
@@ -154,32 +150,12 @@ export default new Router({
         // Maestras
         {
           path: 'maestras',
-          redirect: '/maestras/presentaciones',
+          redirect: '/maestras/unidades',
           name: 'Maestras',
           component: {
             render (c) { return c('router-view') }
           },
           children: [
-            {
-              path: 'presentaciones',
-              name: 'Listado Presentaciones',
-              component: Presentations
-            },
-            {
-              path: 'procesos',
-              name: 'Listado Procesos',
-              component: Processes
-            },
-            {
-              path: 'turnos',
-              name: 'Listado Turnos',
-              component: Shifts
-            },
-            {
-              path: 'maquinas',
-              name: 'Listado Máquinas',
-              component: Machines
-            },
             {
               path: 'unidades',
               name: 'Listado Unidades de Medida',

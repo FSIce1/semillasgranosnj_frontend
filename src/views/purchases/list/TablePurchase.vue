@@ -38,145 +38,149 @@
       <CRow>
         <CCol md="6" class="d-flex align-items-center">
           <CButton color="primary" @click="getPurchases" class="mr-2" style="width: auto;">
-            <CIcon name="cil-share" /> Buscar
+            <CIcon name="cil-magnifying-glass" /> Buscar
           </CButton>
+
           <CButton color="info" @click="cleanFilters" class="mr-2" style="width: auto;">
             <CIcon name="cil-share" /> Limpiar filtros
           </CButton>
+
           <CButton color="success" @click="downloadExcelPurchase" style="width: auto;">
-            <CIcon name="cil-cloud-download" /> Generar Excel
+            <CIcon name="cil-spreadsheet" /> Generar Excel
           </CButton>
         </CCol>
       </CRow>
       <br />
 
       <!-- LIST -->
-      <div>
+      <CDataTable
+        :items="tableItems"
+        :fields="fields"
+        :items-per-page="10"
+        :no-items-view="{
+          noItems: 'No hay registros',
+          noResults: 'No se encontraron resultados'
+        }"
+        hover
+        :striped="striped"
+        :border="border"
+        :small="small"
+        :fixed="fixed"
+        :dark="dark"
+        pagination
+        :loading="loading"
+      >
 
-        <CDataTable
-          :items="tableItems"
-          :fields="fields"
-          :items-per-page="10"
-          :no-items-view="{
-            noItems: 'No hay registros',
-            noResults: 'No se encontraron resultados'
-          }"
-          hover
-          :striped="striped"
-          :border="border"
-          :small="small"
-          :fixed="fixed"
-          :dark="dark"
-          pagination
-          :loading="loading"
-        >
+        <template #loading>
+          <div class="text-center p-4">
+            <CSpinner color="primary" />
+            <p>Cargando...</p>
+          </div>
+        </template>
 
-          <template #loading>
-            <div class="text-center p-4">
-              <CSpinner color="primary" />
-              <p>Cargando...</p>
-            </div>
-          </template>
+        <template #index="{ index }">
+          <td>{{ index + 1 }}</td>
+        </template>
 
-          <template #index="{ index }">
-            <td>{{ index + 1 }}</td>
-          </template>
+        <template #provider="{ item }">
+          <td class="text-center">{{ item.provider.name || '-' }}</td>
+        </template>
 
-          <template #provider="{ item }">
-            <td>{{ item.provider.name }}</td>
-          </template>
+        <template #user_creator="{ item }">
+          <td class="text-center">{{ item.user.name || '-' }}</td>
+        </template>
 
-          <template #user_creator="{ item }">
-            <td>{{ item.user.name }}</td>
-          </template>
+        <template #type="{ item }">
+          <td class="text-center">
+            <CBadge :color="item.type === 'credito' ? 'warning' : 'success'">
+              {{ item.type === 'credito' ? 'Crédito' : 'Contado' }}
+            </CBadge>
+          </td>
+        </template>
 
-          <template #type="{ item }">
-            <td>{{ item.type == "credito" ? "Crédito" : "Contado" }}</td>
-          </template>
+        <template #boleta_factura="{ item }">
+          <td class="text-center">
+            <CBadge color="info">{{ item.boleta_factura }}</CBadge>
+          </td>
+        </template>
 
-          <!-- <template #subtotal="{ item }">
-            <td>S/. {{ item.subtotal }}</td>
-          </template>
+        <!-- BUTTON TICKET -->
+        <template #buttonTicket="{item}">
+          <td class="text-center">
+            <a 
+              href="#" 
+              class="btn btn-sm btn-youtube ml-1" 
+              @click="downloadReport('purchase_pdf', 'ticket', '.pdf', item)"
+            >
+              <CIcon size="sm" name="cil-file"/>
+            </a>
+          </td>
+        </template>
 
-          <template #deposit="{ item }">
-            <td>S/. {{ item.deposit }}</td>
-          </template>
+        <!-- BUTTON VIEW -->
+        <template #buttonView="{item}">
+          <td class="text-center">
+            <CButton
+              :name="item.id"
+              size="sm"
+              :key="item.id"
+              color="twitter"
+              @click="sendViewPurchase(item)"
+            >
+              <CIcon size="sm" name="cil-magnifying-glass"/>
+            </CButton>
+          </td>
+        </template>
 
-          <template #consumption="{ item }">
-            <td>S/. {{ item.consumption }}</td>
-          </template>
+        <!-- BUTTON EDIT -->
+        <template #buttonEdit="{item}">
+          <td class="text-center">
+            <CButton
+              :name="item.id"
+              size="sm"
+              :key="item.id"
+              color="facebook"
+              @click="sendEditPurchase(item)"
+            >
+              <CIcon size="sm" name="cil-pencil"/>
+            </CButton>
+          </td>
+        </template>
 
-          <template #total="{ item }">
-            <td>S/. {{ item.total }}</td>
-          </template> -->
+        <!-- BUTTON DELETE -->
+        <template #buttonDelete="{item}">
+          <td class="text-center">
+            <CButton
+              :name="item.id"
+              size="sm"
+              :key="item.id"
+              color="youtube"
+              @click="deletePurchase(item.id, item.consecutive)"
+            >
+              <CIcon size="sm" name="cil-trash"/>
+            </CButton>
+          </td>
+        </template>
 
-          <!-- BUTTON TICKET -->
-          <template #buttonTicket="{item}">
-            <td>
-              <a 
-                href="#" 
-                class="btn btn-sm btn-youtube ml-1" 
-                @click="downloadReport('purchase_pdf', 'ticket', '.pdf', item)"
-              >
-                <CIcon size="sm" name="cil-print"/>
-              </a>
-            </td>
-          </template>
+      </CDataTable>
 
-          <!-- BUTTON VIEW -->
-          <template #buttonView="{item}">
-            <td>
-              <CButton
-                :name="item.id"
-                size="sm"
-                :key="item.id"
-                color="twitter"
-                @click="sendViewPurchase(item)"
-              >
-                <CIcon size="sm" name="cil-share"/>
-              </CButton>
-            </td>
-          </template>
-
-          <!-- BUTTON EDIT -->
-          <template #buttonEdit="{item}">
-            <td>
-              <CButton
-                :name="item.id"
-                size="sm"
-                :key="item.id"
-                color="facebook"
-                @click="sendEditPurchase(item)"
-              >
-                <CIcon size="sm" name="cil-comment-square"/>
-              </CButton>
-            </td>
-          </template>
-
-          <!-- BUTTON DELETE -->
-          <template #buttonDelete="{item}">
-            <td>
-              <CButton
-                :name="item.id"
-                size="sm"
-                :key="item.id"
-                color="youtube"
-                @click="deletePurchase(item.id, item.consecutive)"
-              >
-                <CIcon size="sm" name="cil-ban"/>
-              </CButton>
-            </td>
-          </template>
-
-        </CDataTable>
-
-        <div class="totals">
-          <br>
-          <p><b>Subtotal:</b> S/. {{ totalSubtotal.toFixed(2) }}</p>
-          <p><b>Total:</b> S/. {{ totalFinal.toFixed(2) }}</p>
-        </div>
-
-      </div>
+      <!-- Totales -->
+      <CRow class="mt-3">
+        <CCol md="6" lg="4">
+          <CCard class="shadow-sm">
+            <CCardBody class="py-3">
+              <div class="d-flex justify-content-between">
+                <span class="text-muted">Subtotal</span>
+                <strong>S/. {{ totalSubtotal.toFixed(2) }}</strong>
+              </div>
+              <div class="d-flex justify-content-between">
+                <span class="text-muted">Total</span>
+                <strong>S/. {{ totalFinal.toFixed(2) }}</strong>
+              </div>
+            </CCardBody>
+          </CCard>
+        </CCol>
+      </CRow>
 
     </CCardBody>
   </CCard>
@@ -195,20 +199,22 @@
         type: Array,
         default () {
           return [
-            { key: 'index', label: '#' },
-            { key: 'consecutive', label: 'Número de Compra' },
-            { key: 'date', label: 'Día de creación' },
-            { key: 'provider', label: 'Proveedor' },
-            { key: 'user_creator', label: 'Usuario Creador', _style:'min-width:30px;' },
-            { key: 'type', label: 'Modo' },
-            { key: 'boleta_factura', label: 'Tipo' },
-            { key: 'subtotal', label: 'Subtotal (S/.)' },
-            { key: 'deposit', label: 'Depositó (S/.)' },
-            { key: 'total', label: 'Total (S/.)' },
-            { key: 'buttonTicket', label: 'Ticket', _style:'min-width:20%;' },
-            { key: 'buttonView', label: 'Ver', _style:'min-width:20%;' },
-            { key: 'buttonEdit', label: 'Editar', _style:'min-width:20%;' },
-            { key: 'buttonDelete', label: 'Eliminar', _style:'min-width:20%;' },
+            { key: 'index',          label: '#',                 _classes: 'text-center' },
+            { key: 'consecutive',    label: 'Nº de Compra',      _classes: 'text-center' },
+            { key: 'dateCast',       label: 'Fecha',             _classes: 'text-center' },
+            { key: 'provider',       label: 'Proveedor',         _classes: 'text-center', _style: 'min-width:120px;' },
+            { key: 'user_creator',   label: 'Usuario Creador',   _classes: 'text-center', _style: 'min-width:140px;' },
+            { key: 'type',           label: 'Modo',              _classes: 'text-center' },
+            { key: 'boleta_factura', label: 'Tipo',              _classes: 'text-center' },
+            { key: 'subtotal',       label: 'Subtotal (S/.)',    _classes: 'text-center' },
+            { key: 'deposit',        label: 'Depositó (S/.)',    _classes: 'text-center' },
+            { key: 'total',          label: 'Total (S/.)',       _classes: 'text-center' },
+
+            // Botones de acción
+            { key: 'buttonTicket',   label: 'Ticket',   _classes: 'text-center', _style:'min-width:20%;' }, 
+            { key: 'buttonView',     label: 'Ver',      _classes: 'text-center', _style:'min-width:20%;' }, 
+            { key: 'buttonEdit',     label: 'Editar',   _classes: 'text-center', _style:'min-width:20%;' }, 
+            { key: 'buttonDelete',   label: 'Eliminar', _classes: 'text-center', _style:'min-width:20%;' },
           ]
         }
       },

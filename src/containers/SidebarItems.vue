@@ -111,11 +111,6 @@
             icon: 'cil-list',
             items: [
               {
-                name: 'Listado Presentaciones',
-                to: '/maestras/presentaciones',
-                icon: 'cil-list',
-              },
-              {
                 name: 'Listado Procesos',
                 to: '/maestras/procesos',
                 icon: 'cil-list',
