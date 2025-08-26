@@ -27,7 +27,17 @@
                       select-label="Presiona para seleccionar"
                       selected-label="Seleccionado"
                       deselect-label="Presiona para quitar"
-                    />
+                    >
+                      <!-- Lista vacía (sin opciones) -->
+                      <template #noOptions>
+                        <span class="text-muted">No hay clientes disponibles</span>
+                      </template>
+
+                      <!-- Sin resultados al buscar -->
+                      <template #noResult>
+                        <span class="text-muted">No se encontraron resultados</span>
+                      </template>
+                    </multiselect>
                     <br>
                   </div>
                 </template>

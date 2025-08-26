@@ -124,7 +124,7 @@
 <script>
 
   import Swal from "sweetalert2"
-  import {list, save, destroy} from '../../../assets/js/methods/functions.js'
+  import {list, save, destroy} from '../../../../assets/js/methods/functions.js'
 
   export default {
     name: 'ModalDepositsPurchase',

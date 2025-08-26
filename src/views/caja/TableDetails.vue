@@ -53,35 +53,7 @@
       </CRow>
       <br />
 
-      <!-- LIST -->
-      <CDataTable
-        :items="tableItems"
-        :fields="fields"
-        :items-per-page="10"
-        :no-items-view="{
-          noItems: 'No hay registros',
-          noResults: 'No se encontraron resultados'
-        }"
-        hover
-        :striped="striped"
-        :border="border"
-        :small="small"
-        :fixed="fixed"
-        :dark="dark"
-        pagination
-        :loading="loading"
-      >
-
-        <template #loading>
-          <div class="text-center p-4">
-            <CSpinner color="primary" />
-            <p>Cargando...</p>
-          </div>
-        </template>
-
-        <template #index="{ index }">
-          <td>{{ index + 1 }}</td>
-        </template>
+      <TableCustom :items="tableItems" :fields="fields" :loading="loading">
 
         <template #date="{ item }">
           <td>{{ item.date }}</td>
@@ -115,22 +87,7 @@
           <td>{{ item.total }}</td>
         </template>
 
-        <!-- BUTTON VIEW -->
-        <template #buttonView="{item}">
-          <td>
-            <CButton
-              :name="item.id"
-              size="sm"
-              :key="item.id"
-              color="twitter"
-              @click="sendViewSale(item)"
-            >
-              <CIcon size="sm" name="cil-magnifying-glass"/>
-            </CButton>
-          </td>
-        </template>
-
-      </CDataTable>
+      </TableCustom>
 
     </CCardBody>
   </CCard>
@@ -162,12 +119,6 @@
           ]
         }
       },
-      hover: Boolean,
-      striped: Boolean,
-      border: Boolean,
-      small: Boolean,
-      fixed: Boolean,
-      dark: Boolean
     },
     mounted() {
       this.getDetailsSales();
@@ -263,12 +214,6 @@
           typeProduct : "ambas",
           type        : "ambas",
         };
-      },
-      sendViewSale(item) {
-        this.$router.push({ 
-          name: 'Detalle venta', 
-          query: { data: JSON.stringify(item) }
-        });
       },
       validateDates() {
         if (this.filters.start_date && this.filters.end_date) {

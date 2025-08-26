@@ -13,13 +13,13 @@ const Purchase = () => import('@/views/purchases/details/Purchase')
 const AddPurchase = () => import('@/views/purchases/add/AddPurchase')
 
 // Maestras
-const UnitsMeasure = () => import('@/views/maestras/units_measure/UnitsMeasure')
+const UnitsMeasure = () => import('@/views/others/maestras/units_measure/UnitsMeasure')
 
 // Administrable
-const Users = () => import('@/views/administrable/users/Users')
-const Clients = () => import('@/views/administrable/clients/Clients')
-const Providers = () => import('@/views/administrable/providers/Providers')
-const RolesProfiles = () => import('@/views/administrable/roles/RolesProfiles')
+const Users = () => import('@/views/others/administrable/users/Users')
+const Clients = () => import('@/views/others/administrable/clients/Clients')
+const Providers = () => import('@/views/others/administrable/providers/Providers')
+const RolesProfiles = () => import('@/views/others/administrable/roles/RolesProfiles')
 
 // Productos
 const Products = () => import('@/views/products/Products')
@@ -74,7 +74,7 @@ export default new Router({
               component: Purchases
             },
             {
-              path: 'add-compra',
+              path: 'agregar-compra',
               name: 'Agregar compra',
               component: AddPurchase
             },
@@ -101,7 +101,7 @@ export default new Router({
               component: Sales
             },
             {
-              path: 'add-venta',
+              path: 'agregar-venta',
               name: 'Agregar venta',
               component: AddSale
             },
@@ -147,7 +147,7 @@ export default new Router({
           ]
         },
 
-        // Maestras
+        // Others
         {
           path: 'maestras',
           redirect: '/maestras/unidades',

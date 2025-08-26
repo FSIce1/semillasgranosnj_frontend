@@ -59,7 +59,7 @@
           {
             _name: 'CSidebarNavItem',
             name: 'Agregar Compra',
-            to: '/compras/add-compra',
+            to: '/compras/agregar-compra',
             icon: 'cil-list',
           },
 
@@ -78,7 +78,7 @@
           {
             _name: 'CSidebarNavItem',
             name: 'Agregar Venta',
-            to: '/ventas/add-venta',
+            to: '/ventas/agregar-venta',
             icon: 'cil-list',
           },
 
@@ -107,35 +107,20 @@
           {
             _name: 'CSidebarNavDropdown',
             name: 'Maestras',
-            route: '/maestras',
+            route: '/others',
             icon: 'cil-list',
             items: [
-              {
-                name: 'Listado Procesos',
-                to: '/maestras/procesos',
-                icon: 'cil-list',
-              },
-              {
-                name: 'Listado Turnos',
-                to: '/maestras/turnos',
-                icon: 'cil-list',
-              },
-              {
-                name: 'Listado Máquinas',
-                to: '/maestras/maquinas',
-                icon: 'cil-list',
-              },
               {
                 name: 'Listado Unidades de Medida',
                 to: '/maestras/unidades',
                 icon: 'cil-list',
-              }
+              },
             ]
           },
           {
             _name: 'CSidebarNavDropdown',
             name: 'Administrable',
-            route: '/administrable',
+            route: '/others',
             icon: 'cil-list',
             items: [
               {

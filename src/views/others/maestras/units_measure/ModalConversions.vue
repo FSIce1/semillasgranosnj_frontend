@@ -112,7 +112,7 @@
 <script>
 
   import Swal from "sweetalert2"
-  import {save, destroy, list} from '../../../assets/js/methods/functions.js'
+  import {save, destroy, list} from '../../../../assets/js/methods/functions.js'
 
   export default {
     name: 'ModalConversions',

@@ -25,49 +25,13 @@
         </CRow>
 
         <!-- LISTADO -->
-        <CDataTable
-          :items="tableItems"
-          :fields="fields"
-          :items-per-page="5"
-          :no-items-view="{
-            noItems: 'No hay registros',
-            noResults: 'No se encontraron resultados'
-          }"
-          hover
-          striped
-          border
-          small
-          fixed
-          pagination
-          :loading="loadingProducts"
-        >
+        <TableCustom :items="tableItems" :items-per-page="5" :fields="fields" :loading="loadingProducts">
 
-          <template #loading>
-            <div class="text-center p-4">
-              <CSpinner color="primary" />
-              <p>Cargando...</p>
-            </div>
+          <template #buttonSelect="{item}">
+            <BaseButton :modo="'select'" @click="selectProduct(item)" />
           </template>
 
-          <template #index="{ index }">
-            <td>{{ index + 1 }}</td>
-          </template>
-
-          <template #buttonSelect="{ item }">
-            <td style="text-align: center">
-              <CButton
-                :name="item.id"
-                size="sm"
-                :key="item.id"
-                color="facebook"
-                @click="selectProduct(item)"
-              >
-                <CIcon size="sm" name="cil-magnifying-glass" />
-              </CButton>
-            </td>
-          </template>
-
-        </CDataTable>
+        </TableCustom>
       </CCardBody>
     </template>
     
@@ -147,7 +111,7 @@ export default {
   },
   computed: {
     tableItems () {
-      return this.loading ? [] : this.products
+      return this.loadingProducts ? [] : this.products
     }
   },
   watch: {

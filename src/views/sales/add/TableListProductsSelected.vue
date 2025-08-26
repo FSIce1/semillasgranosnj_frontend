@@ -26,6 +26,7 @@
           :fixed="fixed"
           :dark="dark"
         >
+
           <template #index="{ index }">
             <td>{{ index + 1 }}</td>
           </template>
@@ -81,8 +82,6 @@
             { key: 'product', label: 'Producto' },
             { key: 'name_unit_measure', label: 'Unidad de Medida' },
             { key: 'amount', label: 'Cantidad' },
-            // { key: 'amount_kg', label: 'KG/UND' },
-            // { key: 'amount_saco', label: 'SACO/UND' },
             { key: 'price', label: 'Precio' },
             { key: 'total', label: 'Total' },
             { key: 'buttonDelete', label: 'Acciones' },

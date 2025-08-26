@@ -91,97 +91,24 @@
       </CRow>
       <br />
 
-      <!-- LIST -->
-      <CDataTable
-        :items="tableItems"
-        :fields="fields"
-        :items-per-page="10"
-        :no-items-view="{
-          noItems: 'No hay registros',
-          noResults: 'No se encontraron resultados'
-        }"
-        :hover="hover"
-        :striped="striped"
-        :border="border"
-        :small="small"
-        :fixed="fixed"
-        :dark="dark"
-        pagination
-        :loading="loading"
-      >
-
-        <template #loading>
-          <div class="text-center p-4">
-            <CSpinner color="primary" />
-            <p>Cargando...</p>
-          </div>
-        </template>
-
-        <template #index="{ index }">
-          <td>{{ index + 1 }}</td>
-        </template>
+      <TableCustom :items="tableItems" :fields="fields" :loading="loading">
 
         <!-- BUTTON VIEW -->
         <template #buttonView="{item}">
-          <td>
-            <CButton
-              :name="item.id"
-              size="sm"
-              :key="item.id"
-              color="twitter"
-              @click="openModalConversions(item)"
-            >
-              <CIcon size="sm" name="cil-magnifying-glass"/>
-            </CButton>
-          </td>
+          <BaseButton :modo="'ver'" @click="openModalConversions(item)" />
         </template>
 
         <!-- BUTTON EDIT -->
         <template #buttonEdit="{item}">
-          <td>
-            <template v-if="!loadingButtonEdit">
-              <CCardBody>
-                <div class="sk-chase">
-                  <div class="sk-chase-dot"></div>
-                  <div class="sk-chase-dot"></div>
-                  <div class="sk-chase-dot"></div>
-                  <div class="sk-chase-dot"></div>
-                  <div class="sk-chase-dot"></div>
-                  <div class="sk-chase-dot"></div>
-                </div>
-              </CCardBody>
-            </template>
-            <template v-else>
-              <CButton
-                :name="item.id"
-                size="sm"
-                :key="item.id"
-                color="facebook"
-                @click="editModal(item.id)"
-              >
-                <CIcon size="sm" name="cil-pencil"/>
-              </CButton>
-            </template>
-
-          </td>
+          <BaseButton :modo="'editar'" :loading="loadingButtonEdit[item.id]" @click="editModal(item.id)"></BaseButton>
         </template>
 
         <!-- BUTTON DELETE -->
         <template #buttonDelete="{item}">
-          <td>
-            <CButton
-              :name="item.id"
-              size="sm"
-              :key="item.id"
-              color="youtube"
-              @click="deleteUnitMeasurement(item.id, item.name)"
-            >
-              <CIcon size="sm" name="cil-trash"/>
-            </CButton>
-          </td>
+          <BaseButton :modo="'eliminar'" @click="deleteUnitMeasurement(item.id, item.name)"></BaseButton>
         </template>
 
-      </CDataTable>
+      </TableCustom>
 
     </CCardBody>
   </CCard>
@@ -191,7 +118,7 @@
 
   import Swal from "sweetalert2"
   import * as XLSX from 'xlsx';
-  import {list, save, show, destroy} from '../../../assets/js/methods/functions.js'
+  import {list, save, show, destroy} from '../../../../assets/js/methods/functions.js'
   import CModalConversions from "./ModalConversions.vue";
 
   export default {
@@ -208,21 +135,12 @@
             { key: 'name',          label: 'Nombre' },
 
             // Botones de acción
-            { key: 'buttonEdit',    label: 'Editar',    _style:'min-width:20%;' },
-            { key: 'buttonDelete',  label: 'Eliminar',  _style:'min-width:20%;' },
+            { key: 'buttonView',    label: 'Ver',      _classes: 'text-center', _style:'min-width:20%;' },
+            { key: 'buttonEdit',    label: 'Editar',   _classes: 'text-center', _style:'min-width:20%;' },
+            { key: 'buttonDelete',  label: 'Eliminar', _classes: 'text-center', _style:'min-width:20%;' },
           ]
         }
       },
-      caption: {
-        type: String,
-        default: 'TableUnitsMeasure'
-      },
-      hover: Boolean,
-      striped: Boolean,
-      border: Boolean,
-      small: Boolean,
-      fixed: Boolean,
-      dark: Boolean,
     },
     mounted() {
       this.getUnitsMeasure();

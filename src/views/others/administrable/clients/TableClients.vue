@@ -152,98 +152,24 @@
       </CRow>
       <br />
 
-      <CDataTable
-        :items="tableItems"
-        :fields="fields"
-        :items-per-page="10"
-        :no-items-view="{
-          noItems: 'No hay registros',
-          noResults: 'No se encontraron resultados'
-        }"
-        :hover="hover"
-        :striped="striped"
-        :border="border"
-        :small="small"
-        :fixed="fixed"
-        :dark="dark"
-        pagination
-        :loading="loading"
-      >
-
-        <template #loading>
-          <div class="text-center p-4">
-            <CSpinner color="primary" />
-            <p>Cargando...</p>
-          </div>
-        </template>
-
-        <template #index="{ index }">
-          <td>{{ index + 1 }}</td>
-        </template>
+      <TableCustom :items="tableItems" :fields="fields" :loading="loading">
 
         <!-- BUTTON VIEW -->
-        <template #buttonViewSales="{item}">
-          <td class="text-center">
-            <CButton
-              :name="item.id"
-              size="sm"
-              :key="item.id"
-              color="twitter"
-              variant="outline"
-              @click="openModalSalesByClient(item)"
-            >
-              <CIcon size="sm" name="cil-magnifying-glass"/>
-            </CButton>
-          </td>
+        <template #buttonView="{item}">
+          <BaseButton :modo="'ver'" @click="openModalSalesByClient(item)" />
         </template>
 
         <!-- BUTTON EDIT -->
         <template #buttonEdit="{item}">
-          <td class="text-center">
-            <template v-if="!loadingButtonEdit">
-              <CCardBody>
-                <div class="sk-chase">
-                  <div class="sk-chase-dot"></div>
-                  <div class="sk-chase-dot"></div>
-                  <div class="sk-chase-dot"></div>
-                  <div class="sk-chase-dot"></div>
-                  <div class="sk-chase-dot"></div>
-                  <div class="sk-chase-dot"></div>
-                </div>
-              </CCardBody>
-            </template>
-            <template v-else>
-              <CButton
-                :name="item.id"
-                size="sm"
-                :key="item.id"
-                color="facebook"
-                variant="outline"
-                @click="editModal(item.id)"
-              >
-                <CIcon size="sm" name="cil-comment-square"/>
-              </CButton>
-            </template>
-          </td>
+          <BaseButton :modo="'editar'" :loading="loadingButtonEdit[item.id]" @click="editModal(item.id)"></BaseButton>
         </template>
 
         <!-- BUTTON DELETE -->
         <template #buttonDelete="{item}">
-          <td class="text-center">
-            <CButton
-              :name="item.id"
-              size="sm"
-              :key="item.id"
-              color="danger"
-              variant="outline"
-              @click="deleteClient(item.id, item.name)"
-            >
-              <CIcon size="sm" name="cil-trash"/>
-            </CButton>
-          </td>
+          <BaseButton :modo="'eliminar'" @click="deleteClient(item.id, item.name)"></BaseButton>
         </template>
 
-      </CDataTable>
+      </TableCustom>
 
     </CCardBody>
   </CCard>
@@ -253,7 +179,7 @@
 
   import Swal from "sweetalert2"
   import * as XLSX from 'xlsx';
-  import {list, save, show, destroy} from '../../../assets/js/methods/functions.js'
+  import {list, save, show, destroy} from '../../../../assets/js/methods/functions.js'
   import CModalSalesByClient from "./ModalSalesByClient.vue";
 
   export default {
@@ -275,22 +201,12 @@
             { key: 'description',     label: 'Descripción' },
 
             // Botones de acción
-            { key: 'buttonViewSales', label: 'Ver',      _classes: 'text-center', _style:'min-width:20%;' },
+            { key: 'buttonView',      label: 'Ver',      _classes: 'text-center', _style:'min-width:20%;' },
             { key: 'buttonEdit',      label: 'Editar',   _classes: 'text-center', _style:'min-width:20%;' },
             { key: 'buttonDelete',    label: 'Eliminar', _classes: 'text-center', _style:'min-width:20%;' },
           ]
         }
       },
-      caption: {
-        type: String,
-        default: 'TableClients'
-      },
-      hover: Boolean,
-      striped: Boolean,
-      border: Boolean,
-      small: Boolean,
-      fixed: Boolean,
-      dark: Boolean,
     },
     mounted() {
       this.getClients();

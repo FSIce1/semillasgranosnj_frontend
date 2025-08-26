@@ -80,34 +80,7 @@
       </CRow>
 
       <!-- LIST -->
-      <CDataTable
-        :items="tableItems"
-        :fields="fields"
-        :items-per-page="10"
-        :no-items-view="{
-          noItems: 'No hay registros',
-          noResults: 'No se encontraron resultados'
-        }"
-        :hover="hover"
-        :striped="striped"
-        :border="border"
-        :small="small"
-        :fixed="fixed"
-        :dark="dark"
-        pagination
-        :loading="loading"
-      >
-
-        <template #loading>
-          <div class="text-center p-4">
-            <CSpinner color="primary" />
-            <p>Cargando...</p>
-          </div>
-        </template>
-
-        <template #index="{ index }">
-          <td>{{ index + 1 }}</td>
-        </template>
+      <TableCustom :items="tableItems" :fields="fields" :loading="loading">
 
         <template #buttonChange="{item}">
           <td>
@@ -122,7 +95,7 @@
           </td>
         </template>
 
-      </CDataTable>
+      </TableCustom>
 
     </CCardBody>
   </CCard>
@@ -131,7 +104,7 @@
 <script>
 
   import Swal from "sweetalert2"
-  import {list, save} from '../../../assets/js/methods/functions.js'
+  import {list, save} from '../../../../assets/js/methods/functions.js'
 
   export default {
     name: 'TableRolesPerfiles',
@@ -141,23 +114,13 @@
         type: Array,
         default () {
           return [
-            { key: 'index', label: '#' },
-            { key: 'name', label: 'Nombre' },
-            { key: 'description', label: 'Descripción' },
-            { key: 'buttonChange', label: 'Acción', _style:'min-width:20%;' },
+            { key: 'index',         label: '#' },
+            { key: 'name',          label: 'Nombre' },
+            { key: 'description',   label: 'Descripción' },
+            { key: 'buttonChange',  label: 'Acción',      _style:'min-width:20%;' },
           ]
         }
       },
-      caption: {
-        type: String,
-        default: 'Table'
-      },
-      hover: Boolean,
-      striped: Boolean,
-      border: Boolean,
-      small: Boolean,
-      fixed: Boolean,
-      dark: Boolean
     },
     async mounted() {
       await this.getRoles();
@@ -228,7 +191,7 @@
         this.loading = true;
 
         try {
-          
+
           let filters = {
             permission_id : item.id,
             role_id       : this.role_id,
@@ -251,14 +214,14 @@
           }
 
         } finally {
-          
+
           this.loading = false;
-        
+
         }
 
       },
       async getFunctions(){
-        
+
         this.loading = true;
 
         try {

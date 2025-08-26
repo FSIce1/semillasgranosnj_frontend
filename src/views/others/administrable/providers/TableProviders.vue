@@ -153,37 +153,10 @@
       </CRow>
       <br />
 
-      <CDataTable
-        :items="tableItems"
-        :fields="fields"
-        :items-per-page="10"
-        :no-items-view="{
-          noItems: 'No hay registros',
-          noResults: 'No se encontraron resultados'
-        }"
-        :hover="hover"
-        :striped="striped"
-        :border="border"
-        :small="small"
-        :fixed="fixed"
-        :dark="dark"
-        pagination
-        :loading="loading"
-      >
-
-        <template #loading>
-          <div class="text-center p-4">
-            <CSpinner color="primary" />
-            <p>Cargando...</p>
-          </div>
-        </template>
-
-        <template #index="{ index }">
-          <td>{{ index + 1 }}</td>
-        </template>
+      <TableCustom :items="tableItems" :fields="fields" :loading="loading">
 
         <!-- BUTTON VIEW -->
-        <template #buttonViewSales="{item}">
+        <template #buttonView="{item}">
           <BaseButton :modo="'ver'" @click="openModalPurchasesByProvider(item)" />
         </template>
 
@@ -197,7 +170,7 @@
           <BaseButton :modo="'eliminar'" @click="deleteProvider(item.id, item.name)"></BaseButton>
         </template>
 
-      </CDataTable>
+      </TableCustom>
 
     </CCardBody>
   </CCard>
@@ -207,7 +180,7 @@
 
   import Swal from "sweetalert2"
   import * as XLSX from 'xlsx';
-  import {list, save, show, destroy} from '../../../assets/js/methods/functions.js'
+  import {list, save, show, destroy} from '../../../../assets/js/methods/functions.js'
   import CModalPurchasesByProvider from "./ModalPurchasesByProvider.vue";
 
   export default {
@@ -227,22 +200,12 @@
             { key: 'phone',           label: 'Teléfono' },
             { key: 'address',         label: 'Dirección' },
             { key: 'description',     label: 'Descripción' },
-            { key: 'buttonViewSales', label: 'Ver',      _classes: 'text-center', _style:'min-width:20%;' },
+            { key: 'buttonView',      label: 'Ver',      _classes: 'text-center', _style:'min-width:20%;' },
             { key: 'buttonEdit',      label: 'Editar',   _classes: 'text-center', _style:'min-width:20%;' },
             { key: 'buttonDelete',    label: 'Eliminar', _classes: 'text-center', _style:'min-width:20%;' },
           ]
         }
       },
-      caption: {
-        type: String,
-        default: 'TableProviders'
-      },
-      hover: Boolean,
-      striped: Boolean,
-      border: Boolean,
-      small: Boolean,
-      fixed: Boolean,
-      dark: Boolean,
     },
     mounted() {
       this.getProviders();

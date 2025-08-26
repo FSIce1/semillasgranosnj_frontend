@@ -52,35 +52,7 @@
       </CRow>
       <br />
 
-      <!-- LIST -->
-      <CDataTable
-        :items="tableItems"
-        :fields="fields"
-        :items-per-page="10"
-        :no-items-view="{
-          noItems: 'No hay registros',
-          noResults: 'No se encontraron resultados'
-        }"
-        hover
-        :striped="striped"
-        :border="border"
-        :small="small"
-        :fixed="fixed"
-        :dark="dark"
-        pagination
-        :loading="loading"
-      >
-
-        <template #loading>
-          <div class="text-center p-4">
-            <CSpinner color="primary" />
-            <p>Cargando...</p>
-          </div>
-        </template>
-
-        <template #index="{ index }">
-          <td>{{ index + 1 }}</td>
-        </template>
+      <TableCustom :items="tableItems" :fields="fields" :loading="loading">
 
         <template #provider="{ item }">
           <td class="text-center">{{ item.provider.name || '-' }}</td>
@@ -106,63 +78,25 @@
 
         <!-- BUTTON TICKET -->
         <template #buttonTicket="{item}">
-          <td class="text-center">
-            <a 
-              href="#" 
-              class="btn btn-sm btn-youtube ml-1" 
-              @click="downloadReport('purchase_pdf', 'ticket', '.pdf', item)"
-            >
-              <CIcon size="sm" name="cil-file"/>
-            </a>
-          </td>
+          <BaseButton :modo="'file'" @click="downloadReport('purchase_pdf', 'ticket', '.pdf', item)" />
         </template>
 
         <!-- BUTTON VIEW -->
         <template #buttonView="{item}">
-          <td class="text-center">
-            <CButton
-              :name="item.id"
-              size="sm"
-              :key="item.id"
-              color="twitter"
-              @click="sendViewPurchase(item)"
-            >
-              <CIcon size="sm" name="cil-magnifying-glass"/>
-            </CButton>
-          </td>
+          <BaseButton :modo="'ver'" @click="sendViewPurchase(item)" />
         </template>
 
         <!-- BUTTON EDIT -->
         <template #buttonEdit="{item}">
-          <td class="text-center">
-            <CButton
-              :name="item.id"
-              size="sm"
-              :key="item.id"
-              color="facebook"
-              @click="sendEditPurchase(item)"
-            >
-              <CIcon size="sm" name="cil-pencil"/>
-            </CButton>
-          </td>
+          <BaseButton :modo="'editar'" @click="sendEditPurchase(item)"></BaseButton>
         </template>
 
         <!-- BUTTON DELETE -->
         <template #buttonDelete="{item}">
-          <td class="text-center">
-            <CButton
-              :name="item.id"
-              size="sm"
-              :key="item.id"
-              color="youtube"
-              @click="deletePurchase(item.id, item.consecutive)"
-            >
-              <CIcon size="sm" name="cil-trash"/>
-            </CButton>
-          </td>
+          <BaseButton :modo="'eliminar'" @click="deletePurchase(item.id, item.consecutive)"></BaseButton>
         </template>
 
-      </CDataTable>
+      </TableCustom>
 
       <!-- Totales -->
       <CRow class="mt-3">
@@ -218,12 +152,6 @@
           ]
         }
       },
-      hover: Boolean,
-      striped: Boolean,
-      border: Boolean,
-      small: Boolean,
-      fixed: Boolean,
-      dark: Boolean
     },
     mounted() {
       this.getPurchases();

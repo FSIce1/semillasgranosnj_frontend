@@ -53,17 +53,23 @@
             computedIcon() {
                 switch (this.modo) {
                     case 'eliminar': return 'cil-trash'
-                    case 'editar': return 'cil-pencil'
-                    case 'ver': return 'cil-magnifying-glass'
-                    default: return 'cil-circle'
+                    case 'editar':   return 'cil-pencil'
+                    case 'ver':      return 'cil-magnifying-glass'
+                    case 'stock':    return 'cil-pencil'
+                    case 'file':     return 'cil-file'
+                    case 'select':   return 'cil-check-circle'
+                    default:         return 'cil-circle'
                 }
             },
             computedColor() {
                 switch (this.modo) {
                     case 'eliminar': return 'danger'
-                    case 'editar': return 'warning'
-                    case 'ver': return 'info'
-                    default: return this.$attrs.color || 'secondary'
+                    case 'editar':   return 'warning'
+                    case 'ver':      return 'info'
+                    case 'stock':    return 'success'
+                    case 'file':     return 'danger'
+                    case 'select':   return 'info'
+                    default:         return this.$attrs.color || 'secondary'
                 }
             }
         },

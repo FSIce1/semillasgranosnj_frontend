@@ -4,14 +4,8 @@
       <div class="d-flex align-items-center">
         <CIcon name="cil-grid"/> Listado de productos
       </div>
-
       <div>
-        <CButton color="primary" @click="openModal()">
-          Nuevo
-        </CButton>
-        <!-- <CButton color="success" @click="openModalDetail()">
-          Transferir
-        </CButton> -->
+        <CButton color="primary" @click="openModal()">Nuevo</CButton>
       </div>
     </CCardHeader>
 
@@ -188,34 +182,7 @@
       </CRow>
       <br />
 
-      <CDataTable
-        :items="tableItems"
-        :fields="fields"
-        :items-per-page="10"
-        :no-items-view="{
-          noItems: 'No hay registros',
-          noResults: 'No se encontraron resultados'
-        }"
-        :hover="hover"
-        :striped="striped"
-        :border="border"
-        :small="small"
-        :fixed="fixed"
-        :dark="dark"
-        pagination
-        :loading="loading"
-      >
-
-        <template #loading>
-          <div class="text-center p-4">
-            <CSpinner color="primary" />
-            <p>Cargando...</p>
-          </div>
-        </template>
-
-        <template #index="{ index }">
-          <td>{{ index + 1 }}</td>
-        </template>
+      <TableCustom :items="tableItems" :fields="fields" :loading="loading">
 
         <template #cod_product="{ item }">
           <td>{{ item.cod_product }}</td>
@@ -233,82 +200,27 @@
           <td class="text-center">S/. {{ item.price_purchase }}</td>
         </template>
 
-        <!-- BUTTON STOCK -->
+        <!-- BUTTON HISTORIAL -->
         <template #buttonStock="{item}">
-          <td class="text-center">
-            <CButton
-              :name="item.id"
-              size="sm"
-              :key="item.id"
-              color="success"
-              @click="openModalStock(item)"
-            >
-              <CIcon size="sm" name="cil-pencil"/>
-            </CButton>
-          </td>
+          <BaseButton :modo="'stock'" @click="openModalStock(item)" />
         </template>
 
         <!-- BUTTON HISTORIAL -->
         <template #buttonHistory="{item}">
-          <td class="text-center">
-            <CButton
-              :name="item.id"
-              size="sm"
-              :key="item.id"
-              color="info"
-              @click="openModalStockHistory(item)"
-            >
-              <CIcon size="sm" name="cil-magnifying-glass"/>
-            </CButton>
-          </td>
+          <BaseButton :modo="'ver'" @click="openModalStockHistory(item)" />
         </template>
-
+        
         <!-- BUTTON EDIT -->
         <template #buttonEdit="{item}">
-          <td class="text-center">
-            <template v-if="!loadingButtonEdit">
-              <CCardBody>
-                <div class="sk-chase">
-                  <div class="sk-chase-dot"></div>
-                  <div class="sk-chase-dot"></div>
-                  <div class="sk-chase-dot"></div>
-                  <div class="sk-chase-dot"></div>
-                  <div class="sk-chase-dot"></div>
-                  <div class="sk-chase-dot"></div>
-                </div>
-              </CCardBody>
-            </template>
-            <template v-else>
-              <CButton
-                :name="item.id"
-                size="sm"
-                :key="item.id"
-                color="facebook"
-                @click="editModal(item.id)"
-              >
-                <CIcon size="sm" name="cil-pencil"/>
-              </CButton>
-            </template>
-
-          </td>
+          <BaseButton :modo="'editar'" :loading="loadingButtonEdit[item.id]" @click="editModal(item.id)"></BaseButton>
         </template>
 
         <!-- BUTTON DELETE -->
         <template #buttonDelete="{item}">
-          <td class="text-center">
-            <CButton
-              :name="item.id"
-              size="sm"
-              :key="item.id"
-              color="youtube"
-              @click="deleteProduct(item.id, item.name)"
-            >
-              <CIcon size="sm" name="cil-trash"/>
-            </CButton>
-          </td>
+          <BaseButton :modo="'eliminar'" @click="deleteProduct(item.id, item.name)"></BaseButton>
         </template>
 
-      </CDataTable>
+      </TableCustom>
 
     </CCardBody>
   </CCard>
@@ -349,16 +261,6 @@
           ]
         }
       },
-      caption: {
-        type: String,
-        default: 'TableProducts'
-      },
-      hover: Boolean,
-      striped: Boolean,
-      border: Boolean,
-      small: Boolean,
-      fixed: Boolean,
-      dark: Boolean,
     },
     async mounted() {
       await this.getProcesses();
