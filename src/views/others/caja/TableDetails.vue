@@ -96,7 +96,7 @@
 <script>
 
   import Swal from "sweetalert2"
-  import {list, report} from '../../assets/js/methods/functions.js'
+  import {list, report} from '../../../assets/js/methods/functions.js'
 
   export default {
     name: 'TableDetails',

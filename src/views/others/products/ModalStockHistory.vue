@@ -56,7 +56,7 @@
 
 <script>
 
-import {list} from '../../assets/js/methods/functions.js'
+import {list} from '../../../assets/js/methods/functions.js'
 
 export default {
   name: 'ModalStockHistory',

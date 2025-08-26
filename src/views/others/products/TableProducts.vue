@@ -230,7 +230,7 @@
 
   import Swal from "sweetalert2"
   import * as XLSX from 'xlsx';
-  import {list, save, show, destroy} from '../../assets/js/methods/functions.js'
+  import {list, save, show, destroy} from '../../../assets/js/methods/functions.js'
   import ModalTransfer from './ModalTransfer.vue';
   import ModalStock from './ModalStock.vue';
   import ModalStockHistory from './ModalStockHistory.vue';

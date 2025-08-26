@@ -99,8 +99,8 @@
   
 <script>
 
-  import CTableProducts from "../modals/ModalProducts.vue";
-  import {save} from '../../assets/js/methods/functions.js'
+  import CTableProducts from "../../modals/ModalProducts.vue";
+  import {save} from '../../../assets/js/methods/functions.js'
   import Swal from "sweetalert2";
 
   export default {

@@ -5,7 +5,6 @@ import Router from 'vue-router'
 const Sales = () => import('@/views/sales/list/Sales')
 const Sale = () => import('@/views/sales/details/Sale')
 const AddSale = () => import('@/views/sales/add/AddSale')
-const Caja = () => import('@/views/caja/Details')
 
 // Compras
 const Purchases = () => import('@/views/purchases/list/Purchases')
@@ -14,6 +13,7 @@ const AddPurchase = () => import('@/views/purchases/add/AddPurchase')
 
 // Maestras
 const UnitsMeasure = () => import('@/views/others/maestras/units_measure/UnitsMeasure')
+const WareHouses = () => import('@/views/others/maestras/warehouses/WareHouses')
 
 // Administrable
 const Users = () => import('@/views/others/administrable/users/Users')
@@ -21,18 +21,20 @@ const Clients = () => import('@/views/others/administrable/clients/Clients')
 const Providers = () => import('@/views/others/administrable/providers/Providers')
 const RolesProfiles = () => import('@/views/others/administrable/roles/RolesProfiles')
 
-// Productos
-const Products = () => import('@/views/products/Products')
+// Caja
+const Caja = () => import('@/views/others/caja/Details')
 
+// Productos
+const Products = () => import('@/views/others/products/Products')
+
+// Estadísticas y Reportes
+const Statistics = () => import('@/views/others/statistics/Statistics')
 
 // Containers
 const TheContainer = () => import('@/containers/TheContainer')
 
 // Views
 const Perfil = () => import('@/views/perfil/Perfil')
-
-// Estadísticas y Reportes
-const Statistics = () => import('@/views/statistics/Statistics')
 
 // Views - Pages
 const Page404 = () => import('@/views/pages/Page404')
@@ -147,7 +149,9 @@ export default new Router({
           ]
         },
 
-        // Others
+        //* Others
+
+        // Maestras
         {
           path: 'maestras',
           redirect: '/maestras/unidades',
@@ -158,8 +162,13 @@ export default new Router({
           children: [
             {
               path: 'unidades',
-              name: 'Listado Unidades de Medida',
+              name: 'Unidades de Medida',
               component: UnitsMeasure
+            },
+            {
+              path: 'almacenes',
+              name: 'Almacenes',
+              component: WareHouses
             },
           ]
         },

@@ -1,117 +1,111 @@
 <template>
-  <CCard>
-    <CCardHeader class="d-flex justify-content-between align-items-center">
-      <div class="d-flex align-items-center">
-        <CIcon name="cil-grid"/> Listado de unidades de medidas
-      </div>
-      <div>
-        <CButton class="mr-2" color="primary" @click="openModalConversions()">
-          Agregar Conversión
-        </CButton>
-        <CButton color="twitter" @click="openModal()">
-          Nuevo
-        </CButton>
-      </div>
-    </CCardHeader>
-    <CCardBody>
-
-      <!-- MODAL -->
-      <CModal
-        :title="titleModal"
-        size="lg"
-        :show.sync="flagModal"
-      >
-
-        <CForm novalidate>
+  <div>
+    <CRow>
+      <CCol lg="12">
+        <CCard>
+          <CCardHeader class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+              <CIcon name="cil-grid"/> Listado de almacenes
+            </div>
+            <div>
+              <CButton color="twitter" @click="openModal()">
+                Nuevo
+              </CButton>
+            </div>
+          </CCardHeader>
           <CCardBody>
 
-            <CInput
-              :value.sync="unit_measure.name"
-              :disabled="loadingModal"
-              @keyup.enter="saveUnitMeasurement()"
-              description="Por favor ingresa un nombre."
-              label="Nombre"
-              placeholder="Ingresa un nombre..."
-              required
-              was-validated
-            />
+            <!-- MODAL -->
+            <CModal
+              :title="titleModal"
+              size="lg"
+              :show.sync="flagModal"
+            >
+
+              <CForm novalidate>
+                <CCardBody>
+
+                  <CInput
+                    :value.sync="warehouse.name"
+                    :disabled="loadingModal"
+                    @keyup.enter="saveWarehouse()"
+                    description="Por favor ingresa un nombre."
+                    label="Nombre"
+                    placeholder="Ingresa un nombre..."
+                    required
+                    was-validated
+                  />
+
+                </CCardBody>
+              </CForm>
+
+              <template #footer>
+
+                <div v-if="!loadingModal">
+                  <CButton color="primary" @click="saveWarehouse()" class="mr-1 mb-3"><CIcon name="cil-save"/> <span v-text="textButton"></span></CButton>
+                </div>
+                <div v-else>
+                  <CCol xl="3" lg="4" md="6">
+                    <CCardBody>
+                      <div class="sk-chase">
+                        <div class="sk-chase-dot"></div>
+                        <div class="sk-chase-dot"></div>
+                        <div class="sk-chase-dot"></div>
+                        <div class="sk-chase-dot"></div>
+                        <div class="sk-chase-dot"></div>
+                        <div class="sk-chase-dot"></div>
+                      </div>
+                    </CCardBody>
+                  </CCol>
+                </div>
+
+              </template>
+
+            </CModal>
+
+            <!-- FILTROS -->
+            <CRow>
+              <CCol md="3">
+                <CInput type="text" label="Código" v-model="filters.code" />
+              </CCol>
+              <CCol md="3">
+                <CInput type="text" label="Nombre" v-model="filters.name" />
+              </CCol>
+            </CRow>
+            <CRow>
+              <CCol md="6" class="d-flex align-items-center">
+                <CButton color="primary" @click="getWarehouses" class="mr-2" style="width: auto;">
+                  <CIcon name="cil-magnifying-glass" /> Buscar
+                </CButton>
+                <CButton color="info" @click="cleanFilters" class="mr-2" style="width: auto;">
+                  <CIcon name="cil-share" /> Limpiar filtros
+                </CButton>
+                <CButton color="success" @click="downloadExcelWarehouses" style="width: auto;">
+                  <CIcon name="cil-spreadsheet" /> Generar Excel
+                </CButton>
+              </CCol>
+            </CRow>
+            <br />
+
+            <TableCustom :items="tableItems" :fields="fields" :loading="loading">
+
+              <!-- BUTTON EDIT -->
+              <template #buttonEdit="{item}">
+                <BaseButton :modo="'editar'" :loading="loadingButtonEdit[item.id]" @click="editModal(item.id)"></BaseButton>
+              </template>
+
+              <!-- BUTTON DELETE -->
+              <template #buttonDelete="{item}">
+                <BaseButton :modo="'eliminar'" @click="deleteUnitWarehouse(item.id, item.name)"></BaseButton>
+              </template>
+
+            </TableCustom>
 
           </CCardBody>
-        </CForm>
-
-        <template #footer>
-
-          <div v-if="!loadingModal">
-            <CButton color="primary" @click="saveUnitMeasurement()" class="mr-1 mb-3"><CIcon name="cil-save"/> <span v-text="textButton"></span></CButton>
-          </div>
-          <div v-else>
-            <CCol xl="3" lg="4" md="6">
-              <CCardBody>
-                <div class="sk-chase">
-                  <div class="sk-chase-dot"></div>
-                  <div class="sk-chase-dot"></div>
-                  <div class="sk-chase-dot"></div>
-                  <div class="sk-chase-dot"></div>
-                  <div class="sk-chase-dot"></div>
-                  <div class="sk-chase-dot"></div>
-                </div>
-              </CCardBody>
-            </CCol>
-          </div>
-
-        </template>
-
-      </CModal>
-
-      <!-- MODAL: LISTADO DE VENTAS POR CLIENTE -->
-      <CModalConversions
-        :isVisible="flagModalConversions"
-        :unitMeasure="unitMeasure"
-        @close-modal-conversions="closeModalConversions"
-      />
-
-      <!-- FILTROS -->
-      <CRow>
-        <CCol md="3">
-          <CInput type="text" label="Nombre" v-model="filters.name" />
-        </CCol>
-      </CRow>
-      <CRow>
-        <CCol md="6" class="d-flex align-items-center">
-          <CButton color="primary" @click="getUnitsMeasure" class="mr-2" style="width: auto;">
-            <CIcon name="cil-magnifying-glass" /> Buscar
-          </CButton>
-          <CButton color="info" @click="cleanFilters" class="mr-2" style="width: auto;">
-            <CIcon name="cil-share" /> Limpiar filtros
-          </CButton>
-          <CButton color="success" @click="downloadExcelUnitsMeasure" style="width: auto;">
-            <CIcon name="cil-spreadsheet" /> Generar Excel
-          </CButton>
-        </CCol>
-      </CRow>
-      <br />
-
-      <TableCustom :items="tableItems" :fields="fields" :loading="loading">
-
-        <!-- BUTTON VIEW -->
-        <template #buttonView="{item}">
-          <BaseButton :modo="'ver'" @click="openModalConversions(item)" />
-        </template>
-
-        <!-- BUTTON EDIT -->
-        <template #buttonEdit="{item}">
-          <BaseButton :modo="'editar'" :loading="loadingButtonEdit[item.id]" @click="editModal(item.id)"></BaseButton>
-        </template>
-
-        <!-- BUTTON DELETE -->
-        <template #buttonDelete="{item}">
-          <BaseButton :modo="'eliminar'" @click="deleteUnitMeasurement(item.id, item.name)"></BaseButton>
-        </template>
-
-      </TableCustom>
-
-    </CCardBody>
-  </CCard>
+        </CCard>
+      </CCol>
+    </CRow>
+  </div>
 </template>
 
 <script>
@@ -119,23 +113,19 @@
   import Swal from "sweetalert2"
   import * as XLSX from 'xlsx';
   import {list, save, show, destroy} from '../../../../assets/js/methods/functions.js'
-  import CModalConversions from "./ModalConversions.vue";
 
   export default {
-    name: 'TableUnitsMeasure',
-    components: {
-      CModalConversions,
-    },
+    name: 'WareHouses',
     props: {
       fields: {
         type: Array,
         default () {
           return [
-            { key: 'index',         label: '#' },
-            { key: 'name',          label: 'Nombre' },
+            { key: 'index',         label: '#',        _classes: 'text-center' },
+            { key: 'code',          label: 'Código',   _classes: 'text-center' },
+            { key: 'name',          label: 'Nombre',   _classes: 'text-center' },
 
             // Botones de acción
-            { key: 'buttonView',    label: 'Ver',      _classes: 'text-center', _style:'min-width:20%;' },
             { key: 'buttonEdit',    label: 'Editar',   _classes: 'text-center', _style:'min-width:20%;' },
             { key: 'buttonDelete',  label: 'Eliminar', _classes: 'text-center', _style:'min-width:20%;' },
           ]
@@ -143,21 +133,20 @@
       },
     },
     mounted() {
-      this.getUnitsMeasure();
+      this.getWarehouses();
     },
     computed: {
       tableItems () {
-        return this.loading ? [] : this.units_measure
+        return this.loading ? [] : this.warehouses
       }
     },
     data () {
       return {
-        prefix_list: "units_measure",
-        prefix: "unit_measure",
-        units_measure: [],
-        unitMeasure: null,
+        prefix_list: "warehouses",
+        prefix: "warehouse",
+        warehouses: [],
         loading: true,
-        unit_measure: {
+        warehouse: {
           id: "",
           name: "",
         },
@@ -166,26 +155,25 @@
         },
 
         // Modal
-        titleModal: "Nueva Unidad de medida",
+        titleModal: "Nuevo almacén",
         textButton: "Guardar",
         flagModal: false,
-        flagModalConversions: false,
         loadingModal: false,
         loadingButtonEdit: true,
       }
     },
     methods: {
-      async getUnitsMeasure(){
+      async getWarehouses(){
 
         this.loading = true;
 
         try {
-          
+
           const url = this.$store.state.url;
           const response = await list(url + this.prefix_list, this.filters);
 
           if (response.status === 200) {
-            this.units_measure = response.data.data;
+            this.warehouses = response.data.data;
           }
 
         } catch (errors) {
@@ -203,19 +191,19 @@
         }
 
       },
-      async saveUnitMeasurement(){
-        
+      async saveWarehouse(){
+
         this.loadingModal = true;
-        
+
         try {
-        
+
           const url = this.$store.state.url;
-          const data = this.getSetData(this.unit_measure);
-          const response = await save(url + this.prefix, data, this.unit_measure.id);
-           
+          const data = this.getSetData(this.warehouse);
+          const response = await save(url + this.prefix, data, this.warehouse.id);
+
           if (response.status === 200) {
             
-            this.getUnitsMeasure();
+            this.getWarehouses();
             
             Swal.fire("Alerta", response.data.message, "success");
             this.flagModal = false;
@@ -223,7 +211,7 @@
           }
 
         } catch (errors) {
-          
+
           if (errors.length > 0) {
             Swal.fire("Alerta", errors[0], "warning");
           } else {
@@ -231,16 +219,16 @@
           }
 
         } finally {
- 
+
           this.loadingModal = false;
-        
+
         }
 
       },
       async editModal(id){
 
         try {
-        
+
           this.flagModal = true;
           this.loadingModal = true;
 
@@ -248,12 +236,12 @@
           const response = await show(url+ this.prefix +`/${id}`);
 
           if (response.status === 200) {
-              
+
             let data = response?.data?.data;
 
-            this.unit_measure.id    = data?.id;
-            this.unit_measure.name  = data?.name;
-            this.titleModal         = "Modificar Unidad de Medida";
+            this.warehouse.id    = data?.id;
+            this.warehouse.name  = data?.name;
+            this.titleModal         = "Modificar Almacén";
             this.textButton         = "Modificar";
 
           }
@@ -273,13 +261,13 @@
         }
 
       },
-      async deleteUnitMeasurement(id, name){
+      async deleteUnitWarehouse(id, name){
 
         let el = this;
 
         Swal.fire({
           title: "¿Está seguro?",
-          html: `Se eliminará la unidad de medida '${name}'.`,
+          html: `Se eliminará el almacén '${name}'.`,
           icon: "warning",
           confirmButtonText: "Sí, eliminar",
           closeOnConfirm: false,
@@ -297,9 +285,9 @@
 
               if (response.status === 200) {
 
-                el.getUnitsMeasure();
+                el.getWarehouses();
                 Swal.fire("Alerta", response.data.message, "success");
-                
+
               }
 
             } catch (errors) {
@@ -317,14 +305,15 @@
         });
 
       },
-      downloadExcelUnitsMeasure() {
+      downloadExcelWarehouses() {
 
         let data = [];
-        let units_measure = this.units_measure;
+        let warehouses = this.warehouses;
         
-        units_measure.forEach(unit_measure => {
+        warehouses.forEach(warehouse => {
             data.push({
-                'Nombre': unit_measure.name,
+                'Código': warehouse.code,
+                'Nombre': warehouse.name,
             });
         });
 
@@ -367,7 +356,7 @@
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.setAttribute('download', 'reporte_unidades_medida.xlsx');
+        link.setAttribute('download', 'reporte_almacenes.xlsx');
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -378,31 +367,25 @@
         this.flagModal = true;
       },
       cleanModal(){
-        this.unit_measure.id    = "";
-        this.unit_measure.name  = "";
-        this.titleModal         = "Nueva Unidad de medida";
+        this.warehouse.id    = "";
+        this.warehouse.name  = "";
+        this.titleModal         = "Nuevo Almacén";
         this.textButton         = "Guardar";
       },
       getSetData(data){
-          
+
         let formData = new FormData();
-        
+
         formData.append('name', data.name);
-        
+
         return formData;
 
       },
       cleanFilters() {
         this.filters = {
+          code  : "",
           name  : "",
         };
-      },
-      async openModalConversions(item){
-        this.flagModalConversions = true;
-        this.unitMeasure = item;
-      },
-      closeModalConversions() {
-        this.flagModalConversions = false;
       },
     }
   }

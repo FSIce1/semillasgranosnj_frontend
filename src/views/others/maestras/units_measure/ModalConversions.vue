@@ -49,50 +49,14 @@
             </CCol>
           </CRow>
 
-          <CDataTable
-            :items="tableItems"
-            :fields="fields"
-            :items-per-page="5"
-            :no-items-view="{
-              noItems: 'No hay registros',
-              noResults: 'No se encontraron resultados'
-            }"
-            hover
-            striped
-            border
-            small
-            fixed
-            pagination
-            :loading="loading"
-          >
-
-            <template #loading>
-              <div class="text-center p-4">
-                <CSpinner color="primary" />
-                <p>Cargando...</p>
-              </div>
-            </template>
-
-            <template #index="{ index }">
-              <td>{{ index + 1 }}</td>
-            </template>
+          <TableCustom :items="tableItems" :fields="fields" :loading="loading">
 
             <!-- BUTTON DELETE -->
             <template #buttonDelete="{item}">
-              <td>
-                <CButton
-                  :name="item.id"
-                  size="sm"
-                  :key="item.id"
-                  color="youtube"
-                  @click="deleteConvertion(item.id)"
-                >
-                  <CIcon size="sm" name="cil-trash"/>
-                </CButton>
-              </td>
+              <BaseButton :modo="'eliminar'" @click="deleteConvertion(item.id)"></BaseButton>
             </template>
 
-          </CDataTable>
+          </TableCustom>
 
         </CCardBody>
       </template>
@@ -130,11 +94,11 @@
         type: Array,
         default() {
           return [
-              { key: "index", label: "#" },
-              { key: "text1", label: "Unidad" },
-              { key: "amount", label: "Factor de conversión" },
-              { key: "text2", label: "Unidad 2" },
-              { key: 'buttonDelete', label: 'Eliminar', _style:'min-width:20%;' },
+              { key: "index",         label: "#",                     _classes: 'text-center' },
+              { key: "text1",         label: "Unidad",                _classes: 'text-center' },
+              { key: "amount",        label: "Factor de conversión",  _classes: 'text-center' },
+              { key: "text2",         label: "Unidad 2",              _classes: 'text-center' },
+              { key: 'buttonDelete',  label: 'Eliminar',              _classes: 'text-center', _style:'min-width:20%;' },
           ];
         },
       },

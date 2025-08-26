@@ -111,8 +111,13 @@
             icon: 'cil-list',
             items: [
               {
-                name: 'Listado Unidades de Medida',
+                name: 'Unidades de Medida',
                 to: '/maestras/unidades',
+                icon: 'cil-list',
+              },
+              {
+                name: 'Almacenes',
+                to: '/maestras/almacenes',
                 icon: 'cil-list',
               },
             ]

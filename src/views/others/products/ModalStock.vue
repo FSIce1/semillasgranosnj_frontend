@@ -63,7 +63,7 @@
   
 <script>
 
-  import {save} from '../../assets/js/methods/functions.js'
+  import {save} from '../../../assets/js/methods/functions.js'
   import Swal from "sweetalert2";
 
   export default {
