@@ -172,11 +172,11 @@
 
 <script>
 
-  import Swal from "sweetalert2"
   import * as XLSX from 'xlsx';
-  import {list, save, show, destroy} from '../../../../assets/js/methods/functions.js'
+  import Swal from "sweetalert2"
   import CModalSalesByClient from "./ModalSalesByClient.vue";
   import { validateNumber } from '@/utils/validators.js'
+  import {list, save, show, destroy} from '@/utils/functions.js'
 
   export default {
     name: 'Clients',
@@ -234,7 +234,7 @@
           type      : "",
         },
 
-        // Modal
+        //? Modal
         titleModal: "Nuevo Cliente",
         textButton: "Guardar",
         flagModal: false,
