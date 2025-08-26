@@ -22,7 +22,7 @@
           <CCardBody>
 
             <CRow>
-              <CCol md="6">
+              <CCol md="4">
                 <CInput
                   label="Código"
                   :value.sync="product.cod_product"
@@ -31,13 +31,26 @@
                   description="Por favor ingresa un código del producto."
                 />
               </CCol>
-              <CCol md="6">
+              <CCol md="4">
                 <CInput
                   label="Nombre"
                   :value.sync="product.name"
                   :disabled="loadingModal"
                   @keyup.enter="saveProduct()"
                   description="Por favor ingresa el nombre del producto."
+                  required
+                  was-validated
+                />
+              </CCol>
+              <CCol md="4">
+                <CSelect
+                  label="Almacén"
+                  :value.sync="product.id_warehouse"
+                  :disabled="loadingModal"
+                  :options=warehouses
+                  @keyup.enter="saveProduct()"
+                  description="Por favor seleccione un almacén."
+                  placeholder="Seleccione un almacen"
                   required
                   was-validated
                 />
@@ -200,6 +213,14 @@
           <td class="text-center">S/. {{ item.price_purchase }}</td>
         </template>
 
+        <template #warehouse="{ item }">
+          <td class="text-center">{{ item.warehouse.name }}</td>
+        </template>
+
+        <template #unit_measure="{ item }">
+          <td class="text-center">{{ item.unit_measure.name }}</td>
+        </template>
+
         <!-- BUTTON HISTORIAL -->
         <template #buttonStock="{item}">
           <BaseButton :modo="'stock'" @click="openModalStock(item)" />
@@ -251,6 +272,7 @@
             { key: 'price',           label: 'Precio de venta',   _classes: 'text-center' },
             { key: 'price_purchase',  label: 'Precio de compra',  _classes: 'text-center' },
             { key: 'stock',           label: 'Stock',             _classes: 'text-center' },
+            { key: 'warehouse',       label: 'Almacén',           _classes: 'text-center' },
             { key: 'unit_measure',    label: 'UM',                _classes: 'text-center' },
 
             // Botones de acción
@@ -263,7 +285,7 @@
       },
     },
     async mounted() {
-      await this.getProcesses();
+      await this.getWarehouses();
       await this.getUnitsMeasure();
       await this.getProductsWithFilters();
     },
@@ -278,20 +300,20 @@
     data () {
       return {
         prefix_list: "products",
-        prefix_list_process: "processes",
         prefix_units_measure: "units_measure",
+        prefix_warehouses: "warehouses",
         prefix: "product",
         products: [],
         processes: [],
         units_measure: [],
+        warehouses: [],
         loading: true,
         types: ['ambas', 'insumo', 'nutrivan'],
         product: {
           id                : "",
           cod_product       : "",
           name              : "",
-          id_process        : "",
-          id_presentation   : "",
+          id_warehouse      : "",
           id_unit_measure   : "",
           price             : "",
           price_purchase    : "",
@@ -350,23 +372,23 @@
         }
 
       },
-      async getProcesses(){
+      async getWarehouses(){
         
         this.loading = true;
 
         try {
           
           const url = this.$store.state.url;
-          const response = await list(url + this.prefix_list_process);
+          const response = await list(url + this.prefix_warehouses);
 
           if (response.status === 200) {
             
-            let setProcesses = (response.data.data).map(role => ({
+            let setWarehouses = (response.data.data).map(role => ({
               value: role.id, 
               label: role.name
             }));
 
-            this.processes = setProcesses;
+            this.warehouses = setWarehouses;
 
           }
 
@@ -421,26 +443,26 @@
 
       },
       async saveProduct(){
-        
+
         this.loadingModal = true;
-        
+
         try {
-          
+
           const url = this.$store.state.url;
           const data = this.getSetData(this.product);
           const response = await save(url + this.prefix, data, this.product.id);
-                    
+
           if (response.status === 200) {
-            
+
             this.getProductsWithFilters();
-            
+
             Swal.fire("Alerta", response.data.message, "success");
             this.flagModal = false;
 
           }
 
         } catch (errors) {
-          
+
           if (errors.length > 0) {
             Swal.fire("Alerta", errors[0], "warning");
           } else {
@@ -448,9 +470,9 @@
           }
 
         } finally {
- 
+
           this.loadingModal = false;
-        
+
         }
 
       },
@@ -471,8 +493,7 @@
             this.product.id               = data?.id;
             this.product.cod_product      = data?.cod_product;
             this.product.name             = data?.name;
-            this.product.id_process       = data?.id_process;
-            this.product.id_presentation  = data?.id_presentation;
+            this.product.id_warehouse     = data?.id_warehouse;
             this.product.id_unit_measure  = data?.id_unit_measure;
             this.product.price            = data?.price;
             this.product.price_purchase   = data?.price_purchase;
@@ -485,9 +506,9 @@
             this.textButton               = "Modificar";
 
           }
-          
+
         } catch (errors) {
-          
+
           if (errors.length > 0) {
             Swal.fire("Alerta", errors[0], "warning");
           } else {
@@ -672,10 +693,8 @@
         this.product.id               = "";
         this.product.cod_product      = "";
         this.product.name             = "";
-        this.product.id_process       = "";
-        this.product.id_presentation  = "";
+        this.product.id_warehouse     = "";
         this.product.id_unit_measure  = "";
-        // this.selectedPresentation     = "";
         this.product.price            = "";
         this.product.price_purchase   = "";
         this.product.converted_price  = "";
@@ -698,8 +717,7 @@
         formData.append('slug', sessionStorage.getItem("slug_role"));
         formData.append('cod_product', data.cod_product);
         formData.append('name', data.name);
-        formData.append('id_process', data.id_process);
-        formData.append('id_presentation', data.id_presentation);
+        formData.append('id_warehouse', data.id_warehouse);
         formData.append('id_unit_measure', data.id_unit_measure);
         formData.append('price', data.price);
         formData.append('price_purchase', data.price_purchase);
