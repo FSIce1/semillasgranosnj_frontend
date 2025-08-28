@@ -133,7 +133,7 @@
           <CInput type="text" label="Email" v-model="filters.email" />
         </CCol>
         <CCol md="3">
-          <CInput type="text" label="Rol" v-model="filters.role" />
+          <CInput type="text" label="Tipo de Usuario" v-model="filters.role" />
         </CCol>
       </CRow>
       <CRow>
@@ -178,7 +178,7 @@
   import Swal from "sweetalert2"
   import * as XLSX from 'xlsx';
   import { validateNumber } from '@/utils/validators.js'
-  import {list, save, show, destroy} from '@/utils/functions.js'
+  import {list, save, show, destroy, request} from '@/utils/functions.js'
 
   export default {
     name: 'Users',
@@ -251,7 +251,7 @@
             const resp = await list(url + this.prefix_list, this.filters)
             if (resp.status === 200) this.users = resp.data.data || []
             else this.users = []
-          })
+          }, { loadingKey: "loading" })
 
         },
         async getRoles () {
@@ -270,7 +270,7 @@
               this.roles = []
             }
 
-          })
+          }, { loadingKey: "loading" })
 
         },
         async saveUser(){
@@ -287,7 +287,7 @@
               this.flagModal = false
             }
 
-          }, { useModal: true })
+          }, { loadingKey: "loadingModal" })
 
         },
         async editModal(id){
@@ -343,7 +343,7 @@
               Swal.fire("Alerta", resp.data.message, "success")
             }
 
-          })
+          }, { loadingKey: "loadingModal" })
 
         },
         downloadExcelUsers() {
@@ -377,26 +377,7 @@
 
       //* Secondary Functions
         validateNumber,
-        async request (fn, { useModal = false } = {}) {
-
-          const setLoading = val => useModal ? (this.loadingModal = val) : (this.loading = val)
-
-          try {
-
-            setLoading(true)
-            return await fn()
-
-          } catch (errors) {
-
-            const msg = Array.isArray(errors) && errors.length ? errors[0] : (errors?.message || "Ocurrió un error desconocido")
-            Swal.fire("Alerta", msg, "error")
-            return null 
-
-          } finally {
-            setLoading(false)
-          }
-
-        },
+        request,
         getSetData(data){
 
           let formData = new FormData();

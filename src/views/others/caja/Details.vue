@@ -103,7 +103,7 @@
 <script>
 
   import Swal from "sweetalert2"
-  import {list, report} from '@/utils/functions.js'
+  import {list, report, request} from '@/utils/functions.js'
 
   export default {
     name: 'Details',
@@ -157,83 +157,55 @@
       }
     },
     methods: {
-      async getDetailsSales(){
 
-        this.loading = true;
+      //* Main Functions
+        async getDetailsSales(){
 
-        try {
+          await this.request(async () => {
+            const url = this.$store.state.url
+            const resp = await list(url + this.prefix_list, this.filters)
+            if (resp.status === 200) this.sales = resp.data.data || []
+            else this.sales = []
+          }, { loadingKey: "loading" })
 
-          const url = this.$store.state.url;
-          const response = await list(url + this.prefix_list, this.filters);
+        },
+        async downloadExcelSale(){
 
-          if (response.status === 200) { 
-            this.sales = response.data.data;
+          await this.request(async () => {
+            const url = this.$store.state.url
+            await report(url+"sales_details_excel", this.filters, "reporte caja.xlsx");
+          }, { loadingKey: "loading" })
+
+        },
+
+      //* Secondary Functions
+        request,
+        cleanFilters() {
+
+          this.filters = {
+            consecutive : "",
+            date        : "",
+            start_date  : "",
+            end_date    : "",
+            client      : "",
+            user        : "",
+            product     : "",
+            typeProduct : "ambas",
+            type        : "ambas",
+          };
+
+        },
+        validateDates() {
+
+          if (this.filters.start_date && this.filters.end_date) {
+            if (this.filters.end_date < this.filters.start_date) {
+              Swal.fire("Alerta", "La fecha fin debe ser mayor o igual a la fecha inicio.", "warning");
+              this.filters.end_date = '';
+            }
           }
-
-        } catch (errors) {
-
-          if (errors.length > 0) {
-            Swal.fire("Alerta", errors[0], "warning");
-          } else {
-            Swal.fire("Alerta", "Ocurrió un error desconocido", "error");
-          }
-
-        } finally {
-
-          this.loading = false;
 
         }
 
-      },
-      async downloadExcelSale(){
-
-        this.loading = true;
-
-        try {
-
-          const url = this.$store.state.url;
-          await report(url+"sales_details_excel", this.filters, "reporte caja.xlsx");
-
-        } catch (errors) {
-
-          if (errors.length > 0) {
-            Swal.fire("Alerta", errors[0], "warning");
-          } else {
-            Swal.fire("Alerta", "Ocurrió un error desconocido", "error");
-          }
-
-        } finally {
-
-          this.loading = false;
-
-        }
-
-      },
-      cleanFilters() {
-
-        this.filters = {
-          consecutive : "",
-          date        : "",
-          start_date  : "",
-          end_date    : "",
-          client      : "",
-          user        : "",
-          product     : "",
-          typeProduct : "ambas",
-          type        : "ambas",
-        };
-
-      },
-      validateDates() {
-
-        if (this.filters.start_date && this.filters.end_date) {
-          if (this.filters.end_date < this.filters.start_date) {
-            Swal.fire("Alerta", "La fecha fin debe ser mayor o igual a la fecha inicio.", "warning");
-            this.filters.end_date = '';
-          }
-        }
-
-      }
     }
   }
 

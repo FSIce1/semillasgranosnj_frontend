@@ -110,7 +110,7 @@
 <script>
 
   import Swal from "sweetalert2"
-  import {list, save} from '@/utils/functions.js'
+  import {list, save, request} from '@/utils/functions.js'
 
   export default {
     name: 'RolesPerfiles',
@@ -215,26 +215,7 @@
         },
 
         //* Secondary Functions
-          async request (fn, { loadingKey = null } = {}) {
-
-            const setLoading = val => { this[loadingKey] = val }
-
-            try {
-
-              setLoading(true)
-              return await fn()
-
-            } catch (errors) {
-
-              const msg = Array.isArray(errors) && errors.length ? errors[0] : (errors?.message || "Ocurrió un error desconocido")
-              Swal.fire("Alerta", msg, "error")
-              return null
-
-            } finally {
-              setLoading(false)
-            }
-
-          },
+          request,
 
           //? Modal
           openModal(){

@@ -77,7 +77,7 @@
 <script>
 
   import Swal from "sweetalert2"
-  import {save, destroy, list} from '@/utils/functions.js'
+  import {save, destroy, list, request} from '@/utils/functions.js'
   import { preventInvalidDecimal } from '@/utils/validators.js'
 
   export default {
@@ -229,26 +229,7 @@
 
       //* Secondary Functions
         preventInvalidDecimal,
-        async request (fn, { loadingKey = null } = {}) {
-
-          const setLoading = val => { this[loadingKey] = val }
-
-          try {
-
-            setLoading(true)
-            return await fn()
-
-          } catch (errors) {
-
-            const msg = Array.isArray(errors) && errors.length ? errors[0] : (errors?.message || "Ocurrió un error desconocido")
-            Swal.fire("Alerta", msg, "error")
-            return null
-
-          } finally {
-            setLoading(false)
-          }
-
-        },
+        request,
         getSetData(data){
 
           let formData = new FormData();
