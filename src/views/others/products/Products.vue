@@ -418,7 +418,7 @@
             const resp = await show(url + this.prefix + `/${id}`)
             if (resp.status === 200) {
               const d = resp?.data?.data || {}
-              this.warehouse = {
+              this.product = {
                 id: d.id || "",
                 cod_product: d.cod_product || "",
                 name: d.name || "",
