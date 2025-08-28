@@ -94,6 +94,7 @@
             </CRow>
             <br />
 
+            <!-- LISTADO -->
             <TableCustom :items="tableItems" :fields="fields" :loading="loading">
 
               <!-- BUTTON VIEW -->
@@ -124,11 +125,11 @@
 
   import Swal from "sweetalert2"
   import * as XLSX from 'xlsx';
-  import {list, save, show, destroy} from '../../../../assets/js/methods/functions.js'
+  import {list, save, show, destroy} from '@/utils/functions.js'
   import CModalConvertions from "./ModalConversions.vue";
 
   export default {
-    name: 'TableUnitsMeasure',
+    name: 'UnitsMeasure',
     components: {
       CModalConvertions,
     },
@@ -141,7 +142,7 @@
             { key: 'name',          label: 'Nombre' },
 
             // Botones de acción
-            { key: 'buttonView',    label: 'Ver',      _classes: 'text-center', _style:'min-width:20%;' },
+            // { key: 'buttonView',    label: 'Ver',      _classes: 'text-center', _style:'min-width:20%;' },
             { key: 'buttonEdit',    label: 'Editar',   _classes: 'text-center', _style:'min-width:20%;' },
             { key: 'buttonDelete',  label: 'Eliminar', _classes: 'text-center', _style:'min-width:20%;' },
           ]
@@ -152,9 +153,7 @@
       this.getUnitsMeasure();
     },
     computed: {
-      tableItems () {
-        return this.loading ? [] : this.units_measure
-      }
+      tableItems () { return this.loading ? [] : this.units_measure }
     },
     data () {
       return {
@@ -162,7 +161,10 @@
         prefix: "unit_measure",
         units_measure: [],
         unitMeasure: null,
+
         loading: true,
+        loadingModal: false,
+
         unit_measure: {
           id: "",
           name: "",
@@ -176,240 +178,168 @@
         textButton: "Guardar",
         flagModal: false,
         flagModalConversions: false,
-        loadingModal: false,
-        loadingButtonEdit: true,
+        loadingButtonEdit: {},
       }
     },
     methods: {
-      async getUnitsMeasure(){
 
-        this.loading = true;
+      //* Main Functions 
+        async getUnitsMeasure(){
 
-        try {
-          
-          const url = this.$store.state.url;
-          const response = await list(url + this.prefix_list, this.filters);
+          await this.request(async () => {
+            const url = this.$store.state.url
+            const resp = await list(url + this.prefix_list, this.filters)
+            if (resp.status === 200) this.units_measure = resp.data.data || []
+            else this.units_measure = []
+          }, { loadingKey: "loading" })
 
-          if (response.status === 200) {
-            this.units_measure = response.data.data;
-          }
+        },
+        async saveUnitMeasurement(){
 
-        } catch (errors) {
+          await this.request(async () => {
 
-          if (errors.length > 0) {
-            Swal.fire("Alerta", errors[0], "warning");
-          } else {
-            Swal.fire("Alerta", "Ocurrió un error desconocido", "error");
-          }
+            const url = this.$store.state.url
+            const data = this.getSetData(this.unit_measure)
+            const resp = await save(url + this.prefix, data, this.unit_measure.id)
 
-        } finally {
-          
-          this.loading = false;
-        
-        }
-
-      },
-      async saveUnitMeasurement(){
-
-        this.loadingModal = true;
-
-        try {
-
-          const url = this.$store.state.url;
-          const data = this.getSetData(this.unit_measure);
-          const response = await save(url + this.prefix, data, this.unit_measure.id);
-
-          if (response.status === 200) {
-            
-            this.getUnitsMeasure();
-            
-            Swal.fire("Alerta", response.data.message, "success");
-            this.flagModal = false;
-
-          }
-
-        } catch (errors) {
-
-          if (errors.length > 0) {
-            Swal.fire("Alerta", errors[0], "warning");
-          } else {
-            Swal.fire("Alerta", "Ocurrió un error desconocido", "error");
-          }
-
-        } finally {
-
-          this.loadingModal = false;
-
-        }
-
-      },
-      async editModal(id){
-
-        try {
-
-          this.flagModal = true;
-          this.loadingModal = true;
-
-          const url = this.$store.state.url;
-          const response = await show(url+ this.prefix +`/${id}`);
-
-          if (response.status === 200) {
-
-            let data = response?.data?.data;
-
-            this.unit_measure.id    = data?.id;
-            this.unit_measure.name  = data?.name;
-            this.titleModal         = "Modificar Unidad de Medida";
-            this.textButton         = "Modificar";
-
-          }
-          
-        } catch (errors) {
-          
-          if (errors.length > 0) {
-            Swal.fire("Alerta", errors[0], "warning");
-          } else {
-            Swal.fire("Alerta", "Ocurrió un error desconocido", "error");
-          }
-
-        } finally {
-
-          this.loadingModal = false;
-        
-        }
-
-      },
-      async deleteUnitMeasurement(id, name){
-
-        let el = this;
-
-        Swal.fire({
-          title: "¿Está seguro?",
-          html: `Se eliminará la unidad de medida '${name}'.`,
-          icon: "warning",
-          confirmButtonText: "Sí, eliminar",
-          closeOnConfirm: false,
-          showCancelButton: true,
-          cancelButtonText: "Cancelar"
-        })
-        .then(async function(result) {
-
-          if(result.value) {
-
-            try {
-
-              const url = el.$store.state.url;
-              const response = await destroy(url+el.prefix+`/${id}`);
-
-              if (response.status === 200) {
-
-                el.getUnitsMeasure();
-                Swal.fire("Alerta", response.data.message, "success");
-                
-              }
-
-            } catch (errors) {
-
-              if (errors.length > 0) {
-                Swal.fire("Alerta", errors[0], "warning");
-              } else {
-                Swal.fire("Alerta", "Ocurrió un error desconocido", "error");
-              }
-
+            if (resp.status === 200) {
+              await this.getUnitsMeasure()
+              Swal.fire("Alerta", resp.data.message, "success")
+              this.flagModal = false;
             }
 
+          }, { loadingKey: "loadingModal" })
+
+        },
+        async editModal(id){
+
+          this.flagModal = true
+          this.titleModal = "Modificar Unidad de Medida"
+          this.textButton = "Modificar"
+          this.loadingModal = true
+
+          try {
+            const url = this.$store.state.url
+            const resp = await show(url + this.prefix + `/${id}`)
+            if (resp.status === 200) {
+              const d = resp?.data?.data || {}
+              this.unit_measure = {
+                id: d.id || "",
+                name: d.name || "",
+              }
+              this.$set(this.loadingButtonEdit, id, false)
+            }
+          } catch (e) {
+            // ya maneja Swal arriba
+          } finally {
+            this.loadingModal = false
           }
 
-        });
+        },
+        async deleteUnitMeasurement(id, name){
 
-      },
-      downloadExcelUnitsMeasure() {
+          const res = await Swal.fire({
+            title: "¿Está seguro?",
+            html: `Se eliminará la unidad de medida '<b>${name}</b>'.`,
+            icon: "warning",
+            confirmButtonText: "Sí, eliminar",
+            showCancelButton: true,
+            cancelButtonText: "Cancelar"
+          })
 
-        let data = [];
-        let units_measure = this.units_measure;
-        
-        units_measure.forEach(unit_measure => {
-            data.push({
-                'Nombre': unit_measure.name,
-            });
-        });
+          if (!res.value) return
 
-        // Convertir los datos a una hoja de trabajo de Excel
-        const worksheet = XLSX.utils.json_to_sheet(data);
+          await this.request(async () => {
 
-        // Obtener las cabeceras (letras de las columnas) y aplicar estilos
-        const headerRange = XLSX.utils.decode_range(worksheet['!ref']);
-        for (let col = headerRange.s.c; col <= headerRange.e.c; col++) {
-            const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
-            if (!worksheet[cellAddress]) continue;
+            const url = this.$store.state.url
+            const resp = await destroy(url + this.prefix + `/${id}`)
 
-            worksheet[cellAddress].s = {
-                fill: {
-                    fgColor: { rgb: "FFFF00" } // Fondo amarillo (RGB hex)
-                },
-                font: {
-                    bold: true,
-                    color: { rgb: "000000" } // Texto negro
-                },
-                alignment: {
-                    horizontal: "center"
-                }
-            };
-        }
+            if (resp.status === 200) {
+              await this.getUnitsMeasure()
+              Swal.fire("Alerta", resp.data.message, "success")
+            }
 
-        // Crear un nuevo libro y agregar la hoja de trabajo
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'Productos');
+          }, { loadingKey: "loading" })
 
-        // Generar el archivo de Excel
-        const excelBuffer = XLSX.write(workbook, {
-            bookType: 'xlsx',
-            type: 'array',
-            cellStyles: true
-        });
+        },
+        downloadExcelUnitsMeasure() {
 
-        // Crear un blob y desencadenar la descarga
-        const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', 'reporte_unidades_medida.xlsx');
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+          const data = (this.units_measure || []).map(c => ({
+            'Nombre': c.name || '',
+          }))
 
-      },
-      openModal(){
-        this.cleanModal();
-        this.flagModal = true;
-      },
-      cleanModal(){
-        this.unit_measure.id    = "";
-        this.unit_measure.name  = "";
-        this.titleModal         = "Nueva Unidad de medida";
-        this.textButton         = "Guardar";
-      },
-      getSetData(data){
-          
-        let formData = new FormData();
-        
-        formData.append('name', data.name);
-        
-        return formData;
+          const ws = XLSX.utils.json_to_sheet(data)
+          const range = XLSX.utils.decode_range(ws['!ref'] || 'A1:A1')
 
-      },
-      cleanFilters() {
-        this.filters = {
-          name  : "",
-        };
-      },
-      async openModalConversions(item){
-        this.flagModalConversions = true;
-        this.unitMeasure = item;
-      },
-      closeModalConversions() {
-        this.flagModalConversions = false;
-      },
+          for (let c = range.s.c; c <= range.e.c; c++) {
+            const addr = XLSX.utils.encode_cell({ r: 0, c })
+            if (ws[addr]) {
+              ws[addr].s = {
+                font: { bold: true },
+                alignment: { horizontal: "center" }
+              }
+            }
+          }
+
+          const wb = XLSX.utils.book_new()
+          XLSX.utils.book_append_sheet(wb, ws, 'Unidades de Medida')
+          XLSX.writeFile(wb, 'reporte_unidades_medida.xlsx')
+
+        },
+
+      //* Secondary Functions
+        async request (fn, { loadingKey = null } = {}) {
+
+          const setLoading = val => { this[loadingKey] = val }
+
+          try {
+
+            setLoading(true)
+            return await fn()
+
+          } catch (errors) {
+
+            const msg = Array.isArray(errors) && errors.length ? errors[0] : (errors?.message || "Ocurrió un error desconocido")
+            Swal.fire("Alerta", msg, "error")
+            return null
+
+          } finally {
+            setLoading(false)
+          }
+
+        },
+        getSetData(data){
+
+          let formData = new FormData();
+
+          formData.append('name', data.name);
+
+          return formData;
+
+        },
+        cleanFilters() {
+          this.filters = { name:"" }
+        },
+
+        //? Modal
+        openModal(){
+          this.cleanModal();
+          this.flagModal = true;
+        },
+        cleanModal(){
+          this.unit_measure.id    = "";
+          this.unit_measure.name  = "";
+          this.titleModal         = "Nueva Unidad de medida";
+          this.textButton         = "Guardar";
+        },
+        async openModalConversions(item){
+          this.flagModalConversions = true;
+          this.unitMeasure = item;
+        },
+        closeModalConversions() {
+          this.flagModalConversions = false;
+        },
+
     }
   }
 

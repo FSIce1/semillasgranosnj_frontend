@@ -35,91 +35,37 @@
           </CRow>
 
           <!-- LISTADO -->
-          <template v-if="loading">
-            <div class="sk-chase" style="margin-top: 10px; text-align: center">
-              <div class="sk-chase-dot"></div>
-              <div class="sk-chase-dot"></div>
-              <div class="sk-chase-dot"></div>
-              <div class="sk-chase-dot"></div>
-              <div class="sk-chase-dot"></div>
-              <div class="sk-chase-dot"></div>
-            </div>
-          </template>
-          <template v-else>
-            <CDataTable
-              :items="sales"
-              :fields="fields"
-              :no-items-view="{
-                noItems: 'No hay registros',
-                noResults: 'No se encontraron resultados'
-              }"
-              hover
-              striped
-              border
-              small
-              fixed
-              :items-per-page="5"
-              pagination
-            >
-              <template #index="{ index }">
-                <td>{{ index + 1 }}</td>
-              </template>
+          <TableCustom :items="tableItems" :fields="fields" :loading="loading" :items-per-page="5">
 
-              <template #subtotal="{ item }">
-                <td>S/. {{ item.subtotal }}</td>
-              </template>
+            <template #subtotal="{ item }">
+              <td>S/. {{ item.subtotal }}</td>
+            </template>
 
-              <template #deposit="{ item }">
-                <td>S/. {{ item.deposit }}</td>
-              </template>
+            <template #deposit="{ item }">
+              <td>S/. {{ item.deposit }}</td>
+            </template>
 
-              <!-- <template #total="{ item }">
-                <td>S/. {{ item.total }}</td>
-              </template> -->
+            <template #debt="{ item }">
+              <td>S/. {{ item.subtotal - item.deposit }}</td>
+            </template>
 
-              <template #debt="{ item }">
-                <td>S/. {{ item.subtotal - item.deposit }}</td>
-              </template>
+            <!-- BUTTON PAY -->
+            <template #buttonSelect="{item}">
+              <BaseButton :modo="'pay'" @click="openModalDepositsSale(item)"></BaseButton>
+            </template>
 
-              <!-- BUTTON VIEW -->
-              <template #buttonView="{item}">
-                <td>
-                  <CButton
-                    :name="item.id"
-                    size="sm"
-                    :key="item.id"
-                    color="twitter"
-                    @click="sendViewSale(item)"
-                  >
-                    <CIcon size="sm" name="cil-magnifying-glass"/>
-                  </CButton>
-                </td>
-              </template>
+            <!-- BUTTON VIEW -->
+            <template #buttonView="{item}">
+              <BaseButton :modo="'ver'" @click="sendViewSale(item)" />
+            </template>
 
-              <!-- BUTTON SELECT -->
-              <template #buttonSelect="{ item }">
-                <td style="text-align: center">
-                  <CButton
-                    :name="item.id"
-                    size="sm"
-                    :key="item.id"
-                    color="facebook"
-                    @click="openModalDepositsSale(item)"
-                  >
-                    <CIcon size="sm" name="cil-magnifying-glass" />
-                  </CButton>
-                </td>
-              </template>
+          </TableCustom>
 
-            </CDataTable>
-
-            <!-- Fila de sumas al final -->
-            <div style="text-align: right; padding: 10px; font-weight: bold;">
-              <span>Último Depósito: S/. {{ lastDeposit }}</span><br>
-              <span>Deuda Total: S/. {{ grandTotal }}</span><br>
-            </div>
-
-          </template>
+          <!-- Fila de sumas al final -->
+          <div style="text-align: right; padding: 10px; font-weight: bold;">
+            <span>Último Depósito: S/. {{ lastDeposit }}</span><br>
+            <span>Deuda Total: S/. {{ grandTotal }}</span><br>
+          </div>
 
         </CCardBody>
       </template>
@@ -148,7 +94,7 @@
 <script>
 
 import CModalDepositsSale from "./ModalDepositsSale.vue";
-import {list} from '../../../../assets/js/methods/functions.js'
+import {list} from '@/utils/functions.js'
 
 export default {
   name: 'ModalClientBySales',
@@ -169,14 +115,14 @@ export default {
       type: Array,
       default() {
         return [
-            { key: "index", label: "#" },
-            { key: "consecutive", label: "Venta" },
-            { key: "date", label: "Día" },
-            { key: "subtotal", label: "Total Venta" },
-            { key: "deposit", label: "Depositó" },
-            { key: "debt", label: "Deuda" },
-            { key: "buttonSelect", label: "Pagar", _style: "min-width:20%;" },
-            { key: "buttonView", label: "Ver", _style: "min-width:20%;" },
+            { key: "index",         label: "#" },
+            { key: "consecutive",   label: "Venta",       _classes: 'text-center' },
+            { key: "date",          label: "Día",         _classes: 'text-center' },
+            { key: "subtotal",      label: "Total Venta", _classes: 'text-center' },
+            { key: "deposit",       label: "Depositó",    _classes: 'text-center' },
+            { key: "debt",          label: "Deuda",       _classes: 'text-center' },
+            { key: "buttonSelect",  label: "Pagar",       _classes: 'text-center',  _style: "min-width:20%;" },
+            { key: "buttonView",    label: "Ver",         _classes: 'text-center',  _style: "min-width:20%;" },
         ];
       },
     },
@@ -201,7 +147,8 @@ export default {
   computed: {
     grandTotal() {
       return this.formatFloat(this.sales.reduce((sum, item) => sum + (parseFloat(item.subtotal) - parseFloat(item.deposit)) || 0, 0));
-    }
+    },
+    tableItems () { return this.loading ? [] : this.sales }
   },
   async mounted() {
     await this.getClientBySales();

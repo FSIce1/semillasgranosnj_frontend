@@ -27,6 +27,10 @@
         <!-- LISTADO -->
         <TableCustom :items="tableItems" :items-per-page="5" :fields="fields" :loading="loadingProducts">
 
+          <template #unit_measure="{ item }">
+            <td class="text-center">{{ item.unit_measure.name }}</td>
+          </template>
+
           <template #buttonSelect="{item}">
             <BaseButton :modo="'select'" @click="selectProduct(item)" />
           </template>

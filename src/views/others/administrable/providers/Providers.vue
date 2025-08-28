@@ -145,6 +145,7 @@
             </CRow>
             <br />
 
+            <!-- LISTADO -->
             <TableCustom :items="tableItems" :fields="fields" :loading="loading">
 
               <!-- BUTTON VIEW -->
@@ -207,6 +208,9 @@
     mounted() {
       this.getProviders();
     },
+    computed: {
+      tableItems () { return this.loading ? [] : this.providers }
+    },
     data () {
       return {
         prefix_list: "providers",
@@ -240,9 +244,6 @@
         flagModal: false,
         flagModalPurchasesByProvider: false,
       }
-    },
-    computed: {
-      tableItems () { return this.loading ? [] : this.providers }
     },
     methods: {
 
@@ -340,8 +341,8 @@
           }))
 
           const ws = XLSX.utils.json_to_sheet(data)
-          // estilos cabecera (simple)
           const range = XLSX.utils.decode_range(ws['!ref'] || 'A1:A1')
+
           for (let c = range.s.c; c <= range.e.c; c++) {
             const addr = XLSX.utils.encode_cell({ r: 0, c })
             if (ws[addr]) {
@@ -373,7 +374,7 @@
 
             const msg = Array.isArray(errors) && errors.length ? errors[0] : (errors?.message || "Ocurrió un error desconocido")
             Swal.fire("Alerta", msg, "error")
-            throw errors
+            return null
 
           } finally {
             setLoading(false)
@@ -398,21 +399,21 @@
           this.getProviders()
         },
 
-      //? Modal
-      openModal(){ this.cleanModal(); this.flagModal = true },
-      cleanModal(){
-        this.provider = { id:"", document:"", name:"", phone:"", address:"", description:"" }
-        this.titleModal = "Nuevo Proveedor";
-        this.textButton = "Guardar";
-      },
-      async openModalPurchasesByProvider(item){
-        this.providerData = item;
-        this.flagModalPurchasesByProvider = true;
-      },
-      closeModalPurchasesByProvider() {
-        this.getProviders();
-        this.flagModalPurchasesByProvider = false;
-      },
+        //? Modal
+        openModal(){ this.cleanModal(); this.flagModal = true },
+        cleanModal(){
+          this.provider = { id:"", document:"", name:"", phone:"", address:"", description:"" }
+          this.titleModal = "Nuevo Proveedor";
+          this.textButton = "Guardar";
+        },
+        async openModalPurchasesByProvider(item){
+          this.providerData = item;
+          this.flagModalPurchasesByProvider = true;
+        },
+        closeModalPurchasesByProvider() {
+          this.getProviders();
+          this.flagModalPurchasesByProvider = false;
+        },
 
     }
   }

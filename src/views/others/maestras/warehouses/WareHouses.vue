@@ -87,6 +87,7 @@
             </CRow>
             <br />
 
+            <!-- LISTADO -->
             <TableCustom :items="tableItems" :fields="fields" :loading="loading">
 
               <!-- BUTTON EDIT -->
@@ -112,7 +113,7 @@
 
   import Swal from "sweetalert2"
   import * as XLSX from 'xlsx';
-  import {list, save, show, destroy} from '../../../../assets/js/methods/functions.js'
+  import {list, save, show, destroy, request} from '@/utils/functions.js'
 
   export default {
     name: 'WareHouses',
@@ -136,16 +137,17 @@
       this.getWarehouses();
     },
     computed: {
-      tableItems () {
-        return this.loading ? [] : this.warehouses
-      }
+      tableItems () { return this.loading ? [] : this.warehouses }
     },
     data () {
       return {
         prefix_list: "warehouses",
         prefix: "warehouse",
         warehouses: [],
+
         loading: true,
+        loadingModal: false,
+
         warehouse: {
           id: "",
           name: "",
@@ -154,239 +156,144 @@
           name  : "",
         },
 
-        // Modal
+        //? Modal
         titleModal: "Nuevo almacén",
         textButton: "Guardar",
         flagModal: false,
-        loadingModal: false,
-        loadingButtonEdit: true,
+        loadingButtonEdit: {},
       }
     },
     methods: {
-      async getWarehouses(){
 
-        this.loading = true;
+      //* Main Functions
+        async getWarehouses(){
 
-        try {
+          await this.request(async () => {
+            const url = this.$store.state.url
+            const resp = await list(url + this.prefix_list, this.filters)
+            if (resp.status === 200) this.warehouses = resp.data.data || []
+            else this.warehouses = []
+          }, { loadingKey: "loading" })
 
-          const url = this.$store.state.url;
-          const response = await list(url + this.prefix_list, this.filters);
+        },
+        async saveWarehouse(){
 
-          if (response.status === 200) {
-            this.warehouses = response.data.data;
-          }
+          await this.request(async () => {
 
-        } catch (errors) {
+            const url = this.$store.state.url
+            const data = this.getSetData(this.warehouse);
+            const resp = await save(url + this.prefix, data, this.warehouse.id)
 
-          if (errors.length > 0) {
-            Swal.fire("Alerta", errors[0], "warning");
-          } else {
-            Swal.fire("Alerta", "Ocurrió un error desconocido", "error");
-          }
-
-        } finally {
-          
-          this.loading = false;
-        
-        }
-
-      },
-      async saveWarehouse(){
-
-        this.loadingModal = true;
-
-        try {
-
-          const url = this.$store.state.url;
-          const data = this.getSetData(this.warehouse);
-          const response = await save(url + this.prefix, data, this.warehouse.id);
-
-          if (response.status === 200) {
-            
-            this.getWarehouses();
-            
-            Swal.fire("Alerta", response.data.message, "success");
-            this.flagModal = false;
-
-          }
-
-        } catch (errors) {
-
-          if (errors.length > 0) {
-            Swal.fire("Alerta", errors[0], "warning");
-          } else {
-            Swal.fire("Alerta", "Ocurrió un error desconocido", "error");
-          }
-
-        } finally {
-
-          this.loadingModal = false;
-
-        }
-
-      },
-      async editModal(id){
-
-        try {
-
-          this.flagModal = true;
-          this.loadingModal = true;
-
-          const url = this.$store.state.url;
-          const response = await show(url+ this.prefix +`/${id}`);
-
-          if (response.status === 200) {
-
-            let data = response?.data?.data;
-
-            this.warehouse.id    = data?.id;
-            this.warehouse.name  = data?.name;
-            this.titleModal         = "Modificar Almacén";
-            this.textButton         = "Modificar";
-
-          }
-          
-        } catch (errors) {
-          
-          if (errors.length > 0) {
-            Swal.fire("Alerta", errors[0], "warning");
-          } else {
-            Swal.fire("Alerta", "Ocurrió un error desconocido", "error");
-          }
-
-        } finally {
-
-          this.loadingModal = false;
-        
-        }
-
-      },
-      async deleteUnitWarehouse(id, name){
-
-        let el = this;
-
-        Swal.fire({
-          title: "¿Está seguro?",
-          html: `Se eliminará el almacén '${name}'.`,
-          icon: "warning",
-          confirmButtonText: "Sí, eliminar",
-          closeOnConfirm: false,
-          showCancelButton: true,
-          cancelButtonText: "Cancelar"
-        })
-        .then(async function(result) {
-
-          if(result.value) {
-
-            try {
-
-              const url = el.$store.state.url;
-              const response = await destroy(url+el.prefix+`/${id}`);
-
-              if (response.status === 200) {
-
-                el.getWarehouses();
-                Swal.fire("Alerta", response.data.message, "success");
-
-              }
-
-            } catch (errors) {
-
-              if (errors.length > 0) {
-                Swal.fire("Alerta", errors[0], "warning");
-              } else {
-                Swal.fire("Alerta", "Ocurrió un error desconocido", "error");
-              }
-
+            if (resp.status === 200) {
+              await this.getWarehouses()
+              Swal.fire("Alerta", resp.data.message, "success")
+              this.flagModal = false
             }
 
+          }, { loadingKey: "loadingModal" })
+
+        },
+        async editModal(id){
+
+          this.flagModal = true
+          this.titleModal = "Modificar Almacén"
+          this.textButton = "Modificar"
+          this.loadingModal = true
+
+          try {
+            const url = this.$store.state.url
+            const resp = await show(url + this.prefix + `/${id}`)
+            if (resp.status === 200) {
+              const d = resp?.data?.data || {}
+              this.warehouse = {
+                id: d.id || "",
+                name: d.name || "",
+              }
+              this.$set(this.loadingButtonEdit, id, false)
+            }
+          } catch (e) {
+            // ya maneja Swal arriba
+          } finally {
+            this.loadingModal = false
           }
 
-        });
+        },
+        async deleteUnitWarehouse(id, name){
 
-      },
-      downloadExcelWarehouses() {
+          const res = await Swal.fire({
+            title: "¿Está seguro?",
+            html: `Se eliminará el almacén '${name}'.`,
+            icon: "warning",
+            confirmButtonText: "Sí, eliminar",
+            showCancelButton: true,
+            cancelButtonText: "Cancelar"
+          })
 
-        let data = [];
-        let warehouses = this.warehouses;
-        
-        warehouses.forEach(warehouse => {
-            data.push({
-                'Código': warehouse.code,
-                'Nombre': warehouse.name,
-            });
-        });
+          if (!res.value) return
 
-        // Convertir los datos a una hoja de trabajo de Excel
-        const worksheet = XLSX.utils.json_to_sheet(data);
+          await this.request(async () => {
 
-        // Obtener las cabeceras (letras de las columnas) y aplicar estilos
-        const headerRange = XLSX.utils.decode_range(worksheet['!ref']);
-        for (let col = headerRange.s.c; col <= headerRange.e.c; col++) {
-            const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
-            if (!worksheet[cellAddress]) continue;
+            const url = this.$store.state.url
+            const resp = await destroy(url + this.prefix + `/${id}`)
 
-            worksheet[cellAddress].s = {
-                fill: {
-                    fgColor: { rgb: "FFFF00" } // Fondo amarillo (RGB hex)
-                },
-                font: {
-                    bold: true,
-                    color: { rgb: "000000" } // Texto negro
-                },
-                alignment: {
-                    horizontal: "center"
-                }
-            };
-        }
+            if (resp.status === 200) {
+              await this.getWarehouses()
+              Swal.fire("Alerta", resp.data.message, "success")
+            }
 
-        // Crear un nuevo libro y agregar la hoja de trabajo
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'Productos');
+          })
 
-        // Generar el archivo de Excel
-        const excelBuffer = XLSX.write(workbook, {
-            bookType: 'xlsx',
-            type: 'array',
-            cellStyles: true
-        });
+        },
+        downloadExcelWarehouses() {
 
-        // Crear un blob y desencadenar la descarga
-        const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', 'reporte_almacenes.xlsx');
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+          const data = (this.warehouses || []).map(c => ({
+            'Código': c.code || '',
+            'Nombre': c.name || '',
+          }))
 
-      },
-      openModal(){
-        this.cleanModal();
-        this.flagModal = true;
-      },
-      cleanModal(){
-        this.warehouse.id    = "";
-        this.warehouse.name  = "";
-        this.titleModal         = "Nuevo Almacén";
-        this.textButton         = "Guardar";
-      },
-      getSetData(data){
+          const ws = XLSX.utils.json_to_sheet(data)
+          const range = XLSX.utils.decode_range(ws['!ref'] || 'A1:A1')
 
-        let formData = new FormData();
+          for (let c = range.s.c; c <= range.e.c; c++) {
+            const addr = XLSX.utils.encode_cell({ r: 0, c })
+            if (ws[addr]) {
+              ws[addr].s = {
+                font: { bold: true },
+                alignment: { horizontal: "center" }
+              }
+            }
+          }
 
-        formData.append('name', data.name);
+          const wb = XLSX.utils.book_new()
+          XLSX.utils.book_append_sheet(wb, ws, 'Almacenes')
+          XLSX.writeFile(wb, 'reporte_almacenes.xlsx')
 
-        return formData;
+        },
 
-      },
-      cleanFilters() {
-        this.filters = {
-          code  : "",
-          name  : "",
-        };
-      },
+      //* Secondary Functions
+        request,
+        getSetData(data){
+
+          let formData = new FormData();
+
+          formData.append('name', data.name);
+
+          return formData;
+
+        },
+        cleanFilters() {
+          this.filters = { document:"", name:"", type:"" }
+          this.getWarehouses()
+        },
+
+        //? Modal
+        openModal(){ this.cleanModal(); this.flagModal = true },
+        cleanModal(){
+          this.warehouse  = { id:"", document:"", name:"" }
+          this.titleModal = "Nuevo Almacén";
+          this.textButton = "Guardar";
+        },
+
     }
   }
 

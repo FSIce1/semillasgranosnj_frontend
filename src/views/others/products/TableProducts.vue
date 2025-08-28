@@ -221,7 +221,7 @@
           <td class="text-center">{{ item.unit_measure.name }}</td>
         </template>
 
-        <!-- BUTTON HISTORIAL -->
+        <!-- BUTTON STOCK -->
         <template #buttonStock="{item}">
           <BaseButton :modo="'stock'" @click="openModalStock(item)" />
         </template>

@@ -35,33 +35,7 @@
           </CRow>
 
           <!-- LISTADO -->
-          <CDataTable
-            :items="tableItems"
-            :fields="fields"
-            :items-per-page="5"
-            :no-items-view="{
-              noItems: 'No hay registros',
-              noResults: 'No se encontraron resultados'
-            }"
-            hover
-            striped
-            border
-            small
-            fixed
-            pagination
-            :loading="loading"
-          >
-
-            <template #loading>
-              <div class="text-center p-4">
-                <CSpinner color="primary" />
-                <p>Cargando...</p>
-              </div>
-            </template>
-
-            <template #index="{ index }">
-              <td>{{ index + 1 }}</td>
-            </template>
+          <TableCustom :items="tableItems" :fields="fields" :loading="loading" :items-per-page="5">
 
             <template #subtotal="{ item }">
               <td>S/. {{ item.subtotal }}</td>
@@ -75,37 +49,17 @@
               <td>S/. {{ (item.subtotal - item.deposit).toFixed(4) }}</td>
             </template>
 
+            <!-- BUTTON PAY -->
+            <template #buttonSelect="{item}">
+              <BaseButton :modo="'pay'" @click="openModalDepositsPurchase(item)"></BaseButton>
+            </template>
+
             <!-- BUTTON VIEW -->
             <template #buttonView="{item}">
-              <td class="text-center">
-                <CButton
-                  :name="item.id"
-                  size="sm"
-                  :key="item.id"
-                  color="twitter"
-                  @click="sendViewPurchase(item)"
-                >
-                  <CIcon size="sm" name="cil-magnifying-glass"/>
-                </CButton>
-              </td>
+              <BaseButton :modo="'ver'" @click="sendViewPurchase(item)" />
             </template>
 
-            <!-- BUTTON SELECT -->
-            <template #buttonSelect="{ item }">
-              <td class="text-center">
-                <CButton
-                  :name="item.id"
-                  size="sm"
-                  :key="item.id"
-                  color="facebook"
-                  @click="openModalDepositsPurchase(item)"
-                >
-                  <CIcon size="sm" name="cil-magnifying-glass" />
-                </CButton>
-              </td>
-            </template>
-
-          </CDataTable>
+          </TableCustom>
 
           <!-- Fila de sumas al final -->
           <div style="text-align: right; padding: 10px; font-weight: bold;">
@@ -140,7 +94,7 @@
 <script>
 
 import CModalDepositsPurchase from "./ModalDepositsPurchase.vue";
-import {list} from '../../../../assets/js/methods/functions.js'
+import {list} from '@/utils/functions.js'
 
 export default {
   name: 'ModalPurchasesByProvider',
@@ -161,14 +115,14 @@ export default {
       type: Array,
       default() {
         return [
-            { key: "index", label: "#" },
-            { key: "consecutive", label: "Compra" },
-            { key: "date", label: "Día" },
-            { key: "subtotal", label: "Total Compra" },
-            { key: "deposit", label: "Depositó" },
-            { key: "debt", label: "Deuda" },
-            { key: "buttonSelect", label: "Pagar", _style: "min-width:20%;" },
-            { key: "buttonView", label: "Ver", _style: "min-width:20%;" },
+            { key: "index",         label: "#",             _classes: 'text-center' },
+            { key: "consecutive",   label: "Compra",        _classes: 'text-center' },
+            { key: "date",          label: "Día",           _classes: 'text-center' },
+            { key: "subtotal",      label: "Total Compra",  _classes: 'text-center' },
+            { key: "deposit",       label: "Depositó",      _classes: 'text-center' },
+            { key: "debt",          label: "Deuda",         _classes: 'text-center' },
+            { key: "buttonSelect",  label: "Pagar",         _classes: 'text-center', _style: "min-width:20%;" },
+            { key: "buttonView",    label: "Ver",           _classes: 'text-center', _style: "min-width:20%;" },
         ];
       },
     },
@@ -194,9 +148,7 @@ export default {
     grandTotal() {
       return this.formatFloat(this.purchases.reduce((sum, item) => sum + (parseFloat(item.subtotal) - parseFloat(item.deposit)) || 0, 0));
     },
-    tableItems () {
-      return this.loading ? [] : this.purchases
-    }
+    tableItems () { return this.loading ? [] : this.purchases }
   },
   async mounted() {
     await this.getProviderByPurchases();

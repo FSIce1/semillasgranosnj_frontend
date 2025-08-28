@@ -117,7 +117,8 @@
 
   import CTableProducts from "../../modals/ModalProducts.vue";
   import Swal from "sweetalert2";
-  import {list} from '../../../assets/js/methods/functions.js'
+  import {list} from '@/utils/functions.js'
+  import { preventInvalidDecimal } from '@/utils/validators.js'
 
   export default {
     name: "ModalDetail",
@@ -173,6 +174,7 @@
       },
     },
     methods: {
+      preventInvalidDecimal,
       async getUnitsMeasure(id_unit_measure){
 
         this.loading = true;
@@ -276,12 +278,13 @@
         this.detail.product.name              = product.name;
         this.detail.product.code              = product.cod_product;
         this.detail.product.id_unit_measure   = product.id_unit_measure;
-        this.detail.product.um                = product.unit_measure;
-        this.detail.product.slug              = product.unit_measure_data.slug;
+        this.detail.product.um                = product.unit_measure.name;
+        this.detail.product.slug              = product.unit_measure.slug;
         this.detail.product.stock             = product.stock;
         this.detail.product.minimum_quantity  = product.minimum_quantity;
         this.detail.equivalent                = product.equivalent;
         this.detail.price                     = product.price;
+
       },
       cleanModal(){
         this.detail.product.id                = "";
@@ -298,56 +301,6 @@
         this.detail.price                     = "";
         this.detail.equivalent                = "";
         this.detail.amount                    = "";
-      },
-      preventInvalidDecimal(event) {
-        const key = event.key;
-        const value = event.target.value;
-        const selectionStart = event.target.selectionStart;
-        const selectionEnd = event.target.selectionEnd;
-
-        // Permitir sobrescribir el contenido seleccionado sin bloquear por largo de la cadena
-        const isReplacing = selectionStart !== selectionEnd;
-
-        // Permite solo números, un solo punto decimal, y teclas útiles como Retroceso, Suprimir, etc.
-        if (!/^[0-9]$/.test(key) && key !== '.' && !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(key)) {
-          event.preventDefault();
-          return;
-        }
-
-        // Permitir borrar (Backspace, Delete) y escribir nuevamente en la parte entera
-        if (['Backspace', 'Delete'].includes(key)) {
-          return; // Permite borrar sin restricciones
-        }
-
-        // Asegura que solo se permita un punto decimal
-        if (key === '.' && value.includes('.')) {
-          event.preventDefault();
-          return;
-        }
-
-        // Si estamos reemplazando texto, permite que se complete la sobrescritura
-        if (isReplacing) {
-          return;
-        }
-
-        // Limitar la parte entera a 8 dígitos si ya hay un punto decimal
-        const [integerPart, decimalPart] = value.split('.');
-
-        // Si no hay parte entera, permite seguir escribiendo (por si se borró todo)
-        if (!integerPart && key !== '.') {
-          return;
-        }
-
-        // Limitar la parte entera a 8 dígitos si ya hay un punto decimal o aún no se ha ingresado
-        if (integerPart && integerPart.length >= 8 && key !== '.' && !value.includes('.')) {
-          event.preventDefault();
-          return;
-        }
-
-        // Limitar la parte decimal a 4 dígitos
-        if (decimalPart && decimalPart.length >= 4 && value.includes('.')) {
-          event.preventDefault();
-        }
       },
     },
   };

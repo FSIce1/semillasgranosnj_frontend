@@ -11,100 +11,59 @@
       <template>
         <CCardBody>
 
-          <!-- LISTADO -->
-          <template v-if="loading">
-            <div class="sk-chase" style="margin-top: 10px; text-align: center">
-              <div class="sk-chase-dot"></div>
-              <div class="sk-chase-dot"></div>
-              <div class="sk-chase-dot"></div>
-              <div class="sk-chase-dot"></div>
-              <div class="sk-chase-dot"></div>
-              <div class="sk-chase-dot"></div>
-            </div>
-          </template>
-          <template v-else>
+          <!-- FORMULARIO DE PAGOS -->
+          <CRow class="align-items-end">
+            <CCol md="3">
+              <CInput 
+                label="Cantidad"
+                v-model="deposit.amount" 
+                @keydown="preventInvalidDecimal($event)"
+              />
+            </CCol>
+            <CCol md="3">
+              <CInput 
+                label="Total" 
+                :value.sync="purchaseData.total"
+                disabled 
+                @keydown="preventInvalidDecimal($event)"
+              />
+            </CCol>
+            <CCol md="3">
+              <CInput 
+                label="Depositó" 
+                :value.sync="purchaseData.deposit"
+                disabled 
+                @keydown="preventInvalidDecimal($event)"
+              />
+            </CCol>
+            <CCol md="3">
+              <CInput 
+                label="Pendiente" 
+                :value.sync="purchaseData.pending"
+                disabled 
+                @keydown="preventInvalidDecimal($event)"
+              />
+            </CCol>
+            <CCol md="3">
+              <CSpinner v-if="loading" size="sm" color="light" />
+              <CButton v-if="!loading" color="primary" @click="saveDeposit" class="mr-1 mb-3">
+                <CIcon name="cil-save" /> Realizar Pago
+              </CButton>
+            </CCol>
+          </CRow>
 
-            <!-- FORMULARIO DE PAGOS -->
-            <CRow class="align-items-end">
-              <CCol md="3">
-                <CInput 
-                  label="Cantidad"
-                  v-model="deposit.amount" 
-                  @keydown="preventInvalidDecimal($event)"
-                />
-              </CCol>
-              <CCol md="3">
-                <CInput 
-                  label="Total" 
-                  :value.sync="purchaseData.total"
-                  disabled 
-                  @keydown="preventInvalidDecimal($event)"
-                />
-              </CCol>
-              <CCol md="3">
-                <CInput 
-                  label="Depositó" 
-                  :value.sync="purchaseData.deposit"
-                  disabled 
-                  @keydown="preventInvalidDecimal($event)"
-                />
-              </CCol>
-              <CCol md="3">
-                <CInput 
-                  label="Pendiente" 
-                  :value.sync="purchaseData.pending"
-                  disabled 
-                  @keydown="preventInvalidDecimal($event)"
-                />
-              </CCol>
-              <CCol md="3">
-                <CButton color="primary" @click="saveDeposit" class="mr-1 mb-3">
-                  <CIcon name="cil-save" /> Realizar Pago
-                </CButton>
-              </CCol>
-            </CRow>
+          <TableCustom :items="tableItems" :fields="fields" :loading="loading" :items-per-page="5">
 
-            <CDataTable
-              :items="history"
-              :fields="fields"
-              hover
-              striped
-              border
-              small
-              fixed
-              :items-per-page="5"
-              :no-items-view="{
-                noItems: 'No hay registros',
-                noResults: 'No se encontraron resultados'
-              }"
-              pagination
-            >
+            <template #amount="{ item }">
+              <td>S/. {{ item.amount }}</td>
+            </template>
 
-              <template #index="{ index }">
-                <td>{{ index + 1 }}</td>
-              </template>
+            <!-- BUTTON DELETE -->
+            <template #buttonDelete="{item}">
+              <BaseButton :modo="'eliminar'" @click="deleteDeposit(item.id)"></BaseButton>
+            </template>
 
-              <template #amount="{ item }">
-                <td>S/. {{ item.amount }}</td>
-              </template>
-
-              <!-- BUTTON DELETE -->
-              <template #buttonDelete="{item}">
-                <td>
-                  <CButton
-                    :name="item.id"
-                    size="sm"
-                    :key="item.id"
-                    color="youtube"
-                    @click="deleteDeposit(item.id)"
-                  >
-                    <CIcon size="sm" name="cil-ban"/>
-                  </CButton>
-                </td>
-              </template>
-
-            </CDataTable>
-          </template>
+          </TableCustom>
 
         </CCardBody>
       </template>
@@ -124,7 +83,8 @@
 <script>
 
   import Swal from "sweetalert2"
-  import {list, save, destroy} from '../../../../assets/js/methods/functions.js'
+  import {list, save, destroy} from '@/utils/functions.js'
+  import { preventInvalidDecimal } from '@/utils/validators.js'
 
   export default {
     name: 'ModalDepositsPurchase',
@@ -142,11 +102,11 @@
         type: Array,
         default() {
           return [
-              { key: "index", label: "#" },
-              { key: "user", label: "Usuario" },
-              { key: "date", label: "Día que se realizó el pago" },
-              { key: "amount", label: "Depositó" },
-              { key: 'buttonDelete', label: 'Eliminar', _style:'min-width:20%;' },
+            { key: "index",         label: "#",                           _classes: 'text-center' },
+            { key: "user",          label: "Usuario",                     _classes: 'text-center' },
+            { key: "date",          label: "Día que se realizó el pago",  _classes: 'text-center' },
+            { key: "amount",        label: "Depositó",                    _classes: 'text-center' },
+            { key: 'buttonDelete',  label: 'Eliminar',                    _classes: 'text-center', _style:'min-width:20%;' },
           ];
         },
       },
@@ -177,6 +137,9 @@
     async mounted() {
       await this.getDepositsHistory();
     },
+    computed: {
+      tableItems () { return this.loading ? [] : this.history }
+    },
     watch: {
       async isVisible(newValue) {
         if (newValue) {
@@ -184,12 +147,8 @@
         }
       },
     },
-    computed: {
-      formattedPending() {
-        return this.saleData.pending ? this.saleData.pending.toFixed(4) : '0.0000';
-      }
-    },
     methods: {
+      preventInvalidDecimal,
       async getDepositsHistory(){
 
         this.loading = true;
@@ -199,7 +158,6 @@
           this.purchaseData.consecutive = this.purchase.consecutive;
           this.purchaseData.total = this.purchase.subtotal;
           this.purchaseData.deposit = this.purchase.deposit;
-          // this.purchaseData.pending = this.purchase.subtotal - this.purchase.deposit;
           this.purchaseData.pending = (this.purchase.subtotal - this.purchase.deposit).toFixed(4);
 
           this.filters.purchase = this.purchase.id;
@@ -352,56 +310,6 @@
 
         return formData;
 
-      },
-      preventInvalidDecimal(event) {
-        const key = event.key;
-        const value = event.target.value;
-        const selectionStart = event.target.selectionStart;
-        const selectionEnd = event.target.selectionEnd;
-
-        // Permitir sobrescribir el contenido seleccionado sin bloquear por largo de la cadena
-        const isReplacing = selectionStart !== selectionEnd;
-
-        // Permite solo números, un solo punto decimal, y teclas útiles como Retroceso, Suprimir, etc.
-        if (!/^[0-9]$/.test(key) && key !== '.' && !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(key)) {
-          event.preventDefault();
-          return;
-        }
-
-        // Permitir borrar (Backspace, Delete) y escribir nuevamente en la parte entera
-        if (['Backspace', 'Delete'].includes(key)) {
-          return; // Permite borrar sin restricciones
-        }
-
-        // Asegura que solo se permita un punto decimal
-        if (key === '.' && value.includes('.')) {
-          event.preventDefault();
-          return;
-        }
-
-        // Si estamos reemplazando texto, permite que se complete la sobrescritura
-        if (isReplacing) {
-          return;
-        }
-
-        // Limitar la parte entera a 8 dígitos si ya hay un punto decimal
-        const [integerPart, decimalPart] = value.split('.');
-
-        // Si no hay parte entera, permite seguir escribiendo (por si se borró todo)
-        if (!integerPart && key !== '.') {
-          return;
-        }
-
-        // Limitar la parte entera a 8 dígitos si ya hay un punto decimal o aún no se ha ingresado
-        if (integerPart && integerPart.length >= 8 && key !== '.' && !value.includes('.')) {
-          event.preventDefault();
-          return;
-        }
-
-        // Limitar la parte decimal a 4 dígitos
-        if (decimalPart && decimalPart.length >= 4 && value.includes('.')) {
-          event.preventDefault();
-        }
       },
       closeModal(){
         this.$emit("close-modal-deposits-purchase");

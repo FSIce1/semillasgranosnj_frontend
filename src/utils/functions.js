@@ -1,5 +1,6 @@
 
 import axios from "axios"
+import Swal from "sweetalert2"
 
 export function signIn(url, data){
 
@@ -210,5 +211,28 @@ function handleErrors(error, reject) {
     }
 
     reject(errorMessages);
+
+}
+
+export async function request (fn, { loadingKey = 'loading' } = {}) {
+
+    const setLoading = val => { this[loadingKey] = val }
+
+    try {
+
+        setLoading(true)
+        return await fn()
+
+    } catch (errors) {
+
+        const msg = Array.isArray(errors) && errors.length ? errors[0] : (errors?.message || "Ocurrió un error desconocido")
+        Swal.fire("Alerta", msg, "error")
+        return null
+
+    } finally {
+
+        setLoading(false)
+
+    }
 
 }

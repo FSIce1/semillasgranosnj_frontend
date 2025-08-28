@@ -49,6 +49,7 @@
             </CCol>
           </CRow>
 
+          <!-- LISTADO -->
           <TableCustom :items="tableItems" :fields="fields" :loading="loading">
 
             <!-- BUTTON DELETE -->
@@ -76,7 +77,8 @@
 <script>
 
   import Swal from "sweetalert2"
-  import {save, destroy, list} from '../../../../assets/js/methods/functions.js'
+  import {save, destroy, list} from '@/utils/functions.js'
+  import { preventInvalidDecimal } from '@/utils/validators.js'
 
   export default {
     name: 'ModalConversions',
@@ -125,9 +127,7 @@
       await this.getConvertionsByUnit();
     },
     computed: {
-      tableItems () {
-        return this.loading ? [] : this.convertions
-      }
+      tableItems () { return this.loading ? [] : this.convertions }
     },
     watch: {
       async isVisible(newValue) {
@@ -138,245 +138,141 @@
       },
     },
     methods: {
-      async getUnitsMeasure(){
 
-        this.loading = true;
-        this.loadingUnitMeasure = true;
+      //* Main Functions 
+        async getUnitsMeasure () {
 
-        try {
+          await this.request(async () => {
+            const url  = this.$store.state.url
+            const resp = await list(url + this.prefix_units_measure)
+            this.units_measure = resp?.status === 200
+              ? (resp.data?.data || []).map(r => ({ value: r.id, label: r.name }))
+              : []
+          }, { loadingKey: "loadingUnitMeasure" })
 
-          const url = this.$store.state.url;
-          const response = await list(url + this.prefix_units_measure);
+        },
+        async getConvertionsByUnit(){
 
-          if (response.status === 200) {
+          await this.request(async () => {
+            const url  = this.$store.state.url
+            const resp = await list(url + this.prefix_list)
+            if (resp.status === 200) this.convertions = resp.data.data || []
+          }, { loadingKey: "loading" })
 
-            let setUnitsMeasure = (response.data.data).map(role => ({
-              value: role.id, 
-              label: role.name
-            }));
+        },
+        async saveConvertion() {
 
-            this.units_measure = setUnitsMeasure;
+          await this.request(async () => {
 
-          }
-
-        } catch (errors) {
-
-          if (errors.length > 0) {
-            Swal.fire("Alerta", errors[0], "warning");
-          } else {
-            Swal.fire("Alerta", "Ocurrió un error desconocido", "error");
-          }
-
-        } finally {
-
-          this.loadingUnitMeasure = false;
-
-        }
-
-      },
-      async getConvertionsByUnit(){
-
-        this.loading = true;
-
-        try {
-
-          const url = this.$store.state.url;
-          const response = await list(url + this.prefix_list);
-          
-          if (response.status === 200) {
-            this.convertions = response.data.data;
-          }
-
-        } catch (errors) {
-
-          this.convertions = [];
-
-        } finally {
-
-          this.loading = false;
-
-        }
-
-      },
-      async saveConvertion(){
-
-        this.loading = true;
-
-        try {
-
-          if(this.filters.amount == 0){
-            Swal.fire("Alerta", "El factor de conversión no puede ser 0", "warning");
-            this.loading = false;
-            return
-          }
-
-          if(this.filters.unitMeasure == 0){
-            Swal.fire("Alerta", "La Unidad de Medida es obligatoria", "warning");
-            this.loading = false;
-            return
-          }
-
-          if(this.filters.unitMeasureConvert == 0){
-            Swal.fire("Alerta", "La Unidad de Medida 2 es obligatoria", "warning");
-            this.loading = false;
-            return
-          }
-
-          if(this.filters.unitMeasure == this.filters.unitMeasureConvert){
-            Swal.fire("Alerta", "Las unidades de medida no pueden ser iguales", "warning");
-            this.loading = false;
-            return
-          }
-
-          const url = this.$store.state.url;
-          const data = this.getSetData(this.filters);
-          const response = await save(url + this.prefix, data);
-
-          if (response.status === 200) {
-
-            this.filters.amount = 0;
-            this.getConvertionsByUnit();
-
-            Swal.fire("Alerta", response.data.message, "success");
-            this.flagModal = false;
-            
-          } else {
-
-            Swal.fire("Alerta", response.data.message, "warning");
-            this.flagModal = false;
-
-          }
-
-        } catch (errors) {
-
-          if (errors.length > 0) {
-            Swal.fire("Alerta", errors[0], "warning");
-          } else {
-            Swal.fire("Alerta", "Ocurrió un error desconocido", "error");
-          }
-
-        } finally {
-
-          this.loading = false;
-
-        }
-
-      },
-      async deleteConvertion(id){
-
-        let el = this;
-
-        Swal.fire({
-          title: "¿Está seguro?",
-          html: "Se eliminará la conversión",
-          icon: "warning",
-          confirmButtonText: "Sí, eliminar",
-          closeOnConfirm: false,
-          showCancelButton: true,
-          cancelButtonText: "Cancelar"
-        })
-        .then(async function(result) {
-
-          if(result.value) {
-
-            try {
-
-              const url = el.$store.state.url;
-              const response = await destroy(url+el.prefix+`/${id}`);
-
-              if (response.status === 200) {
-
-                el.getConvertionsByUnit();
-                Swal.fire("Alerta", response.data.message, "success");
-
-              }
-
-            } catch (errors) {
-
-              if (errors.length > 0) {
-                Swal.fire("Alerta", errors[0], "warning");
-              } else {
-                Swal.fire("Alerta", "Ocurrió un error desconocido", "error");
-              }
-
+            if (this.filters.amount == 0) {
+              Swal.fire("Alerta", "El factor de conversión no puede ser 0", "warning")
+              return
             }
 
+            if (!this.filters.unitMeasure || this.filters.unitMeasure == 0) {
+              Swal.fire("Alerta", "La Unidad de Medida es obligatoria", "warning")
+              return
+            }
+
+            if (!this.filters.unitMeasureConvert || this.filters.unitMeasureConvert == 0) {
+              Swal.fire("Alerta", "La Unidad de Medida 2 es obligatoria", "warning")
+              return
+            }
+
+            if (this.filters.unitMeasure == this.filters.unitMeasureConvert) {
+              Swal.fire("Alerta", "Las unidades de medida no pueden ser iguales", "warning")
+              return
+            }
+
+            const url = this.$store.state.url
+            const data = this.getSetData(this.filters)
+            const resp = await save(url + this.prefix, data)
+
+            if (resp?.status === 200) {
+              this.filters.amount = 0
+              await this.getConvertionsByUnit()
+              Swal.fire("Alerta", resp.data.message, "success")
+              this.flagModal = false
+            } else {
+              Swal.fire("Alerta", resp?.data?.message || "Ocurrió un error", "warning")
+              this.flagModal = false
+            }
+          }, { loadingKey: "loading" })
+
+        },
+        async deleteConvertion(id){
+
+          const res = await Swal.fire({
+            title: "¿Está seguro?",
+            html: "Se eliminará la conversión",
+            icon: "warning",
+            confirmButtonText: "Sí, eliminar",
+            showCancelButton: true,
+            cancelButtonText: "Cancelar"
+          })
+
+          if (!res.value) return
+
+          await this.request(async () => {
+
+            const url = this.$store.state.url
+            const resp = await destroy(url + this.prefix + `/${id}`)
+
+            if (resp.status === 200) {
+              await this.getConvertionsByUnit()
+              Swal.fire("Alerta", resp.data.message, "success")
+            }
+
+          })
+
+        },
+
+      //* Secondary Functions
+        preventInvalidDecimal,
+        async request (fn, { loadingKey = null } = {}) {
+
+          const setLoading = val => { this[loadingKey] = val }
+
+          try {
+
+            setLoading(true)
+            return await fn()
+
+          } catch (errors) {
+
+            const msg = Array.isArray(errors) && errors.length ? errors[0] : (errors?.message || "Ocurrió un error desconocido")
+            Swal.fire("Alerta", msg, "error")
+            return null
+
+          } finally {
+            setLoading(false)
           }
 
-        });
+        },
+        getSetData(data){
 
-      },
-      getSetData(data){
+          let formData = new FormData();
 
-        let formData = new FormData();
+          formData.append('id_unit_measure', data.unitMeasure);
+          formData.append('amount', data.amount);
+          formData.append('id_unit_measure_convert', data.unitMeasureConvert);
 
-        formData.append('id_unit_measure', data.unitMeasure);
-        formData.append('amount', data.amount);
-        formData.append('id_unit_measure_convert', data.unitMeasureConvert);
+          return formData;
 
-        return formData;
+        },
 
-      },
-      closeModal(){
-        this.$emit("close-modal-conversions");
-      },
-      openModalDepositsSale(item) {      
-        this.sale = item;
-        this.flagModalDepositsSale = true;
-      },
-      closeModalDepositsSale() {
-        this.flagModalDepositsSale = false;
-      },
-      preventInvalidDecimal(event) {
-        const key = event.key;
-        const value = event.target.value;
-        const selectionStart = event.target.selectionStart;
-        const selectionEnd = event.target.selectionEnd;
+        //? Modal
+        closeModal(){
+          this.$emit("close-modal-conversions");
+        },
+        openModalDepositsSale(item) {      
+          this.sale = item;
+          this.flagModalDepositsSale = true;
+        },
+        closeModalDepositsSale() {
+          this.flagModalDepositsSale = false;
+        },
 
-        // Permitir sobrescribir el contenido seleccionado sin bloquear por largo de la cadena
-        const isReplacing = selectionStart !== selectionEnd;
-
-        // Permite solo números, un solo punto decimal, y teclas útiles como Retroceso, Suprimir, etc.
-        if (!/^[0-9]$/.test(key) && key !== '.' && !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(key)) {
-          event.preventDefault();
-          return;
-        }
-
-        // Permitir borrar (Backspace, Delete) y escribir nuevamente en la parte entera
-        if (['Backspace', 'Delete'].includes(key)) {
-          return; // Permite borrar sin restricciones
-        }
-
-        // Asegura que solo se permita un punto decimal
-        if (key === '.' && value.includes('.')) {
-          event.preventDefault();
-          return;
-        }
-
-        // Si estamos reemplazando texto, permite que se complete la sobrescritura
-        if (isReplacing) {
-          return;
-        }
-
-        // Limitar la parte entera a 8 dígitos si ya hay un punto decimal
-        const [integerPart, decimalPart] = value.split('.');
-
-        // Si no hay parte entera, permite seguir escribiendo (por si se borró todo)
-        if (!integerPart && key !== '.') {
-          return;
-        }
-
-        // Limitar la parte entera a 8 dígitos si ya hay un punto decimal o aún no se ha ingresado
-        if (integerPart && integerPart.length >= 8 && key !== '.' && !value.includes('.')) {
-          event.preventDefault();
-          return;
-        }
-
-        // Limitar la parte decimal a 2 dígitos
-        if (decimalPart && decimalPart.length >= 2 && value.includes('.')) {
-          event.preventDefault();
-        }
-      },
     },
   };
 

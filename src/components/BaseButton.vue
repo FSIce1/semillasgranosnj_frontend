@@ -58,6 +58,7 @@
                     case 'stock':    return 'cil-pencil'
                     case 'file':     return 'cil-file'
                     case 'select':   return 'cil-check-circle'
+                    case 'pay':      return 'cil-credit-card'
                     default:         return 'cil-circle'
                 }
             },
@@ -69,18 +70,18 @@
                     case 'stock':    return 'success'
                     case 'file':     return 'danger'
                     case 'select':   return 'info'
+                    case 'pay':      return 'success'
                     default:         return this.$attrs.color || 'secondary'
                 }
             }
         },
         methods: {
             handleClick (e) {
-            // Bloquea clicks si está cargando o deshabilitado
-            if (this.loading || this.disabled) {
-                e.preventDefault()
-                return
-            }
-            this.$emit('click', e)
+                if (this.loading || this.disabled) {
+                    e.preventDefault()
+                    return
+                }
+                this.$emit('click', e)
             }
         }
     }
