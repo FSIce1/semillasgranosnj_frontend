@@ -68,7 +68,7 @@
 <script>
 
   import Swal from "sweetalert2"
-  import {destroy} from '../../../assets/js/methods/functions.js'
+  import {destroy} from '@/utils/functions.js'
 
   export default {
     name: 'TableListProductsSelected',

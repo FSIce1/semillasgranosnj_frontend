@@ -198,6 +198,7 @@
             </CRow>
             <br />
 
+            <!-- LISTADO -->
             <TableCustom :items="tableItems" :fields="fields" :loading="loading">
 
               <template #cod_product="{ item }">
@@ -375,7 +376,7 @@
             const setWarehouses = (resp.data.data).map(role => ({ value: role.id, label: role.name }));
             if (resp.status === 200) this.warehouses = setWarehouses || []
             else this.warehouses = []
-          }, { loadingKey: "loading" })
+          }, { loadingKey: "loadingModal" })
 
         },
         async getUnitsMeasure(){
@@ -386,7 +387,7 @@
             const setUnitsMeasure = (resp.data.data).map(role => ({ value: role.id, label: role.name }));
             if (resp.status === 200) this.units_measure = setUnitsMeasure || []
             else this.units_measure = []
-          }, { loadingKey: "loading" })
+          }, { loadingKey: "loadingModal" })
 
         },
         async saveProduct(){

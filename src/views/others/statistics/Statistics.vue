@@ -105,7 +105,7 @@
 
 <script>
 import * as Statistics from './index.js'
-import { list } from '../../../assets/js/methods/functions.js'
+import {list} from '@/utils/functions.js'
 import Swal from 'sweetalert2'
 
 export default {

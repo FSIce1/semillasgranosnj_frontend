@@ -1,6 +1,6 @@
 <script>
 
-  import {getRolePermission} from '../assets/js/methods/functions.js'
+  import {getRolePermission} from '@/utils/functions.js'
 
   export default {
     name: 'nav',

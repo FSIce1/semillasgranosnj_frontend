@@ -94,7 +94,7 @@
 <script>
 
   import Swal from "sweetalert2"
-  import {signIn} from '../../assets/js/methods/functions.js'
+  import {signIn, request} from '@/utils/functions.js'
 
   export default {
     name: 'Login',
@@ -109,21 +109,20 @@
       }
     },
     methods: {
+      request,
       async signIn(){
-        
-        this.loading = true;
-        
-        try {
-        
-          const url = this.$store.state.url;
-          const response = await signIn(url + this.prefix, this.data);
-                              
-          if (response.status === 200) {
-                        
-            let data = response?.data;
+
+        await this.request(async () => {
+
+          const url = this.$store.state.url
+          const resp = await signIn(url + this.prefix, this.data);
+
+          if (resp.status === 200) {
+
+            let data = resp?.data;
 
             if(data.flag){
-              
+
               sessionStorage.setItem('id', data.data?.id);
               sessionStorage.setItem('username', data.data?.username);
               sessionStorage.setItem('name', data.data?.name);
@@ -138,26 +137,14 @@
               });
 
             } else {
-              
+
               Swal.fire("Alerta", data.message, "warning");
 
             }
 
           }
 
-        } catch (errors) {
-          
-          if (errors.length > 0) {
-            Swal.fire("Alerta", errors[0], "warning");
-          } else {
-            Swal.fire("Alerta", "Ocurrió un error desconocido", "error");
-          }
-
-        } finally {
-
-          this.loading = false;
-        
-        }
+        }, { loadingKey: "loading" })
 
       },
     }

@@ -67,10 +67,6 @@
                 <td class="left"><strong>Depositó</strong></td>
                 <td class="right">S/. {{ this.sale.deposit }}</td>
               </tr>
-              <!-- <tr>
-                <td class="left"><strong>Consumo</strong></td>
-                <td class="right">S/. {{ this.sale.consumption }}</td>
-              </tr> -->
               <tr>
                 <td class="left"><strong>Total</strong></td>
                 <td class="right"><strong>S/. {{ this.sale.total }}</strong></td>
@@ -89,8 +85,7 @@
 
 <script>
 
-  import Swal from "sweetalert2"
-  import {report, ticket} from '../../../assets/js/methods/functions.js'
+  import {report, ticket, request} from '@/utils/functions.js'
 
   export default {
     name: 'Sale',
@@ -119,56 +114,52 @@
       await this.getSale();
     },
     methods: {
-      async getSale() {
-        const data = this.$route.query.data;
 
-        if (data && typeof data === 'string' && data.trim() !== '') {
-          const item = JSON.parse(data);
+      //* Main Functions
+        async getSale() {
 
-          this.sale.id = item.id;
-          this.sale.consecutive = item.consecutive;
-          this.sale.date = item.date;
-          this.sale.client = item.client;
-          this.sale.description = item.description;
-          this.sale.subtotal = item.subtotal;
-          this.sale.deposit = item.deposit;
-          this.sale.consumption = item.consumption;
-          this.sale.type = item.type;
-          this.sale.boleta_factura = item.boleta_factura;
-          this.sale.ruc = item.ruc;
-          this.sale.total = item.total;
-          this.sale.details = item.details;
-        }
-      },
-      async downloadReport(method, type, extention) {
+          const data = this.$route.query.data;
 
-        this.loading = true;
+          if (data && typeof data === 'string' && data.trim() !== '') {
 
-        try {
+            const item = JSON.parse(data);
 
-          const url = this.$store.state.url;
+            this.sale.id              = item.id;
+            this.sale.consecutive     = item.consecutive;
+            this.sale.date            = item.date;
+            this.sale.client          = item.client;
+            this.sale.description     = item.description;
+            this.sale.subtotal        = item.subtotal;
+            this.sale.deposit         = item.deposit;
+            this.sale.consumption     = item.consumption;
+            this.sale.type            = item.type;
+            this.sale.boleta_factura  = item.boleta_factura;
+            this.sale.ruc             = item.ruc;
+            this.sale.total           = item.total;
+            this.sale.details         = item.details;
 
-          if(type == "excel"){
-            await report(url+method, this.sale, "reporte N°"+this.sale.consecutive+extention);
-          } else {
-            await ticket(url+method, this.sale, "reporte N°"+this.sale.consecutive+extention);
           }
 
-        } catch (errors) {
+        },
+        async downloadReport(method, type, extention) {
 
-          if (errors.length > 0) {
-            Swal.fire("Alerta", errors[0], "warning");
-          } else {
-            Swal.fire("Alerta", "Ocurrió un error desconocido", "error");
-          }
+          await this.request(async () => {
 
-        } finally {
+            const url = this.$store.state.url
 
-          this.loading = false;        
+            if(type == "excel"){
+              await report(url+method, this.sale, "reporte N°"+this.sale.consecutive+extention);
+            } else {
+              await ticket(url+method, this.sale, "reporte N°"+this.sale.consecutive+extention);
+            }
 
-        }
+          }, { loadingKey: "loading" })
 
-      },
+        },
+
+        //* Secondary Functions
+        request,
+
     }
   }
 

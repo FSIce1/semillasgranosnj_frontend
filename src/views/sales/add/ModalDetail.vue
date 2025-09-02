@@ -117,7 +117,7 @@
 
   import CTableProducts from "../../modals/ModalProducts.vue";
   import Swal from "sweetalert2";
-  import {list} from '@/utils/functions.js'
+  import {list, request} from '@/utils/functions.js'
   import { preventInvalidDecimal } from '@/utils/validators.js'
 
   export default {
@@ -174,134 +174,120 @@
       },
     },
     methods: {
-      preventInvalidDecimal,
-      async getUnitsMeasure(id_unit_measure){
 
-        this.loading = true;
-        this.loadingUnitMeasure = true;
+      //* Main Functions
+        async getUnitsMeasure(id_unit_measure){
 
-        try {
+          await this.request(async () => {
+            const filters = { id_unit_measure : id_unit_measure };
+            const url = this.$store.state.url
+            const resp = await list(url + this.prefix_units_measure, filters)
+            if (resp.status === 200) {
+              let setUnitsMeasure = (resp.data.data).map(unitMeasure => ({
+                value: unitMeasure.id, 
+                label: unitMeasure.name
+              }));
 
-          let filters = {
-            id_unit_measure : id_unit_measure,
-          };
+              this.units_measure = setUnitsMeasure;
+            } else {
+              this.units_measure = [];
+            }
+          }, { loadingKey: "loadingUnitMeasure" })
 
-          const url = this.$store.state.url;
-          const response = await list(url + this.prefix_units_measure, filters);
+        },
+        saveDetail(){
 
-          if (response.status === 200) {
+          let message = "";
 
-            let setUnitsMeasure = (response.data.data).map(unitMeasure => ({
-              value: unitMeasure.id, 
-              label: unitMeasure.name
-            }));
-
-            this.units_measure = setUnitsMeasure;
-
+          if(this.detail.product.id == ""){
+            Swal.fire("Alerta", "Seleccione un producto", "warning");
+            return
+          } else if(this.detail.price == ""){
+            Swal.fire("Alerta", "Ingrese un precio", "warning");
+            return
+          } else if(this.detail.price <= 0){
+            Swal.fire("Alerta", "El precio debe ser mayor a 0", "warning");
+            return
+          } else if(this.detail.um == 0 || this.detail.um == "" || this.detail.um == undefined){
+            Swal.fire("Alerta", "Debe seleccionar la unidad de medida a convertir", "warning");
+            return
           }
 
-        } catch (errors) {
-
-          if (errors.length > 0) {
-            Swal.fire("Alerta", errors[0], "warning");
-          } else {
-            Swal.fire("Alerta", "Ocurrió un error desconocido", "error");
+          if(this.detail.amount == ""){
+            Swal.fire("Alerta", "Ingrese una cantidad", "warning");
+            return
+          } else if(this.detail.amount <= 0){
+            Swal.fire("Alerta", "La cantidad debe ser mayor a 0", "warning");
+            return
+          } else if(this.detail.amount > parseFloat(this.detail.product.stock)){
+            Swal.fire("Alerta", "No hay stock sufiente el producto '"+this.detail.product.name+"' cuenta con una cantidad de "+this.detail.product.stock+" "+this.detail.product.um, "warning");
+            return
+          } else if((parseFloat(this.detail.product.stock) - this.detail.amount < this.detail.product.minimum_quantity)){
+            message = ", el producto '"+this.detail.product.name+"' se está agotando";
           }
 
-        } finally {
+          (this.units_measure).forEach(element => {
+            if(element.value == this.detail.um){
+              this.detail.um_name = element.label;
+            }
+          });
 
-          this.loadingUnitMeasure = false;
+          Swal.fire("Alerta", "Agregado Correctamente"+message, "success");
+          this.$emit("close-modal-detail");
+          this.$emit("get-detail", this.detail);
 
-        }
+          this.loadingDetail = false;
 
-      },
-      openModalDetail() {
-        this.flagModalProducts = true;
-      },
-      saveDetail(){
+        },
+        async selectProduct(product){
 
-        let message = "";
+          await this.getUnitsMeasure(product.id_unit_measure);
 
-        if(this.detail.product.id == ""){
-          Swal.fire("Alerta", "Seleccione un producto", "warning");
-          return
-        } else if(this.detail.price == ""){
-          Swal.fire("Alerta", "Ingrese un precio", "warning");
-          return
-        } else if(this.detail.price <= 0){
-          Swal.fire("Alerta", "El precio debe ser mayor a 0", "warning");
-          return
-        } else if(this.detail.um == 0 || this.detail.um == "" || this.detail.um == undefined){
-          Swal.fire("Alerta", "Debe seleccionar la unidad de medida a convertir", "warning");
-          return
-        }
+          this.flagModalProducts                = false;
+          this.detail.product.id                = product.id;
+          this.detail.product.name              = product.name;
+          this.detail.product.code              = product.cod_product;
+          this.detail.product.id_unit_measure   = product.id_unit_measure;
+          this.detail.product.um                = product.unit_measure.name;
+          this.detail.product.slug              = product.unit_measure.slug;
+          this.detail.product.stock             = product.stock;
+          this.detail.product.minimum_quantity  = product.minimum_quantity;
+          this.detail.equivalent                = product.equivalent;
+          this.detail.price                     = product.price;
 
-        if(this.detail.amount == ""){
-          Swal.fire("Alerta", "Ingrese una cantidad", "warning");
-          return
-        } else if(this.detail.amount <= 0){
-          Swal.fire("Alerta", "La cantidad debe ser mayor a 0", "warning");
-          return
-        } else if(this.detail.amount > parseFloat(this.detail.product.stock)){
-          Swal.fire("Alerta", "No hay stock sufiente el producto '"+this.detail.product.name+"' cuenta con una cantidad de "+this.detail.product.stock+" "+this.detail.product.um, "warning");
-          return
-        } else if((parseFloat(this.detail.product.stock) - this.detail.amount < this.detail.product.minimum_quantity)){
-          message = ", el producto '"+this.detail.product.name+"' se está agotando";
-        }
+        },
 
-        (this.units_measure).forEach(element => {
-          if(element.value == this.detail.um){
-            console.log(element);
-            this.detail.um_name = element.label;
-          }
-        });
+      //* Secondary Functions
+        request,
+        preventInvalidDecimal,
 
-        Swal.fire("Alerta", "Agregado Correctamente"+message, "success");
-        this.$emit("close-modal-detail");
-        this.$emit("get-detail", this.detail);
+        //? Modal
+        openModalDetail() {
+          this.flagModalProducts = true;
+        },
+        closeModalDetail(){
+          this.$emit("close-modal-detail");
+        },
+        closeModalProducts() {
+          this.flagModalProducts = false;
+        },
+        cleanModal(){
+          this.detail.product.id                = "";
+          this.detail.product.name              = "";
+          this.detail.product.code              = "";
+          this.detail.product.id_unit_measure   = 0;
+          this.detail.product.slug              = "";
+          this.detail.product.um                = "";
+          this.detail.product.stock             = "";
+          this.detail.product.minimum_quantity  = "";
+          this.detail.product.equivalent        = "";
+          this.detail.um                        = 0;
+          this.detail.um_name                   = "";
+          this.detail.price                     = "";
+          this.detail.equivalent                = "";
+          this.detail.amount                    = "";
+        },
 
-        this.loadingDetail = false;
-
-      },
-      closeModalDetail(){
-        this.$emit("close-modal-detail");
-      },
-      closeModalProducts() {
-        this.flagModalProducts = false;
-      },
-      async selectProduct(product){
-
-        await this.getUnitsMeasure(product.id_unit_measure);
-
-        this.flagModalProducts                = false;
-        this.detail.product.id                = product.id;
-        this.detail.product.name              = product.name;
-        this.detail.product.code              = product.cod_product;
-        this.detail.product.id_unit_measure   = product.id_unit_measure;
-        this.detail.product.um                = product.unit_measure.name;
-        this.detail.product.slug              = product.unit_measure.slug;
-        this.detail.product.stock             = product.stock;
-        this.detail.product.minimum_quantity  = product.minimum_quantity;
-        this.detail.equivalent                = product.equivalent;
-        this.detail.price                     = product.price;
-
-      },
-      cleanModal(){
-        this.detail.product.id                = "";
-        this.detail.product.name              = "";
-        this.detail.product.code              = "";
-        this.detail.product.id_unit_measure   = 0;
-        this.detail.product.slug              = "";
-        this.detail.product.um                = "";
-        this.detail.product.stock             = "";
-        this.detail.product.minimum_quantity  = "";
-        this.detail.product.equivalent        = "";
-        this.detail.um                        = 0;
-        this.detail.um_name                   = "";
-        this.detail.price                     = "";
-        this.detail.equivalent                = "";
-        this.detail.amount                    = "";
-      },
     },
   };
 

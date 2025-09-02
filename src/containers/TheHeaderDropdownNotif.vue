@@ -27,7 +27,7 @@
 <script>
   
   import Swal from "sweetalert2"
-  import {get} from '../assets/js/methods/functions.js'
+  import {get} from '@/utils/functions.js'
 
   export default {
     name: 'TheHeaderDropdownNotif',

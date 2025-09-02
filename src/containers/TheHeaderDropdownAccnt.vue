@@ -37,7 +37,7 @@
 
 <script>
 
-  import {show} from '../assets/js/methods/functions.js'
+  import {show} from '@/utils/functions.js'
 
   export default {
     name: 'TheHeaderDropdownAccnt',
@@ -62,12 +62,12 @@
         }
       },
       async logout(){
-                        
+
         const url = this.$store.state.url;
         const response = await show(url + this.prefix);
-                            
+
         if (response.status === 200) {
-                      
+
           let data = response?.data;
 
           if(data.flag){
@@ -87,21 +87,6 @@
 
         this.user.id = sessionStorage.getItem('id');
         this.user.name = sessionStorage.getItem('name') || 'Invitado';
-
-        // const url = this.$store.state.url;
-        // const response = await getUser(url + this.prefix_user);
-
-        // if (response.status === 200) {
-                      
-        //   let data = response?.data;
-
-        //   if(data.flag){
-            
-        //     console.log(data);
-            
-        //   }
-
-        // }
 
       },
     }

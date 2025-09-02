@@ -1,6 +1,7 @@
 <template>
   <CCard>
     <CCardBody>
+
       <template v-if="!loadingProducts">
           <div class="sk-chase" style="margin-top: 10px; text-align: center">
             <div class="sk-chase-dot"></div>
@@ -12,24 +13,7 @@
           </div>
       </template>
       <template v-else>
-        <CDataTable
-          :items="items"
-          :fields="fields"
-          :no-items-view="{
-            noItems: 'No hay registros',
-            noResults: 'No se encontraron resultados'
-          }"
-          :hover="hover"
-          :striped="striped"
-          :border="border"
-          :small="small"
-          :fixed="fixed"
-          :dark="dark"
-        >
-
-          <template #index="{ index }">
-            <td>{{ index + 1 }}</td>
-          </template>
+        <TableCustom :items="items" :fields="fields" :loading="false">
 
           <template #product="{ item }">
             <td>{{ item.product.name }}</td>
@@ -45,20 +29,10 @@
 
           <!-- BUTTON DELETE -->
           <template #buttonDelete="{index, item}">
-            <td>
-              <CButton
-                :name="item.id"
-                size="sm"
-                :key="item.id"
-                color="youtube"
-                @click="deleteDetail(index, item.id, item.product.name)"
-              >
-                <CIcon size="sm" name="cil-ban"/>
-              </CButton>
-            </td>
+            <BaseButton :modo="'eliminar'" @click="deleteDetail(index, item.id, item.product.name)"></BaseButton>
           </template>
 
-        </CDataTable>
+        </TableCustom>
       </template>
 
     </CCardBody>
@@ -68,7 +42,7 @@
 <script>
 
   import Swal from "sweetalert2"
-  import {destroy} from '../../../assets/js/methods/functions.js'
+  import {destroy, request} from '@/utils/functions.js'
 
   export default {
     name: 'TableListProductsSelected',
@@ -78,15 +52,13 @@
         type: Array,
         default () {
           return [
-            { key: 'index', label: '#' },
-            { key: 'product', label: 'Producto' },
-            { key: 'name_unit_measure', label: 'Unidad de Medida' },
-            { key: 'amount', label: 'Cantidad' },
-            // { key: 'amount_kg', label: 'KG/UND' },
-            // { key: 'amount_saco', label: 'SACO/UND' },
-            { key: 'price', label: 'Precio' },
-            { key: 'total', label: 'Total' },
-            { key: 'buttonDelete', label: 'Acciones' },
+            { key: 'index',             label: '#',                _classes: 'text-center' },
+            { key: 'product',           label: 'Producto',         _classes: 'text-center' },
+            { key: 'name_unit_measure', label: 'Unidad de Medida', _classes: 'text-center' },
+            { key: 'amount',            label: 'Cantidad',         _classes: 'text-center' },
+            { key: 'price',             label: 'Precio',           _classes: 'text-center' },
+            { key: 'total',             label: 'Total',            _classes: 'text-center' },
+            { key: 'buttonDelete',      label: 'Acciones',         _classes: 'text-center' },
           ]
         }
       },
@@ -106,64 +78,53 @@
       }
     },
     methods: {
-      async deleteDetail(index, id, name) {
 
-        let el = this;
+      //* Main Functions
+        async deleteDetail(index, id, name) {
 
-        if(id == null || id == "" ||id == undefined){
-          id = null;
-        }
+          if(id == null || id == "" ||id == undefined){
+            id = null;
+          }
 
-        Swal.fire({
-          title: "¿Está seguro?",
-          html: `Se eliminará el detalle '${name}'.`,
-          icon: "warning",
-          confirmButtonText: "Sí, eliminar",
-          closeOnConfirm: false,
-          showCancelButton: true,
-          cancelButtonText: "Cancelar"
-        })
-        .then(async function(result) {
+          const res = await Swal.fire({
+            title: "¿Está seguro?",
+            html: `Se eliminará el detalle '${name}'.`,
+            icon: "warning",
+            confirmButtonText: "Sí, eliminar",
+            closeOnConfirm: false,
+            showCancelButton: true,
+            cancelButtonText: "Cancelar"
+          })
 
-          if(result.value) {
+          if (!res.value) return
 
-            try {
+          await this.request(async () => {
 
-              if (id !== null) {
+            if (id !== null) {
 
-                const url = el.$store.state.url;
-                const response = await destroy(url+el.prefix+`/${id}`);
+              const url = this.$store.state.url
+              const resp = await destroy(url + this.prefix + `/${id}`)
 
-                if (response.status === 200) {
-
-                  el.items.splice(index, 1);
-                  el.$emit('get-total-general', index);
-                  Swal.fire("Alerta", response.data.message, "success");
-
-                }
-
-              } else {
-
-                el.items.splice(index, 1);
-                Swal.fire("Alerta", "El detalle fue eliminado correctamente", "success");
-
+              if (resp.status === 200) {
+                this.items.splice(index, 1);
+                this.$emit('get-total-general', index);
+                Swal.fire("Alerta", resp.data.message, "success");
               }
 
-            } catch (errors) {
+            } else {
 
-              if (errors.length > 0) {
-                Swal.fire("Alerta", errors[0], "warning");
-              } else {
-                Swal.fire("Alerta", "Ocurrió un error desconocido", "error");
-              }
+              this.items.splice(index, 1);
+              Swal.fire("Alerta", "El detalle fue eliminado correctamente", "success");
 
             }
 
-          }
+          })
 
-        });
+        },
 
-      },
+      //* Secondary Functions
+        request,
+
     }
   }
 

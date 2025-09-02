@@ -360,8 +360,8 @@
         },
 
       //* Secondary Functions
-        validateNumber,
         request,
+        validateNumber,
         getSetData(data){
 
           let formData = new FormData();

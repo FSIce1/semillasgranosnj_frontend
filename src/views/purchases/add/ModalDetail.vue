@@ -116,7 +116,7 @@
 
   import CTableProducts from "../../modals/ModalProducts.vue";
   import Swal from "sweetalert2";
-  import {list} from '@/utils/functions.js'
+  import {list, request} from '@/utils/functions.js'
   import { preventInvalidDecimal } from '@/utils/validators.js'
 
   export default {
@@ -173,49 +173,26 @@
       },
     },
     methods: {
-      preventInvalidDecimal,
+
+      //* Main Functions
       async getUnitsMeasure(id_unit_measure){
 
-        this.loading = true;
-        this.loadingUnitMeasure = true;
-
-        try {
-
-          let filters = {
-            id_unit_measure : id_unit_measure,
-          };
-
-          const url = this.$store.state.url;
-          const response = await list(url + this.prefix_units_measure, filters);
-
-          if (response.status === 200) {
-
-            let setUnitsMeasure = (response.data.data).map(unitMeasure => ({
+        await this.request(async () => {
+          const filters = { id_unit_measure : id_unit_measure };
+          const url = this.$store.state.url
+          const resp = await list(url + this.prefix_units_measure, filters)
+          if (resp.status === 200) {
+            let setUnitsMeasure = (resp.data.data).map(unitMeasure => ({
               value: unitMeasure.id, 
               label: unitMeasure.name
             }));
 
             this.units_measure = setUnitsMeasure;
-
-          }
-
-        } catch (errors) {
-
-          if (errors.length > 0) {
-            Swal.fire("Alerta", errors[0], "warning");
           } else {
-            Swal.fire("Alerta", "Ocurrió un error desconocido", "error");
+            this.units_measure = [];
           }
+        }, { loadingKey: "loadingUnitMeasure" })
 
-        } finally {
-
-          this.loadingUnitMeasure = false;
-
-        }
-
-      },
-      openModalDetail() {
-        this.flagModalProducts = true;
       },
       saveDetail(){
 
@@ -243,7 +220,6 @@
 
         (this.units_measure).forEach(element => {
           if(element.value == this.detail.um){
-            console.log(element);
             this.detail.um_name = element.label;
           }
         });
@@ -254,12 +230,6 @@
 
         this.loadingDetail = false;
 
-      },
-      closeModalDetail(){
-        this.$emit("close-modal-detail");
-      },
-      closeModalProducts() {
-        this.flagModalProducts = false;
       },
       async selectProduct(product){  
 
@@ -278,22 +248,38 @@
         this.detail.price                     = product.price_purchase;
 
       },
-      cleanModal(){
-        this.detail.product.id                = "";
-        this.detail.product.name              = "";
-        this.detail.product.code              = "";
-        this.detail.product.id_unit_measure   = 0;
-        this.detail.product.slug              = "";
-        this.detail.product.um                = "";
-        this.detail.product.stock             = "";
-        this.detail.product.minimum_quantity  = "";
-        this.detail.product.equivalent        = "";
-        this.detail.um                        = 0;
-        this.detail.um_name                   = "";
-        this.detail.price                     = "";
-        this.detail.equivalent                = "";
-        this.detail.amount                    = "";
-      },
+
+      //* Secondary Functions
+        request,
+        preventInvalidDecimal,
+
+        //? Modal
+        openModalDetail() {
+          this.flagModalProducts = true;
+        },
+        closeModalDetail(){
+          this.$emit("close-modal-detail");
+        },
+        closeModalProducts() {
+          this.flagModalProducts = false;
+        },
+        cleanModal(){
+          this.detail.product.id                = "";
+          this.detail.product.name              = "";
+          this.detail.product.code              = "";
+          this.detail.product.id_unit_measure   = 0;
+          this.detail.product.slug              = "";
+          this.detail.product.um                = "";
+          this.detail.product.stock             = "";
+          this.detail.product.minimum_quantity  = "";
+          this.detail.product.equivalent        = "";
+          this.detail.um                        = 0;
+          this.detail.um_name                   = "";
+          this.detail.price                     = "";
+          this.detail.equivalent                = "";
+          this.detail.amount                    = "";
+        },
+
     },
   };
 

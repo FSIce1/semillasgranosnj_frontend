@@ -63,8 +63,9 @@
   
 <script>
 
-  import {save} from '../../../assets/js/methods/functions.js'
+  import {save, request} from '@/utils/functions.js'
   import Swal from "sweetalert2";
+  import { preventInvalidDecimal } from '@/utils/validators.js'
 
   export default {
     name: "ModalStock",
@@ -103,122 +104,63 @@
       },
     },
     methods: {
+
+      //* Main Functions
       async saveDetail(){
 
-        this.loadingDetail = true;
-
-        try {
+        await this.request(async () => {
 
           if(this.product.stock == "" || this.product.stock == 0){
             Swal.fire("Alerta", "El Stock no puede estar vacío", "warning");
             return
           }
 
-          const url = this.$store.state.url;
+          const url = this.$store.state.url
           const data = this.getSetData(this.product);
-          const response = await save(url + "stock", data, null);
+          const resp = await save(url + "stock", data, null)
 
-          if (response.status === 200) {
+          if (resp.status === 200) {
 
-            Swal.fire("Alerta", response.data.message, "success");
+            Swal.fire("Alerta", resp.data.message, "success");
             this.$emit("close-modal-stock");
             this.$emit("get-detail");
 
           }
 
-        } catch (errors) {
-          
-          if (errors.length > 0) {
-            Swal.fire("Alerta", errors[0], "warning");
-          } else {
-            Swal.fire("Alerta", "Ocurrió un error desconocido", "error");
-          }
-
-        } finally {
-
-          this.loadingDetail = false;
-
-        }
+        }, { loadingKey: "loadingDetail" })
 
       },
-      getSetData(data){
 
-        let formData = new FormData();
+      //* Secondary Functions
+        preventInvalidDecimal,
+        request,
+        setData(product){
+          this.product.id         = product.id;
+          this.product.name       = product.name;
+          this.product.equivalent = product.equivalent;
+        },
+        getSetData(data){
 
-        formData.append('id', data.id);
-        formData.append('name', data.name);
-        formData.append('equivalent', data.equivalent);
-        formData.append('stock', data.stock);
-        formData.append('converted_stock', data.converted_stock);
+          let formData = new FormData();
 
-        return formData;
+          formData.append('id', data.id);
+          formData.append('name', data.name);
+          formData.append('equivalent', data.equivalent);
+          formData.append('stock', data.stock);
+          formData.append('converted_stock', data.converted_stock);
 
-      },
-      closeModalDetail(){
-        this.$emit("close-modal-stock");
-      },
-      cleanModal(){
-        this.product.id               = "";
-        this.product.name             = "";
-        this.product.equivalent       = "";
-        this.product.stock            = "";
-        this.product.converted_stock  = "";
-      },
-      setData(product){
-        this.product.id               = product.id;
-        this.product.name             = product.name;
-        this.product.equivalent       = product.equivalent;
-      },
-      preventInvalidDecimal(event) {
-        const key = event.key;
-        const value = event.target.value;
-        const selectionStart = event.target.selectionStart;
-        const selectionEnd = event.target.selectionEnd;
+          return formData;
 
-        // Permitir sobrescribir el contenido seleccionado sin bloquear por largo de la cadena
-        const isReplacing = selectionStart !== selectionEnd;
+        },
 
-        // Permite solo números, un solo punto decimal, y teclas útiles como Retroceso, Suprimir, etc.
-        if (!/^[0-9]$/.test(key) && key !== '.' && !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(key)) {
-          event.preventDefault();
-          return;
-        }
+        //? Modal
+        closeModalDetail(){
+          this.$emit("close-modal-stock");
+        },
+        cleanModal(){
+          this.product = { id:"", name:"", equivalent:"", stock:"", converted_stock:"" }
+        },
 
-        // Permitir borrar (Backspace, Delete) y escribir nuevamente en la parte entera
-        if (['Backspace', 'Delete'].includes(key)) {
-          return; // Permite borrar sin restricciones
-        }
-
-        // Asegura que solo se permita un punto decimal
-        if (key === '.' && value.includes('.')) {
-          event.preventDefault();
-          return;
-        }
-
-        // Si estamos reemplazando texto, permite que se complete la sobrescritura
-        if (isReplacing) {
-          return;
-        }
-
-        // Limitar la parte entera a 8 dígitos si ya hay un punto decimal
-        const [integerPart, decimalPart] = value.split('.');
-
-        // Si no hay parte entera, permite seguir escribiendo (por si se borró todo)
-        if (!integerPart && key !== '.') {
-          return;
-        }
-
-        // Limitar la parte entera a 8 dígitos si ya hay un punto decimal o aún no se ha ingresado
-        if (integerPart && integerPart.length >= 8 && key !== '.' && !value.includes('.')) {
-          event.preventDefault();
-          return;
-        }
-
-        // Limitar la parte decimal a 4 dígitos
-        if (decimalPart && decimalPart.length >= 4 && value.includes('.')) {
-          event.preventDefault();
-        }
-      },
     },
   };
 

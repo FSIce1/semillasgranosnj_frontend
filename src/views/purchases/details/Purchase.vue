@@ -67,10 +67,6 @@
                 <td class="left"><strong>Depositó</strong></td>
                 <td class="right">S/. {{ this.purchase.deposit }}</td>
               </tr>
-              <!-- <tr>
-                <td class="left"><strong>Consumo</strong></td>
-                <td class="right">S/. {{ this.purchase.consumption }}</td>
-              </tr> -->
               <tr>
                 <td class="left"><strong>Total</strong></td>
                 <td class="right"><strong>S/. {{ this.purchase.total }}</strong></td>
@@ -79,7 +75,6 @@
           </table>
         </CCol>
       </CRow>
-      <!-- Indicador de carga -->
       <div v-if="loading" class="text-center mt-3">
         <CSpinner color="primary" /> Generando archivo...
       </div>
@@ -89,8 +84,7 @@
 
 <script>
 
-  import Swal from "sweetalert2"
-  import {report, ticket} from '../../../assets/js/methods/functions.js'
+  import {report, ticket, request} from '@/utils/functions.js'
 
   export default {
     name: 'Purchase',
@@ -119,60 +113,52 @@
       await this.getPurchase();
     },
     methods: {
-      async getPurchase(){
 
-        const data = this.$route.query.data;
+      //* Main Functions
+        async getPurchase(){
 
-        if (data && typeof data === 'string' && data.trim() !== '') {
+          const data = this.$route.query.data;
 
-          const item = JSON.parse(data);
+          if (data && typeof data === 'string' && data.trim() !== '') {
 
-          this.purchase.id          = item.id;
-          this.purchase.consecutive = item.consecutive;
-          this.purchase.date        = item.date;
-          this.purchase.provider    = item.provider;
-          this.purchase.description = item.description;
-          this.purchase.subtotal    = item.subtotal;
-          this.purchase.deposit     = item.deposit;
-          this.purchase.consumption = item.consumption;
-          this.purchase.type        = item.type;
-          this.purchase.boleta_factura  = item.boleta_factura;
-          this.purchase.ruc         = item.ruc;
-          this.purchase.total       = item.total;
-          this.purchase.details     = item.details;
+            const item = JSON.parse(data);
 
-        }
+            this.purchase.id              = item.id;
+            this.purchase.consecutive     = item.consecutive;
+            this.purchase.date            = item.date;
+            this.purchase.provider        = item.provider;
+            this.purchase.description     = item.description;
+            this.purchase.subtotal        = item.subtotal;
+            this.purchase.deposit         = item.deposit;
+            this.purchase.consumption     = item.consumption;
+            this.purchase.type            = item.type;
+            this.purchase.boleta_factura  = item.boleta_factura;
+            this.purchase.ruc             = item.ruc;
+            this.purchase.total           = item.total;
+            this.purchase.details         = item.details;
 
-      },
-      async downloadReport(method, type, extention) {
-
-        this.loading = true;
-
-        try {
-
-          const url = this.$store.state.url;
-
-          if(type == "excel"){
-            await report(url+method, this.purchase, "reporte N°"+this.purchase.consecutive+extention);
-          } else {
-            await ticket(url+method, this.purchase, "reporte N°"+this.purchase.consecutive+extention);
           }
 
-        } catch (errors) {
+        },
+        async downloadReport(method, type, extention) {
 
-          if (errors.length > 0) {
-            Swal.fire("Alerta", errors[0], "warning");
-          } else {
-            Swal.fire("Alerta", "Ocurrió un error desconocido", "error");
-          }
+          await this.request(async () => {
 
-        } finally {
+            const url = this.$store.state.url
 
-          this.loading = false;        
+            if(type == "excel"){
+              await report(url+method, this.purchase, "reporte N°"+this.purchase.consecutive+extention);
+            } else {
+              await ticket(url+method, this.purchase, "reporte N°"+this.purchase.consecutive+extention);
+            }
 
-        }
+          }, { loadingKey: "loading" })
 
-      },
+        },
+
+      //* Secondary Functions
+        request,
+
     }
   }
 

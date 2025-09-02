@@ -2,7 +2,7 @@
 <template>
   <div>
 
-    <CModal title="Listado de Insumos" size="lg" :show="isVisibleModalHistory">
+    <CModal title="Listado de Insumos" size="lg" :show="isVisibleModalHistory && !!product">
 
       <slot name="header">
         <CIcon name="cil-grid"/> Historial de {{name}}
@@ -10,35 +10,7 @@
 
       <template>
         <CCardBody>
-          <CDataTable
-            :items="tableItems"
-            :fields="fields"
-            :items-per-page="5"
-            :no-items-view="{
-              noItems: 'No hay registros',
-              noResults: 'No se encontraron resultados'
-            }"
-            hover
-            striped
-            border
-            small
-            fixed
-            pagination
-            :loading="loading"
-          >
-
-            <template #loading>
-              <div class="text-center p-4">
-                <CSpinner color="primary" />
-                <p>Cargando...</p>
-              </div>
-            </template>
-
-            <template #index="{ index }">
-              <td>{{ index + 1 }}</td>
-            </template>
-
-          </CDataTable>
+          <TableCustom :items="tableItems" :fields="fields" :loading="loading" :items-per-page="5"></TableCustom>
         </CCardBody>
       </template>
 
@@ -56,7 +28,7 @@
 
 <script>
 
-import {list} from '../../../assets/js/methods/functions.js'
+import {list, request} from '@/utils/functions.js'
 
 export default {
   name: 'ModalStockHistory',
@@ -74,11 +46,11 @@ export default {
       type: Array,
       default() {
         return [
-            { key: "index",       label: "#" },
-            { key: "date",        label: "Día" },
-            { key: 'stock',       label: 'Stock' },
-            { key: "type",        label: "Tipo" },
-            { key: "description", label: "Descripción" },
+            { key: "index",       label: "#",           _classes: 'text-center' },
+            { key: "date",        label: "Día",         _classes: 'text-center' },
+            { key: 'stock',       label: 'Stock',       _classes: 'text-center' },
+            { key: "type",        label: "Tipo",        _classes: 'text-center' },
+            { key: "description", label: "Descripción", _classes: 'text-center' },
         ];
       },
     },
@@ -111,30 +83,19 @@ export default {
     },
   },
   methods: {
+    request,
     async getProductStockHistory(){
 
-      this.loading = true;
+      if (!this.product || !this.product.id) return
 
-      try {
+      await this.request(async () => {
 
-        this.filters.product_id = this.product.id;
+        const url = this.$store.state.url
+        const resp = await list(url + this.prefix, { product_id: this.product.id })
+        if (resp.status === 200) this.history = resp.data.data || []
+        else this.history = []
 
-        const url = this.$store.state.url;
-        const response = await list(url + this.prefix, this.filters);
-
-        if (response.status === 200) {
-          this.history = response.data.data;
-        }
-
-      } catch (errors) {
-
-        this.history = [];
-
-      } finally {
-
-        this.loading = false;
-
-      }
+      }, { loadingKey: "loading" })
 
     },
     closeModal(){
