@@ -75,7 +75,7 @@
 
               <template #boleta_factura="{ item }">
                 <td class="text-center">
-                  <CBadge color="info">{{ item.boleta_factura }}</CBadge>
+                  <CBadge color="info">{{ item.boleta_factura_cast }}</CBadge>
                 </td>
               </template>
 

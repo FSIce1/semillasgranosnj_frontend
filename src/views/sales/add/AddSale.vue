@@ -311,18 +311,18 @@
 
             const item = JSON.parse(data);
 
-            this.sale.id          = item.id;
-            this.sale.consecutive = item.consecutive;
-            this.sale.date        = item.date;
-            this.sale.client      = item.client;
-            this.sale.description = item.description;
-            this.sale.subtotal    = item.subtotal;
-            this.sale.deposit     = item.deposit;
-            this.sale.consumption = item.consumption;
-            this.sale.boleta_factura = item.boleta_factura;
-            this.sale.ruc         = item.ruc;
-            this.sale.total       = item.total;
-            this.sale.details     = item.details;
+            this.sale.id              = item.id;
+            this.sale.consecutive     = item.consecutive;
+            this.sale.date            = item.date;
+            this.sale.client          = item.client;
+            this.sale.description     = item.description;
+            this.sale.subtotal        = item.subtotal;
+            this.sale.deposit         = item.deposit;
+            this.sale.consumption     = item.consumption;
+            this.sale.boleta_factura  = item.boleta_factura;
+            this.sale.ruc             = item.ruc;
+            this.sale.total           = item.total;
+            this.sale.details         = item.details;
 
             this.disabledGeneral  = true;
             this.title = "Modificar Venta";

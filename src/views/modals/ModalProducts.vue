@@ -27,6 +27,10 @@
         <!-- LISTADO -->
         <TableCustom :items="tableItems" :items-per-page="5" :fields="fields" :loading="loadingProducts">
 
+          <template #cod_product="{ item }">
+            <td class="text-center">{{ item?.cod_product }}</td>
+          </template>
+
           <template #unit_measure="{ item }">
             <td class="text-center">{{ item.unit_measure.name }}</td>
           </template>
@@ -78,13 +82,13 @@ export default {
       type: Array,
       default() {
         return [
-            { key: "index", label: "#" },
-            { key: "cod_product", label: "Código" },
-            { key: "name", label: "Nombre" },
-            { key: "price", label: "Precio de venta (S/.)" },
-            { key: "price_purchase", label: "Precio de compra (S/.)" },
-            { key: 'stock', label: 'Stock' },
-            { key: "unit_measure", label: "UM" },
+            { key: "index"          , label: "#" },
+            { key: "cod_product"    , label: "Código" },
+            { key: "name"           , label: "Nombre" },
+            { key: "price"          , label: "Precio de venta (S/.)" },
+            { key: "price_purchase" , label: "Precio de compra (S/.)" },
+            { key: 'stock'          , label: 'Stock' },
+            { key: "unit_measure"   , label: "UM" },
             {
                 key: "buttonSelect",
                 label: "Seleccionar",

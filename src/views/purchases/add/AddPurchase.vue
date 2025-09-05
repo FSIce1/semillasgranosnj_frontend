@@ -203,7 +203,7 @@
   import ModalDetail from './ModalDetail.vue';
   import Multiselect from 'vue-multiselect'
   import {list, save, ticket, request} from '@/utils/functions.js'
-  import {validateNumber, preventInvalidDecimal, getCurrentDate} from '@/utils/validators.js'
+  import {validateNumber, preventInvalidDecimal} from '@/utils/validators.js'
   import CTableProductsSelected from './TableListProductsSelected.vue'
 
   import 'vue-select/dist/vue-select.css'
@@ -311,16 +311,17 @@
 
             const item = JSON.parse(data);
 
-            this.purchase.id          = item.id;
-            this.purchase.consecutive = item.consecutive;
-            this.purchase.date        = item.date;
-            this.purchase.provider    = item.provider;
-            this.purchase.description = item.description;
-            this.purchase.subtotal    = item.subtotal;
-            this.purchase.deposit     = item.deposit;
-            this.purchase.consumption = item.consumption;
-            this.purchase.total       = item.total;
-            this.purchase.details     = item.details;
+            this.purchase.id              = item.id;
+            this.purchase.consecutive     = item.consecutive;
+            this.purchase.date            = item.date;
+            this.purchase.provider        = item.provider;
+            this.purchase.description     = item.description;
+            this.purchase.subtotal        = item.subtotal;
+            this.purchase.deposit         = item.deposit;
+            this.purchase.consumption     = item.consumption;
+            this.purchase.boleta_factura  = item.boleta_factura;
+            this.purchase.total           = item.total;
+            this.purchase.details         = item.details;
 
             this.disabledGeneral  = true;
             this.title = "Modificar Compra";

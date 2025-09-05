@@ -7,8 +7,7 @@ const state = {
   sidebarMinimize: false,
   asideShow: false,
   darkMode: false,
-  // url: 'https://erp-back.nutri-van.com/api/',
-  // url: 'https://backend.nutri-van.com/api/',
+  // url: 'https://backend.granosysemillasnj.com/api/',
   url: 'http://127.0.0.1:8000/api/',
 }
 

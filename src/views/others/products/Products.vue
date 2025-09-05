@@ -218,11 +218,11 @@
               </template>
 
               <template #warehouse="{ item }">
-                <td class="text-center">{{ item.warehouse.name }}</td>
+                <td class="text-center">{{ item.warehouse?.name }}</td>
               </template>
 
               <template #unit_measure="{ item }">
-                <td class="text-center">{{ item.unit_measure.name }}</td>
+                <td class="text-center">{{ item.unit_measure?.name }}</td>
               </template>
 
               <!-- BUTTON STOCK -->
@@ -278,10 +278,10 @@
           return [
             { key: 'index',           label: '#' },
             { key: 'name',            label: 'Nombre',            _classes: 'text-center' },
+            { key: 'warehouse',       label: 'Almacén',           _classes: 'text-center' },
             { key: 'price',           label: 'Precio de venta',   _classes: 'text-center' },
             { key: 'price_purchase',  label: 'Precio de compra',  _classes: 'text-center' },
             { key: 'stock',           label: 'Stock',             _classes: 'text-center' },
-            { key: 'warehouse',       label: 'Almacén',           _classes: 'text-center' },
             { key: 'unit_measure',    label: 'UM',                _classes: 'text-center' },
 
             // Botones de acción
@@ -366,7 +366,6 @@
             if (resp.status === 200) this.products = resp.data.data || []
             else this.products = []
           }, { loadingKey: "loading" })
-
         },
         async getWarehouses(){
 
@@ -472,7 +471,7 @@
 
           const data = (this.warehouses || []).map(c => ({
             'Código': c.cod_product || '',
-            'Nombre': c.name || '',
+            'Nombre': c?.name || '',
             'Precio de venta': c.price || '',
             'Precio de compra': c.price_purchase || '',
             'Stock': c.stock || '',
