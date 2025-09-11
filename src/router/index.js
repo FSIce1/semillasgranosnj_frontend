@@ -14,6 +14,7 @@ const AddPurchase = () => import('@/views/purchases/add/AddPurchase')
 // Maestras
 const UnitsMeasure = () => import('@/views/others/maestras/units_measure/UnitsMeasure')
 const WareHouses = () => import('@/views/others/maestras/warehouses/WareHouses')
+const Lots = () => import('@/views/others/maestras/lots/Lots')
 
 // Administrable
 const Users = () => import('@/views/others/administrable/users/Users')
@@ -43,7 +44,7 @@ const Login = () => import('@/views/pages/Login')
 Vue.use(Router)
 
 export default new Router({
-  mode: 'hash', // https://router.vuejs.org/api/#mode
+  mode: 'hash',
   linkActiveClass: 'open active',
   scrollBehavior: () => ({ y: 0 }),
   routes: [
@@ -61,6 +62,33 @@ export default new Router({
           component: Perfil
         },
 
+        // Préstamos
+        {
+          path: 'préstamos',
+          redirect: '/préstamos/listado',
+          name: 'Préstamos',
+          component: {
+            render (c) { return c('router-view') }
+          },
+          children: [
+            {
+              path: 'listado',
+              name: 'Listado préstamos',
+              component: Purchases
+            },
+            {
+              path: 'agregar-préstamo',
+              name: 'Agregar compra',
+              component: AddPurchase
+            },
+            {
+              path: 'detalle-préstamo',
+              name: 'Detalle préstamo',
+              component: Purchase
+            }
+          ]
+        },
+    
         // Compras
         {
           path: 'compras',
@@ -169,6 +197,11 @@ export default new Router({
               path: 'almacenes',
               name: 'Almacenes',
               component: WareHouses
+            },
+            {
+              path: 'lotes',
+              name: 'Lotes',
+              component: Lots
             },
           ]
         },

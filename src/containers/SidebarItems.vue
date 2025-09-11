@@ -44,6 +44,25 @@
             icon: 'cil-speedometer',
           },
 
+          //? PRÉSTAMOS
+          {
+            _name: 'CSidebarNavTitle',
+            name: 'Préstamos',
+            _children: ['Préstamos']
+          },
+          {
+            _name: 'CSidebarNavItem',
+            name: 'Listado Préstamos',
+            to: '/préstamos/listado',
+            icon: 'cil-list',
+          },
+          {
+            _name: 'CSidebarNavItem',
+            name: 'Agregar Préstamo',
+            to: '/préstamos/agregar-préstamo',
+            icon: 'cil-list',
+          },
+
           //? COMPRAS
           {
             _name: 'CSidebarNavTitle',
@@ -120,6 +139,11 @@
                 to: '/maestras/almacenes',
                 icon: 'cil-list',
               },
+              {
+                name: 'Lotes',
+                to: '/maestras/lotes',
+                icon: 'cil-list',
+              },
             ]
           },
           {
@@ -185,14 +209,16 @@
             if(permissions != undefined && permissions!= null && permissions!=""){
 
               const permissionsArray = permissions.slice();
-              
+
               if (permissionsArray.includes(item.name) || item.name == "Perfil") {
                 return item;
               } else if(item.name == "Ventas" && (permissionsArray.includes("Listado Ventas") || permissionsArray.includes("Agregar Venta"))){
                 return item
-              } else if(item.name == "Otros"){
+              } else if(item.name == "Compras" && (permissionsArray.includes("Listado Compras") || permissionsArray.includes("Agregar Compra"))){
                 return item
-              }else if(item.name == "Compras" && (permissionsArray.includes("Listado Compras") || permissionsArray.includes("Agregar Compra"))){
+              } else if(item.name == "Préstamos" && (permissionsArray.includes("Listado Préstamos") || permissionsArray.includes("Agregar Préstamo"))){
+                return item
+              } else if(item.name == "Otros"){
                 return item
               }
 

@@ -227,7 +227,7 @@ export function getCurrentDate() {
 
 }
 
-export async function request (fn, { loadingKey = 'loading' } = {}) {
+export async function request (fn, { loadingKey = 'loading', load = false } = {}) {
 
     const setLoading = val => { this[loadingKey] = val }
 
@@ -244,7 +244,7 @@ export async function request (fn, { loadingKey = 'loading' } = {}) {
 
     } finally {
 
-        setLoading(false)
+        setLoading(load)
 
     }
 

@@ -27,7 +27,7 @@
         </template>
 
         <template #index="{ index }">
-            <td>{{ index + 1 }}</td>
+            <td class="text-center">{{ index + 1 }}</td>
         </template>
 
         <!-- Empty -->

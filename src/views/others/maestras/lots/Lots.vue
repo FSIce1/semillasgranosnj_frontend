@@ -5,7 +5,7 @@
         <CCard>
           <CCardHeader class="d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center">
-              <CIcon name="cil-grid"/> Listado de almacenes
+              <CIcon name="cil-grid"/> Listado de lotes
             </div>
             <div>
               <CButton color="twitter" @click="openModal()">
@@ -26,9 +26,9 @@
                 <CCardBody>
 
                   <CInput
-                    :value.sync="warehouse.name"
+                    :value.sync="lot.name"
                     :disabled="loadingModal"
-                    @keyup.enter="saveWarehouse()"
+                    @keyup.enter="saveLot()"
                     description="Por favor ingresa un nombre."
                     label="Nombre"
                     placeholder="Ingresa un nombre..."
@@ -36,13 +36,46 @@
                     was-validated
                   />
 
+                  <template v-if="loadingWarehouse">
+                    <div class="spinner-border m-4" role="status">
+                      <span class="visually-hidden"></span>
+                    </div>
+                  </template>
+                  <template v-else>
+                    <div>
+                      <label>Almacenes</label>
+                      <multiselect
+                        v-model="lot.warehouse"
+                        :disabled="loadingModal"
+                        :options=warehouses
+                        placeholder="Selecciona el almacén"
+                        label="name"
+                        track-by="id"
+                        select-label="Presiona para seleccionar"
+                        selected-label="Seleccionado"
+                        deselect-label="Presiona para quitar"
+                      >
+                        <!-- Lista vacía (sin opciones) -->
+                        <template #noOptions>
+                          <span class="text-muted">No hay almacenes disponibles</span>
+                        </template>
+
+                        <!-- Sin resultados al buscar -->
+                        <template #noResult>
+                          <span class="text-muted">No se encontraron resultados</span>
+                        </template>
+                      </multiselect>
+                      <br>
+                    </div>
+                  </template>
+
                 </CCardBody>
               </CForm>
 
               <template #footer>
 
                 <div v-if="!loadingModal">
-                  <CButton color="primary" @click="saveWarehouse()" class="mr-1 mb-3"><CIcon name="cil-save"/> <span v-text="textButton"></span></CButton>
+                  <CButton color="primary" @click="saveLot()" class="mr-1 mb-3"><CIcon name="cil-save"/> <span v-text="textButton"></span></CButton>
                 </div>
                 <div v-else>
                   <CCol xl="3" lg="4" md="6">
@@ -63,12 +96,6 @@
 
             </CModal>
 
-            <ModalLots
-              :isVisibleModalLots="flagModalLots"
-              :warehouse="warehouseSelect"
-              @close-modal-lots="closeModalLots"
-            />
-
             <!-- FILTROS -->
             <CRow>
               <CCol md="3">
@@ -80,13 +107,13 @@
             </CRow>
             <CRow>
               <CCol md="6" class="d-flex align-items-center">
-                <CButton color="primary" @click="getWarehouses" class="mr-2" style="width: auto;">
+                <CButton color="primary" @click="getLots" class="mr-2" style="width: auto;">
                   <CIcon name="cil-magnifying-glass" /> Buscar
                 </CButton>
                 <CButton color="info" @click="cleanFilters" class="mr-2" style="width: auto;">
                   <CIcon name="cil-share" /> Limpiar filtros
                 </CButton>
-                <CButton color="success" @click="downloadExcelWarehouses" style="width: auto;">
+                <CButton color="success" @click="downloadExcelLots" style="width: auto;">
                   <CIcon name="cil-spreadsheet" /> Generar Excel
                 </CButton>
               </CCol>
@@ -96,9 +123,8 @@
             <!-- LISTADO -->
             <TableCustom :items="tableItems" :fields="fields" :loading="loading">
 
-              <!-- BUTTON HISTORIAL -->
-              <template #buttonHistory="{item}">
-                <BaseButton :modo="'ver'" @click="openModalWarehouses(item)" />
+              <template #warehouse="{ item }">
+                <td class="text-center">{{ item?.warehouse?.name }}</td>
               </template>
 
               <!-- BUTTON EDIT -->
@@ -108,7 +134,7 @@
 
               <!-- BUTTON DELETE -->
               <template #buttonDelete="{item}">
-                <BaseButton :modo="'eliminar'" @click="deleteWarehouse(item.id, item.name)"></BaseButton>
+                <BaseButton :modo="'eliminar'" @click="deleteLot(item.id, item.name)"></BaseButton>
               </template>
 
             </TableCustom>
@@ -122,13 +148,16 @@
 
 <script>
 
-import Swal from "sweetalert2"
-import * as XLSX from 'xlsx';
-import {list, save, show, destroy, request} from '@/utils/functions.js'
-import ModalLots from './ModalLots.vue';
+  import Swal from "sweetalert2"
+  import * as XLSX from 'xlsx';
+  import {list, save, show, destroy, request} from '@/utils/functions.js'
+
+  import Multiselect from 'vue-multiselect'
+  import 'vue-select/dist/vue-select.css'
+  import 'vue-multiselect/dist/vue-multiselect.min.css'
 
   export default {
-    name: 'WareHouses',
+    name: 'Lots',
     props: {
       fields: {
         type: Array,
@@ -137,73 +166,75 @@ import ModalLots from './ModalLots.vue';
             { key: 'index',         label: '#',        _classes: 'text-center' },
             { key: 'code',          label: 'Código',   _classes: 'text-center' },
             { key: 'name',          label: 'Nombre',   _classes: 'text-center' },
+            { key: 'warehouse',     label: 'Almacén',  _classes: 'text-center' },
 
             // Botones de acción
-            { key: 'buttonHistory', label: 'Lotes',    _classes: 'text-center', _style:'min-width:20%;' },
             { key: 'buttonEdit',    label: 'Editar',   _classes: 'text-center', _style:'min-width:20%;' },
             { key: 'buttonDelete',  label: 'Eliminar', _classes: 'text-center', _style:'min-width:20%;' },
           ]
         }
       },
     },
-    mounted() {
-      this.getWarehouses();
+    async mounted() {
+      await this.getLots();
+      await this.getWarehouses();
     },
     computed: {
-      tableItems () { return this.loading ? [] : this.warehouses }
+      tableItems () { return this.loading ? [] : this.lots }
     },
     data () {
       return {
-        prefix_list: "warehouses",
-        prefix: "warehouse",
+        prefix_list: "lots",
+        prefix: "lot",
+        lots: [],
         warehouses: [],
-        warehouseSelect: null,
 
         loading: true,
-        loadingModal: false,
+        loadingWarehouse: false,
 
-        warehouse: {
-          id: "",
-          name: "",
+        lot: {
+          id        : "",
+          warehouse : "",
+          name      : "",
         },
         filters: {
           name  : "",
         },
-
+        
         //? Modal
-        titleModal: "Nuevo almacén",
+        loadingModal: false,
+        titleModal: "Nuevo lote",
         textButton: "Guardar",
         flagModal: false,
-        flagModalLots: false,
         loadingButtonEdit: {},
       }
     },
     components: {
-      ModalLots,
+      Multiselect,
     },
     methods: {
 
       //* Main Functions
-        async getWarehouses(){
+        async getLots(){
 
           await this.request(async () => {
             const url = this.$store.state.url
             const resp = await list(url + this.prefix_list, this.filters)
-            if (resp.status === 200) this.warehouses = resp.data.data || []
-            else this.warehouses = []
+            if (resp.status === 200) this.lots = resp.data.data || []
+            else this.lots = []
           }, { loadingKey: "loading" })
 
         },
-        async saveWarehouse(){
+        async saveLot(){
 
           await this.request(async () => {
 
             const url = this.$store.state.url
-            const data = this.getSetData(this.warehouse);
-            const resp = await save(url + this.prefix, data, this.warehouse.id)
+            const data = this.getSetData(this.lot);
+            const resp = await save(url + this.prefix, data, this.lot.id)
 
             if (resp.status === 200) {
-              await this.getWarehouses()
+              await this.getLots()
               Swal.fire("Alerta", resp.data.message, "success")
               this.flagModal = false
             }
@@ -214,7 +245,7 @@ import ModalLots from './ModalLots.vue';
         async editModal(id){
 
           this.flagModal = true
-          this.titleModal = "Modificar Almacén"
+          this.titleModal = "Modificar Lote"
           this.textButton = "Modificar"
           this.loadingModal = true
 
@@ -223,9 +254,10 @@ import ModalLots from './ModalLots.vue';
             const resp = await show(url + this.prefix + `/${id}`)
             if (resp.status === 200) {
               const d = resp?.data?.data || {}
-              this.warehouse = {
+              this.lot = {
                 id: d.id || "",
                 name: d.name || "",
+                warehouse: d.warehouse || "",
               }
               this.$set(this.loadingButtonEdit, id, false)
             }
@@ -236,11 +268,11 @@ import ModalLots from './ModalLots.vue';
           }
 
         },
-        async deleteWarehouse(id, name){
+        async deleteLot(id, name){
 
           const res = await Swal.fire({
             title: "¿Está seguro?",
-            html: `Se eliminará el almacén '${name}'.`,
+            html: `Se eliminará el lote '${name}'.`,
             icon: "warning",
             confirmButtonText: "Sí, eliminar",
             showCancelButton: true,
@@ -255,18 +287,19 @@ import ModalLots from './ModalLots.vue';
             const resp = await destroy(url + this.prefix + `/${id}`)
 
             if (resp.status === 200) {
-              await this.getWarehouses()
+              await this.getLots()
               Swal.fire("Alerta", resp.data.message, "success")
             }
 
           })
 
         },
-        downloadExcelWarehouses() {
+        downloadExcelLots() {
 
-          const data = (this.warehouses || []).map(c => ({
+          const data = (this.lots || []).map(c => ({
             'Código': c.code || '',
             'Nombre': c.name || '',
+            'Almacén': c.warehouse.name || '',
           }))
 
           const ws = XLSX.utils.json_to_sheet(data)
@@ -283,39 +316,43 @@ import ModalLots from './ModalLots.vue';
           }
 
           const wb = XLSX.utils.book_new()
-          XLSX.utils.book_append_sheet(wb, ws, 'Almacenes')
-          XLSX.writeFile(wb, 'reporte_almacenes.xlsx')
+          XLSX.utils.book_append_sheet(wb, ws, 'Lotes')
+          XLSX.writeFile(wb, 'reporte_lotes.xlsx')
 
         },
 
       //* Secondary Functions
         request,
+        async getWarehouses(){
+
+          await this.request(async () => {
+            const url = this.$store.state.url
+            const resp = await list(url + "warehouses")
+            if (resp.status === 200) this.warehouses = resp.data.data || []
+            else this.warehouses = []
+          }, { loadingKey: "loadingWarehouse" })
+
+        },
         getSetData(data){
 
           let formData = new FormData();
 
+          formData.append('warehouse_id', data.warehouse.id);
           formData.append('name', data.name);
 
           return formData;
 
         },
         cleanFilters() {
-          this.filters = { document:"", name:"", type:"" }
-          this.getWarehouses()
+          this.filters = { warehouse_id:"", name:"" }
+          this.getLots()
         },
 
         //? Modal
-        openModalWarehouses(warehouseSelect){
-          this.warehouseSelect = warehouseSelect;
-          this.flagModalLots = true;
-        },
-        closeModalLots(){
-          this.flagModalLots = false;
-        },
-        openModal(){ this.cleanModal(); this.flagModal = true },
+        async openModal(){ this.cleanModal(); this.flagModal = true },
         cleanModal(){
-          this.warehouse  = { id:"", document:"", name:"" }
-          this.titleModal = "Nuevo Almacén";
+          this.lot  = { id:"", warehouse_id:"", name:"" }
+          this.titleModal = "Nuevo Lote";
           this.textButton = "Guardar";
         },
 

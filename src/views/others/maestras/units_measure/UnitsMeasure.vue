@@ -138,8 +138,8 @@
         type: Array,
         default () {
           return [
-            { key: 'index',         label: '#' },
-            { key: 'name',          label: 'Nombre' },
+            { key: 'index',         label: '#',        _classes: 'text-center' },
+            { key: 'name',          label: 'Nombre',   _classes: 'text-center' },
 
             // Botones de acción
             // { key: 'buttonView',    label: 'Ver',      _classes: 'text-center', _style:'min-width:20%;' },
