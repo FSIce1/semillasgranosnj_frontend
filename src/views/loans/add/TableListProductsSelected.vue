@@ -2,18 +2,14 @@
   <CCard>
     <CCardBody>
 
-      <TableCustom :items="tableItems" :fields="fields" :loading="false">
+      <TableCustom :items="tableItems" :fields="fields" :loading="loading">
 
-        <template #product="{ item }">
-          <td class="text-center">{{ item.product.name }}</td>
+        <template #lot="{ item }">
+          <td class="text-center">{{ item.lot.name }}</td>
         </template>
 
-        <template #price="{ item }">
-          <td class="text-center">S/. {{ item.price }}</td>
-        </template>
-
-        <template #total="{ item }">
-          <td class="text-center">S/. {{ item.total }}</td>
+        <template #unit_measure="{ item }">
+          <td class="text-center">{{ item.unit_measure.name }}</td>
         </template>
 
         <!-- BUTTON DELETE -->
@@ -34,7 +30,6 @@
 
   export default {
     name: 'TableListProductsSelected',
-    disabled: { type: Boolean, default: false },
     props: {
       loading: { type: Boolean, default: false },
       disabled: { type: Boolean, default: false },
@@ -43,13 +38,11 @@
         type: Array,
         default () {
           return [
-            { key: 'index',             label: '#',                _classes: 'text-center' },
-            { key: 'product',           label: 'Producto',         _classes: 'text-center' },
-            { key: 'name_unit_measure', label: 'Unidad de Medida', _classes: 'text-center' },
-            { key: 'amount',            label: 'Cantidad',         _classes: 'text-center' },
-            { key: 'price',             label: 'Precio',           _classes: 'text-center' },
-            { key: 'total',             label: 'Total',            _classes: 'text-center' },
-            { key: 'buttonDelete',      label: 'Acciones',         _classes: 'text-center' },
+            { key: 'index',         label: '#',                 _classes: 'text-center' },
+            { key: 'lot',           label: 'Lote',              _classes: 'text-center' },
+            { key: 'quantity_in',   label: 'Cantidad',          _classes: 'text-center' },
+            { key: 'unit_measure',  label: 'Unidad de Medida',  _classes: 'text-center' },
+            { key: 'buttonDelete',  label: 'Acciones',          _classes: 'text-center' },
           ]
         }
       },
@@ -96,9 +89,10 @@
               const resp = await destroy(url + this.prefix + `/${id}`)
 
               if (resp.status === 200) {
+
                 this.items.splice(index, 1);
-                this.$emit('get-total-general', index);
                 Swal.fire("Alerta", resp.data.message, "success");
+
               }
 
             } else {

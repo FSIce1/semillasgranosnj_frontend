@@ -1,6 +1,11 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
+// Préstamos
+const Loans = () => import('@/views/loans/list/Loans')
+const Loan = () => import('@/views/loans/details/Loan')
+const AddLoan = () => import('@/views/loans/add/AddLoan')
+
 // Ventas
 const Sales = () => import('@/views/sales/list/Sales')
 const Sale = () => import('@/views/sales/details/Sale')
@@ -74,17 +79,17 @@ export default new Router({
             {
               path: 'listado',
               name: 'Listado préstamos',
-              component: Purchases
+              component: Loans
             },
             {
               path: 'agregar-préstamo',
-              name: 'Agregar compra',
-              component: AddPurchase
+              name: 'Agregar préstamo',
+              component: AddLoan
             },
             {
               path: 'detalle-préstamo',
               name: 'Detalle préstamo',
-              component: Purchase
+              component: Loan
             }
           ]
         },

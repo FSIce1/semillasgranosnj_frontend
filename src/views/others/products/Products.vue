@@ -21,12 +21,6 @@
               @close-modal-product="closeModalProduct"
             />
 
-            <ModalTransfer
-              :isVisibleModalDetail="flagModalDetail"
-              @get-detail="getProductsWithFilters"
-              @close-modal-detail="closeModalDetail"
-            />
-
             <ModalStock
               :isVisibleModalDetail="flagModalStock"
               :productStock="productStock"
@@ -42,6 +36,9 @@
 
             <!-- FILTROS -->
             <CRow>
+              <CCol md="3">
+                <CInput label="Código del Producto" v-model="filters.cod_product" />
+              </CCol>
               <CCol md="3">
                 <CInput label="Nombre" v-model="filters.name" />
               </CCol>
@@ -65,7 +62,7 @@
             <TableCustom :items="tableItems" :fields="fields" :loading="loading">
 
               <template #cod_product="{ item }">
-                <td>{{ item.cod_product }}</td>
+                <td class="text-center">{{ item?.cod_product }}</td>
               </template>
 
               <template #name="{ item }">
@@ -128,7 +125,6 @@
   import {list, destroy, request} from '@/utils/functions.js'
 
   import ModalProduct from './ModalProduct.vue';
-  import ModalTransfer from './ModalTransfer.vue';
   import ModalStock from './ModalStock.vue';
   import ModalStockHistory from './ModalStockHistory.vue';
 
@@ -141,6 +137,7 @@
         default () {
           return [
             { key: 'index',           label: '#' },
+            { key: 'cod_product',     label: 'Código',            _classes: 'text-center' },
             { key: 'name',            label: 'Nombre',            _classes: 'text-center' },
             { key: 'warehouse',       label: 'Almacén',           _classes: 'text-center' },
             { key: 'lot',             label: 'Lote',              _classes: 'text-center' },
@@ -175,9 +172,7 @@
         productStock: null,
         filters: {
           cod_product : "",
-          name        : "",
-          process     : "",
-          type        : "",
+          name        : ""
         },
 
         //? Modal
@@ -190,7 +185,6 @@
     },
     components: {
       ModalProduct,
-      ModalTransfer,
       ModalStock,
       ModalStockHistory,
     },
@@ -235,7 +229,9 @@
         downloadProducts() {
 
           const data = (this.products || []).map(c => ({
-            'Código': c.cod_product || '',
+            'Código': c?.cod_product || '',
+            'Almacén': c.warehouse?.name || '',
+            'Lote': c.lot?.name || '',
             'Nombre': c?.name || '',
             'Precio de venta': c.price || '',
             'Precio de compra': c.price_purchase || '',
@@ -292,7 +288,7 @@
           this.flagModalHistory = false;
         },
         cleanFilters() {
-          this.filters = { cod_product:"", name:"", process:"", type:"" }
+          this.filters = { cod_product:"", name:"" }
           this.getProducts()
         },
 

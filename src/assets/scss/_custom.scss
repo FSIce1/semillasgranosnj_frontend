@@ -1,1 +1,18 @@
 // Here you can add other styles
+.form-label { font-weight: 400; }
+.form-hint { color: #6c757d; font-size: .85rem; display:block; margin-top:.25rem; }
+// .empty-hint { color:#6c757d; font-size:.85rem; display:flex; align-items:center; margin-top:.25rem; }
+.skeleton-field { display:flex; align-items:center; border:1px solid #e9ecef; background:#f8f9fa; border-radius:.5rem; padding:.5rem .75rem; }
+
+.compact-field >>> .form-group { margin-bottom: .25rem; }
+.compact-field .form-label { margin-bottom: .25rem; }
+.compact-field .mb-1 { margin-bottom: .25rem !important; }
+
+.empty-hint { 
+    color: #6c757d; 
+    font-size: .85rem; 
+    display: flex; 
+    align-items: center; 
+}
+.empty-hint.tight { margin-top: -10px; }
+.empty-hint .c-icon, .empty-hint svg { margin-right: .25rem; }

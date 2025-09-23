@@ -1,6 +1,7 @@
 <template>
     <td class="text-center">
         <CButton
+            v-if="isVisible"
             :type="type"
             :size="size"
             :color="computedColor"
@@ -33,6 +34,8 @@
         components: { CButton },
         inheritAttrs: false,
         props: {
+            // visibilidad
+            isVisible:   { type: Boolean, default: true },
             // control de estilos globales
             disableShape:   { type: Boolean, default: false },
             disableVariant: { type: Boolean, default: false },

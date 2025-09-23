@@ -142,7 +142,6 @@
         sales: [],
         loading: true,
         types: ['ambas', 'contado', 'credito'],
-        typesProducts: ['ambas', 'insumo', 'nutrivan'],
         filters: {
           consecutive : "",
           date        : "",

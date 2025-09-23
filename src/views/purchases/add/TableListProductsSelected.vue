@@ -2,38 +2,26 @@
   <CCard>
     <CCardBody>
 
-      <template v-if="!loadingProducts">
-          <div class="sk-chase" style="margin-top: 10px; text-align: center">
-            <div class="sk-chase-dot"></div>
-            <div class="sk-chase-dot"></div>
-            <div class="sk-chase-dot"></div>
-            <div class="sk-chase-dot"></div>
-            <div class="sk-chase-dot"></div>
-            <div class="sk-chase-dot"></div>
-          </div>
-      </template>
-      <template v-else>
-        <TableCustom :items="items" :fields="fields" :loading="false">
+      <TableCustom :items="tableItems" :fields="fields" :loading="false">
 
-          <template #product="{ item }">
-            <td>{{ item.product.name }}</td>
-          </template>
+        <template #product="{ item }">
+          <td class="text-center">{{ item.product.name }}</td>
+        </template>
 
-          <template #price="{ item }">
-            <td>S/. {{ item.price }}</td>
-          </template>
-          
-          <template #total="{ item }">
-            <td>S/. {{ item.total }}</td>
-          </template>
+        <template #price="{ item }">
+          <td class="text-center">S/. {{ item.price }}</td>
+        </template>
+        
+        <template #total="{ item }">
+          <td class="text-center">S/. {{ item.total }}</td>
+        </template>
 
-          <!-- BUTTON DELETE -->
-          <template #buttonDelete="{index, item}">
-            <BaseButton :modo="'eliminar'" @click="deleteDetail(index, item.id, item.product.name)"></BaseButton>
-          </template>
+        <!-- BUTTON DELETE -->
+        <template #buttonDelete="{index, item}">
+          <BaseButton :disabled="disabled" :modo="'eliminar'" @click="deleteDetail(index, item.id, item.product.name)"></BaseButton>
+        </template>
 
-        </TableCustom>
-      </template>
+      </TableCustom>
 
     </CCardBody>
   </CCard>
@@ -46,7 +34,10 @@
 
   export default {
     name: 'TableListProductsSelected',
+    disabled: { type: Boolean, default: false },
     props: {
+      loading: { type: Boolean, default: false },
+      disabled: { type: Boolean, default: false },
       items: Array,
       fields: {
         type: Array,
@@ -62,12 +53,11 @@
           ]
         }
       },
-      hover: Boolean,
-      striped: Boolean,
-      border: Boolean,
-      small: Boolean,
-      fixed: Boolean,
-      dark: Boolean
+    },
+    computed: {
+      tableItems () {
+        return this.loading ? [] : (this.items || [])
+      }
     },
     data () {
       return {

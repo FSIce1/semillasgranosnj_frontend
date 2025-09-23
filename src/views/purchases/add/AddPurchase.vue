@@ -20,6 +20,7 @@
                     <label>Proveedor</label>
                     <multiselect
                       v-model="purchase.provider"
+                      :disabled="loadingButtonsActions"
                       :options=providers
                       placeholder="Selecciona el proveedor"
                       label="name"
@@ -65,25 +66,28 @@
             <CRow>
               <CCol md="4">
                 <CSelect
+                  label="Tipo de Compra"
+                  :disabled="loadingButtonsActions"
                   :value.sync="purchase.type"
                   :options=types
-                  label="Tipo de Compra"
                   placeholder="Seleccione un tipo"
                 />
               </CCol>
               <CCol md="4">
                 <CSelect
+                  label="Boleta/Factura"
+                  :disabled="loadingButtonsActions"
                   :value.sync="purchase.boleta_factura"
                   :options=types_purchases
-                  label="Boleta/Factura"
                   placeholder="Seleccione un tipo"
                 />
               </CCol>
               <CCol v-if="purchase.boleta_factura == 'factura'" md="4">
                 <CInput
+                  label="RUC"
+                  :disabled="loadingButtonsActions"
                   :value.sync="purchase.ruc"
                   @keydown="validateNumber"
-                  label="RUC"
                   maxlength="11"
                   placeholder="Ingresa el ruc..."
                 />
@@ -94,6 +98,7 @@
               <CCol md="12">
                 <CTextarea
                   label="Descripción"
+                  :disabled="loadingButtonsActions"
                   :value.sync="purchase.description"
                   placeholder="Ingrese una descripción..."
                   vertical
@@ -105,21 +110,21 @@
             <!-- AGREGAR DETALLE -->
             <CRow>
               <CCol md="4">
-                <CButton color="success" @click="openModalDetail()" class="mr-1 mb-3">
+                <CButton color="success" :disabled="loadingButtonsActions" @click="openModalDetail()" class="mr-1 mb-3">
                   Agregar
                 </CButton>
               </CCol>
             </CRow>
 
             <ModalDetail
-              :details="purchase.details"
               :isVisibleModalDetail="flagModalDetail"
+              :details="purchase.details"
               @get-detail="getDetail"
               @close-modal-detail="closeModalDetail"
             />
 
             <!-- LISTA DE PRODUCTOS SELECCIONADOS -->
-            <CTableProductsSelected :items="purchase.details" @get-total-general="getTotalGeneral">
+            <CTableProductsSelected :disabled="loadingButtonsActions" :items="purchase.details" @get-total-general="getTotalGeneral" :loading="loadingProducts">
               <template #header>
                 <CIcon name="cil-grid"/> Listado de Productos seleccionados
               </template>
@@ -146,6 +151,7 @@
                 <CInput
                   horizontal
                   label="Depositó (S/.)"
+                  :disabled="loadingButtonsActions"
                   @input="getTotalGeneral()"
                   @keydown="preventInvalidDecimal($event)"
                   v-model="purchase.deposit"
@@ -238,6 +244,7 @@
         },
         flagModalDetail: false,
         loadingProviders: false,
+        loadingProducts: false, 
         loadingButtonsActions: false,
       }
     },
@@ -245,6 +252,7 @@
       await this.getProviders();
       await this.getPurchase();
       this.getTotalGeneral();
+      this.loadingProducts = false;
     },
     components: {
       ModalDetail,
@@ -281,8 +289,6 @@
             if (resp.status === 200) {
               if(resp.data.flag){
 
-                this.title = "Modificar Compra";
-                this.btnSave = "Modificar";
                 this.purchase.id = resp?.data?.data?.id;
                 this.purchase.consecutive = resp?.data?.data?.consecutive;
 
@@ -324,7 +330,8 @@
             this.purchase.details         = item.details;
 
             this.disabledGeneral  = true;
-            this.title = "Modificar Compra";
+            this.btnSave          = "Modificar";
+            this.title            = "Modificar Compra";
 
           }
 
@@ -386,6 +393,8 @@
           };
 
           this.purchase.details.push(newDetail);
+          this.loadingProducts = false;
+
           this.getTotalGeneral();
 
         },
@@ -419,7 +428,8 @@
 
               formData.append(`details[${index}][id]`, id);
               formData.append(`details[${index}][product_id]`, detail.product.id);
-              formData.append(`details[${index}][um]`, detail.product.um);
+              // formData.append(`details[${index}][um]`, detail.product.id_unit_measure);
+              formData.append(`details[${index}][um]`, detail.um);
               formData.append(`details[${index}][amount]`, detail.amount);
               formData.append(`details[${index}][name_unit_measure]`, detail.name_unit_measure);
               formData.append(`details[${index}][price]`, detail.price);

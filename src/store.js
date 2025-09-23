@@ -7,8 +7,8 @@ const state = {
   sidebarMinimize: false,
   asideShow: false,
   darkMode: false,
-  // url: 'https://backend.granosysemillasnj.com/api/',
-  url: 'http://127.0.0.1:8000/api/',
+  url: 'https://backend.granosysemillasnj.com/api/',
+  // url: 'http://127.0.0.1:8000/api/',
 }
 
 const mutations = {

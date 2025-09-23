@@ -7,7 +7,7 @@
       <CRow>
         <CCol lg="12">
           <CForm>
-            
+
             <CRow>
               <CCol md="4">
                 <template v-if="loadingClients">
@@ -20,6 +20,7 @@
                     <label>Cliente</label>
                     <multiselect
                       v-model="sale.client"
+                      :disabled="loadingButtonsActions"
                       :options=clients
                       placeholder="Selecciona el cliente"
                       label="name"
@@ -30,7 +31,7 @@
                     >
                       <!-- Lista vacía (sin opciones) -->
                       <template #noOptions>
-                        <span class="text-muted">No hay ventas disponibles</span>
+                        <span class="text-muted">No hay clientes disponibles</span>
                       </template>
 
                       <!-- Sin resultados al buscar -->
@@ -65,25 +66,28 @@
             <CRow>
               <CCol md="4">
                 <CSelect
+                  label="Tipo de Venta"
+                  :disabled="loadingButtonsActions"
                   :value.sync="sale.type"
                   :options=types
-                  label="Tipo de Venta"
                   placeholder="Seleccione un tipo"
                 />
               </CCol>
               <CCol md="4">
                 <CSelect
+                  label="Boleta/Factura"
+                  :disabled="loadingButtonsActions"
                   :value.sync="sale.boleta_factura"
                   :options=types_sales
-                  label="Boleta/Factura"
                   placeholder="Seleccione un tipo"
                 />
               </CCol>
               <CCol v-if="sale.boleta_factura == 'factura'" md="4">
                 <CInput
+                  label="RUC"
+                  :disabled="loadingButtonsActions"
                   :value.sync="sale.ruc"
                   @keydown="validateNumber"
-                  label="RUC"
                   maxlength="11"
                   placeholder="Ingresa el ruc..."
                 />
@@ -94,6 +98,7 @@
               <CCol md="12">
                 <CTextarea
                   label="Descripción"
+                  :disabled="loadingButtonsActions"
                   :value.sync="sale.description"
                   placeholder="Ingrese una descripción..."
                   vertical
@@ -105,21 +110,21 @@
             <!-- AGREGAR DETALLE -->
             <CRow>
               <CCol md="4">
-                <CButton color="success" @click="openModalDetail()" class="mr-1 mb-3">
+                <CButton color="success" :disabled="loadingButtonsActions" @click="openModalDetail()" class="mr-1 mb-3">
                   Agregar
                 </CButton>
               </CCol>
             </CRow>
 
             <ModalDetail
-              :details="sale.details"
               :isVisibleModalDetail="flagModalDetail"
+              :details="sale.details"
               @get-detail="getDetail"
               @close-modal-detail="closeModalDetail"
             />
 
             <!-- LISTA DE PRODUCTOS SELECCIONADOS -->
-            <CTableProductsSelected :items="sale.details" @get-total-general="getTotalGeneral">
+            <CTableProductsSelected :disabled="loadingButtonsActions" :items="sale.details" @get-total-general="getTotalGeneral" :loading="loadingProducts">
               <template #header>
                 <CIcon name="cil-grid"/> Listado de Productos seleccionados
               </template>
@@ -146,6 +151,7 @@
                 <CInput
                   horizontal
                   label="Depositó (S/.)"
+                  :disabled="loadingButtonsActions"
                   @input="getTotalGeneral()"
                   @keydown="preventInvalidDecimal($event)"
                   v-model="sale.deposit"
@@ -168,7 +174,7 @@
             <!-- ACCIONES -->
             <CRow>
               <CCol md="4">
-                <template v-if="!loadingButtonsActions">
+                <template v-if="loadingButtonsActions">
                   <CCardBody>
                     <div class="sk-chase">
                       <div class="sk-chase-dot"></div>
@@ -238,13 +244,15 @@
         },
         flagModalDetail: false,
         loadingClients: false,
-        loadingButtonsActions: true,
+        loadingProducts: false, 
+        loadingButtonsActions: false,
       }
     },
     async mounted() {
       await this.getClients();
       await this.getSale();
       this.getTotalGeneral();
+      this.loadingProducts = false;
     },
     components: {
       ModalDetail,
@@ -281,8 +289,6 @@
             if (resp.status === 200) {
               if(resp.data.flag){
 
-                this.title = "Modificar Venta";
-                this.btnSave = "Modificar";
                 this.sale.id = resp?.data?.data?.id;
                 this.sale.consecutive = resp?.data?.data?.consecutive;
 
@@ -325,7 +331,8 @@
             this.sale.details         = item.details;
 
             this.disabledGeneral  = true;
-            this.title = "Modificar Venta";
+            this.btnSave          = "Modificar";
+            this.title            = "Modificar Venta";
 
           }
 
@@ -387,6 +394,8 @@
           };
 
           this.sale.details.push(newDetail);
+          this.loadingProducts = false;
+
           this.getTotalGeneral();
 
         },
@@ -420,7 +429,8 @@
 
             formData.append(`details[${index}][id]`, id);
             formData.append(`details[${index}][product_id]`, detail.product.id);
-            formData.append(`details[${index}][um]`, detail.product.um);
+            // formData.append(`details[${index}][um]`, detail.product.id_unit_measure);
+            formData.append(`details[${index}][um]`, detail.um);
             formData.append(`details[${index}][amount]`, detail.amount);
             formData.append(`details[${index}][name_unit_measure]`, detail.name_unit_measure);
             formData.append(`details[${index}][price]`, detail.price);
