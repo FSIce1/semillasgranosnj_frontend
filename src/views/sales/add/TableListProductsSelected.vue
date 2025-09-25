@@ -2,7 +2,7 @@
   <CCard>
     <CCardBody>
 
-      <TableCustom :items="tableItems" :fields="fields" :loading="false">
+      <TableCustom :items="tableItems" :fields="fields" :loading="loading">
 
         <template #product="{ item }">
           <td class="text-center">{{ item.product.name }}</td>
@@ -30,7 +30,7 @@
 <script>
 
   import Swal from "sweetalert2"
-  import {destroy, request} from '@/utils/functions.js'
+  import {destroy, request2} from '@/utils/functions.js'
 
   export default {
     name: 'TableListProductsSelected',
@@ -55,9 +55,7 @@
       },
     },
     computed: {
-      tableItems () {
-        return this.loading ? [] : (this.items || [])
-      }
+      tableItems(){ return this.loading ? [] : (this.items || []) }
     },
     data () {
       return {
@@ -88,7 +86,7 @@
 
           if (!res.value) return
 
-          await this.request(async () => {
+          await this.request2(async () => {
 
             if (id !== null) {
 
@@ -108,12 +106,12 @@
 
             }
 
-          })
+          }, { loadingKey: "loading" })
 
         },
 
       //* Secondary Functions
-        request,
+        request2,
 
     }
   }

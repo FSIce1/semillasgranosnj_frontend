@@ -254,6 +254,7 @@
           this.detail.product.minimum_quantity  = product.minimum_quantity;
           this.detail.equivalent                = product.equivalent;
           this.detail.price                     = product.price;
+          this.detail.um                        = product.id_unit_measure;
 
         },
 

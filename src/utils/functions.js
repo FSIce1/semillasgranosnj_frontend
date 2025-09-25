@@ -249,3 +249,24 @@ export async function request (fn, { loadingKey = 'loading', load = false } = {}
     }
 
 }
+
+export async function request2 (fn, { setLoading = null } = {}) {
+
+    try {
+
+        if (setLoading) setLoading(true)
+        return await fn()
+
+    } catch (errors) {
+
+        const msg = Array.isArray(errors) && errors.length ? errors[0] : (errors?.message || "Ocurrió un error desconocido")
+        Swal.fire("Alerta", msg, "error")
+        return null
+
+    } finally {
+
+        if (setLoading) setLoading(false)
+
+    }
+
+}

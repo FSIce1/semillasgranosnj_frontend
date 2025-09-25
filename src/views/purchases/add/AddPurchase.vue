@@ -124,7 +124,7 @@
             />
 
             <!-- LISTA DE PRODUCTOS SELECCIONADOS -->
-            <CTableProductsSelected :disabled="loadingButtonsActions" :items="purchase.details" @get-total-general="getTotalGeneral" :loading="loadingProducts">
+            <CTableProductsSelected :disabled="loadingButtonsActions" :items.sync="purchase.details" @get-total-general="getTotalGeneral" :loading.sync="loadingProducts">
               <template #header>
                 <CIcon name="cil-grid"/> Listado de Productos seleccionados
               </template>
@@ -392,7 +392,7 @@
             total: total,
           };
 
-          this.purchase.details.push(newDetail);
+          this.purchase.details = [...this.purchase.details, newDetail];
           this.loadingProducts = false;
 
           this.getTotalGeneral();
@@ -428,8 +428,7 @@
 
               formData.append(`details[${index}][id]`, id);
               formData.append(`details[${index}][product_id]`, detail.product.id);
-              // formData.append(`details[${index}][um]`, detail.product.id_unit_measure);
-              formData.append(`details[${index}][um]`, detail.um);
+              formData.append(`details[${index}][um]`, detail.product.um);
               formData.append(`details[${index}][amount]`, detail.amount);
               formData.append(`details[${index}][name_unit_measure]`, detail.name_unit_measure);
               formData.append(`details[${index}][price]`, detail.price);

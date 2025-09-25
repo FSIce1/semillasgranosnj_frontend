@@ -16,8 +16,8 @@
             <CCol md="4">
               <CSelect
                 :value.sync="filters.unitMeasure"
-                :disabled="loadingUnitMeasure"
                 :options=units_measure
+                :disabled="units_measure.length === 0 || loadingUnitMeasure"
                 @keyup.enter="saveConvertion()"
                 label="Unidad de Medida"
                 placeholder="Seleccione una unidad de medida"
@@ -36,8 +36,8 @@
             <CCol md="4">
               <CSelect
                 :value.sync="filters.unitMeasureConvert"
-                :disabled="loadingUnitMeasure"
                 :options=units_measure
+                :disabled="units_measure.length === 0 || loadingUnitMeasure"
                 @keyup.enter="saveConvertion()"
                 label="Unidad de Medida 2"
                 placeholder="Seleccione una unidad de medida"
@@ -163,6 +163,11 @@
         async saveConvertion() {
 
           await this.request(async () => {
+
+            if (this.units_measure.length == 0) {
+              Swal.fire("Alerta", "No hay unidades de medida disponibles", "warning")
+              return
+            }
 
             if (this.filters.amount == 0) {
               Swal.fire("Alerta", "El factor de conversión no puede ser 0", "warning")

@@ -40,7 +40,7 @@
                         <span class="text-muted">No se encontraron resultados</span>
                       </template>
                     </multiselect>
-                    <small v-if="!loadingClients && clients.length === 0" class="empty-hint tight">
+                    <small v-if="!loadingClients && clients.length === 0" class="empty-hint-2 tight">
                       <CIcon name="cil-inbox" class="mr-1" />
                       No hay clientes disponibles.
                     </small>
@@ -100,7 +100,7 @@
               </CCol>
 
               <!-- FECHA DEVOLUCIÓN ESPERADA -->
-              <CCol md="4">
+              <CCol md="4" class="mt-2">
                 <CInput
                   label="Fecha devolución esperada"
                   :disabled="loadingButtonsActions"
@@ -113,7 +113,7 @@
               </CCol>
 
               <!-- NÚMERO DE PRÉSTAMO -->
-              <CCol md="4">
+              <CCol md="4" class="mt-2">
                 <CInput
                   label="Número de Préstamo"
                   disabled

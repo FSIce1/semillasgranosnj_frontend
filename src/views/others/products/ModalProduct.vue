@@ -79,7 +79,6 @@
                 v-model="product.stock"
                 :disabled="loadingModal"
                 @keyup.enter="saveProduct()"
-                @input="updateFromStock"
                 @keydown="preventInvalidDecimal($event)"
                 description="Por favor ingresa el stock del producto."
                 required
@@ -347,18 +346,6 @@
           formData.append('minimum_quantity', data.minimum_quantity ?? 0);
 
           return formData;
-
-        },
-        updateFromStock() {
-
-          const equivalent = parseFloat(this.product.equivalent);
-          const stock = parseFloat(this.product.stock);
-
-          if (!isNaN(equivalent) && equivalent > 0 && !isNaN(stock) && stock > 0) {
-            this.product.converted_stock = equivalent * stock;
-          } else {
-            this.product.converted_stock = 0;
-          }
 
         },
 
