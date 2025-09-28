@@ -393,7 +393,7 @@
             total: total,
           };
 
-          this.purchase.details = [...this.purchase.details, newDetail];
+          this.sale.details = [...this.sale.details, newDetail];
           this.loadingProducts = false;
 
           this.getTotalGeneral();
