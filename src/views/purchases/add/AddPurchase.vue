@@ -386,6 +386,7 @@
               "name": data.product.name,
               "um": data.um,
             },
+            um: data.um,
             amount: data.amount,
             name_unit_measure: data.um_name,
             price: data.price,
@@ -428,7 +429,7 @@
 
               formData.append(`details[${index}][id]`, id);
               formData.append(`details[${index}][product_id]`, detail.product.id);
-              formData.append(`details[${index}][um]`, detail.product.um);
+              formData.append(`details[${index}][um]`, detail.um);
               formData.append(`details[${index}][amount]`, detail.amount);
               formData.append(`details[${index}][name_unit_measure]`, detail.name_unit_measure);
               formData.append(`details[${index}][price]`, detail.price);
