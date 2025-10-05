@@ -103,7 +103,6 @@
           consumption: 0,
           type: "",
           boleta_factura: "",
-          ruc: "",
           total: 0,
           details: []
         },
@@ -133,7 +132,6 @@
             this.purchase.consumption     = item.consumption;
             this.purchase.type            = item.type;
             this.purchase.boleta_factura  = item.boleta_factura;
-            this.purchase.ruc             = item.ruc;
             this.purchase.total           = item.total;
             this.purchase.details         = item.details;
 

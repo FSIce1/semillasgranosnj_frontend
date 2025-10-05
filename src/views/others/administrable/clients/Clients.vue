@@ -36,15 +36,31 @@
                     was-validated
                   />
 
+                  <CSelect
+                    :value.sync="client.type_document"
+                    :options=types_document
+                    :disabled="loadingModal"
+                    @keyup.enter="saveClient()"
+                    @change="selectTypeDocument"
+                    description="Por favor ingresa el tipo de documento."
+                    label="Tipo de documento"
+                    maxlength="11"
+                    placeholder="Ingresa el tipo de documento..."
+                    required
+                    was-validated
+                  />
+
                   <CInput
                     :value.sync="client.document"
                     :disabled="loadingModal"
                     @keydown="validateNumber"
                     @keyup.enter="saveClient()"
-                    description="Por favor ingresa el dni/ruc."
-                    label="DNI/RUC"
-                    maxlength="11"
-                    placeholder="Ingresa el dni/ruc..."
+                    :description="descriptionDocument"
+                    label="Documento"
+                    :maxlength="lengthDocument"
+                    :placeholder="placeholderDocument"
+                    required
+                    was-validated
                   />
 
                   <CInput
@@ -190,12 +206,13 @@
         type: Array,
         default () {
           return [
-            { key: 'index',           label: '#' },
-            { key: 'document',        label: 'DNI' },
-            { key: 'name',            label: 'Nombre' },
-            { key: 'phone',           label: 'Teléfono' },
-            { key: 'address',         label: 'Dirección' },
-            { key: 'description',     label: 'Descripción' },
+            { key: 'index',           label: '#',                 _classes: 'text-center' },
+            { key: 'type_document',   label: 'Tipo de documento', _classes: 'text-center' },
+            { key: 'document',        label: 'Documento',         _classes: 'text-center' },
+            { key: 'name',            label: 'Nombre',            _classes: 'text-center' },
+            { key: 'phone',           label: 'Teléfono',          _classes: 'text-center' },
+            { key: 'address',         label: 'Dirección',         _classes: 'text-center' },
+            { key: 'description',     label: 'Descripción',       _classes: 'text-center' },
 
             // Botones de acción
             { key: 'buttonView',      label: 'Ver',      _classes: 'text-center', _style:'min-width:20%;' },
@@ -209,7 +226,11 @@
       this.getClients();
     },
     computed: {
-      tableItems () { return this.loading ? [] : this.clients }
+      tableItems () { return this.loading ? [] : this.clients },
+      descriptionDocument(){ return this.client.type_document == 'DNI' ? 'Ingrese DNI' : 'Ingrese RUC' },
+      labelDocument(){ return this.client.type_document == 'DNI' ? 'DNI' : 'RUC' },
+      lengthDocument(){ return this.client.type_document == 'DNI' ? 7 : 11 },
+      placeholderDocument(){ return this.client.type_document == 'DNI' ? 'Ingresa el DNI...' : 'Ingresa el RUC...' }
     },
     data () {
       return {
@@ -223,14 +244,16 @@
         loadingButtonEdit: {},
 
         types: ['ambas', 'contado', 'credito'],
+        types_document: ['DNI', 'RUC'],
 
         client: {
-          id          : "",
-          document    : "",
-          name        : "",
-          phone       : "",
-          address     : "",
-          description : "",
+          id            : "",
+          type_document : "DNI",
+          document      : "",
+          name          : "",
+          phone         : "",
+          address       : "",
+          description   : "",
         },
         filters: {
           document  : "",
@@ -289,6 +312,7 @@
               const d = resp?.data?.data || {}
               this.client = {
                 id: d.id || "",
+                type_document: d.type_document || "",
                 document: d.document || "",
                 name: d.name || "",
                 phone: d.phone || "",
@@ -333,11 +357,12 @@
         downloadExcelClients() {
 
           const data = (this.clients || []).map(c => ({
-            'DNI'        : c.document || '',
-            'Nombre'     : c.name || '',
-            'Teléfono'   : c.phone || '',
-            'Dirección'  : c.address || '',
-            'Descripción': c.description || '',
+            'Tipo documento'  : c.type_document || '',
+            'DNI/RUC'         : c.document || '',
+            'Nombre'          : c.name || '',
+            'Teléfono'        : c.phone || '',
+            'Dirección'       : c.address || '',
+            'Descripción'     : c.description || '',
           }))
 
           const ws = XLSX.utils.json_to_sheet(data)
@@ -366,6 +391,7 @@
 
           let formData = new FormData();
 
+          formData.append('type_document', data.type_document);
           formData.append('document', data.document);
           formData.append('name', data.name);
           formData.append('phone', data.phone);
@@ -376,14 +402,17 @@
 
         },
         cleanFilters() {
-          this.filters = { document:"", name:"", type:"" }
+          this.filters = { type_document:"DNI", document:"", name:"", type:"" }
           this.getClients()
+        },
+        selectTypeDocument(){
+          this.client.document = '';
         },
 
         //? Modal
         openModal(){ this.cleanModal(); this.flagModal = true },
         cleanModal(){
-          this.client     = { id:"", document:"", name:"", phone:"", address:"", description:"" }
+          this.client     = { id:"", type_document:"DNI", document:"", name:"", phone:"", address:"", description:"" }
           this.titleModal = "Nuevo Cliente"
           this.textButton = "Guardar"
         },

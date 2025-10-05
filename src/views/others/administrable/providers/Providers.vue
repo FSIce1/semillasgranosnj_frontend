@@ -36,15 +36,31 @@
                     was-validated
                   />
 
+                  <CSelect
+                    :value.sync="provider.type_document"
+                    :options=types_document
+                    :disabled="loadingModal"
+                    @keyup.enter="saveProvider()"
+                    @change="selectTypeDocument"
+                    description="Por favor ingresa el tipo de documento."
+                    label="Tipo de documento"
+                    maxlength="11"
+                    placeholder="Ingresa el tipo de documento..."
+                    required
+                    was-validated
+                  />
+
                   <CInput
                     :value.sync="provider.document"
                     :disabled="loadingModal"
                     @keydown="validateNumber"
                     @keyup.enter="saveProvider()"
-                    description="Por favor ingresa el ruc."
-                    label="RUC"
-                    maxlength="11"
-                    placeholder="Ingresa el ruc..."
+                    :description="descriptionDocument"
+                    label="Documento"
+                    :maxlength="lengthDocument"
+                    :placeholder="placeholderDocument"
+                    required
+                    was-validated
                   />
 
                   <CInput
@@ -55,7 +71,6 @@
                     description="Por favor ingresa un teléfono."
                     label="Teléfono"
                     placeholder="Ingresa un teléfono..."
-                    required
                     was-validated
                   />
 
@@ -117,7 +132,7 @@
             <!-- FILTROS -->
             <CRow>
               <CCol md="3">
-                <CInput type="text" label="RUC" v-model="filters.document" />
+                <CInput type="text" label="DNI/RUC" v-model="filters.document" />
               </CCol>
               <CCol md="3">
                 <CInput type="text" label="Nombre" v-model="filters.name" />
@@ -192,15 +207,18 @@
         type: Array,
         default () {
           return [
-            { key: 'index',           label: '#' },
-            { key: 'document',        label: 'RUC' },
-            { key: 'name',            label: 'Nombre' },
-            { key: 'phone',           label: 'Teléfono' },
-            { key: 'address',         label: 'Dirección' },
-            { key: 'description',     label: 'Descripción' },
-            { key: 'buttonView',      label: 'Ver',      _classes: 'text-center', _style:'min-width:20%;' },
-            { key: 'buttonEdit',      label: 'Editar',   _classes: 'text-center', _style:'min-width:20%;' },
-            { key: 'buttonDelete',    label: 'Eliminar', _classes: 'text-center', _style:'min-width:20%;' },
+            { key: 'index',           label: '#',                 _classes: 'text-center' },
+            { key: 'type_document',   label: 'Tipo de documento', _classes: 'text-center' },
+            { key: 'document',        label: 'Documento',         _classes: 'text-center' },
+            { key: 'name',            label: 'Nombre',            _classes: 'text-center' },
+            { key: 'phone',           label: 'Teléfono',          _classes: 'text-center' },
+            { key: 'address',         label: 'Dirección',         _classes: 'text-center' },
+            { key: 'description',     label: 'Descripción',       _classes: 'text-center' },
+
+            // Botones de acción
+            { key: 'buttonView',      label: 'Ver',               _classes: 'text-center', _style:'min-width:20%;' },
+            { key: 'buttonEdit',      label: 'Editar',            _classes: 'text-center', _style:'min-width:20%;' },
+            { key: 'buttonDelete',    label: 'Eliminar',          _classes: 'text-center', _style:'min-width:20%;' },
           ]
         }
       },
@@ -209,7 +227,11 @@
       this.getProviders();
     },
     computed: {
-      tableItems () { return this.loading ? [] : this.providers }
+      tableItems () { return this.loading ? [] : this.providers },
+      descriptionDocument(){ return this.provider.type_document == 'DNI' ? 'Ingrese DNI' : 'Ingrese RUC' },
+      labelDocument(){ return this.provider.type_document == 'DNI' ? 'DNI' : 'RUC' },
+      lengthDocument(){ return this.provider.type_document == 'DNI' ? 7 : 11 },
+      placeholderDocument(){ return this.provider.type_document == 'DNI' ? 'Ingresa el DNI...' : 'Ingresa el RUC...' }
     },
     data () {
       return {
@@ -223,14 +245,16 @@
         loadingButtonEdit: {},
 
         types: ['ambas', 'contado', 'credito'],
+        types_document: ['DNI', 'RUC'],
 
         provider: {
-          id          : "",
-          document    : "",
-          name        : "",
-          phone       : "",
-          address     : "",
-          description : "",
+          id            : "",
+          type_document : "DNI",
+          document      : "",
+          name          : "",
+          phone         : "",
+          address       : "",
+          description   : "",
         },
         filters: {
           document  : "",
@@ -289,6 +313,7 @@
               const d = resp?.data?.data || {}
               this.provider = {
                 id: d.id || "",
+                type_document: d.type_document || "",
                 document: d.document || "",
                 name: d.name || "",
                 phone: d.phone || "",
@@ -333,11 +358,12 @@
         downloadExcelProviders() {
 
           const data = (this.providers || []).map(c => ({
-            'RUC'        : c.document || '',
-            'Nombre'     : c.name || '',
-            'Teléfono'   : c.phone || '',
-            'Dirección'  : c.address || '',
-            'Descripción': c.description || '',
+            'Tipo documento'  : c.type_document || '',
+            'DNI/RUC'         : c.document || '',
+            'Nombre'          : c.name || '',
+            'Teléfono'        : c.phone || '',
+            'Dirección'       : c.address || '',
+            'Descripción'     : c.description || '',
           }))
 
           const ws = XLSX.utils.json_to_sheet(data)
@@ -366,6 +392,7 @@
 
           let formData = new FormData();
 
+          formData.append('type_document', data.type_document);
           formData.append('document', data.document);
           formData.append('name', data.name);
           formData.append('phone', data.phone);
@@ -376,14 +403,17 @@
 
         },
         cleanFilters() {
-          this.filters = { document:"", name:"", type:"",}
+          this.filters = { type_document:"DNI", document:"", name:"", type:"",}
           this.getProviders()
+        },
+        selectTypeDocument(){
+          this.provider.document = '';
         },
 
         //? Modal
         openModal(){ this.cleanModal(); this.flagModal = true },
         cleanModal(){
-          this.provider = { id:"", document:"", name:"", phone:"", address:"", description:"" }
+          this.provider = { id:"", type_document:"DNI", document:"", name:"", phone:"", address:"", description:"" }
           this.titleModal = "Nuevo Proveedor";
           this.textButton = "Guardar";
         },

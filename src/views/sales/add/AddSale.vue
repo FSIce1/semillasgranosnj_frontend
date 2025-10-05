@@ -10,6 +10,16 @@
 
             <CRow>
               <CCol md="4">
+                <CSelect
+                  label="Boleta/Factura"
+                  :disabled="loadingButtonsActions"
+                  :value.sync="sale.boleta_factura"
+                  :options=types_sales
+                  @change="selectBoletaFactura"
+                  placeholder="Seleccione un tipo"
+                />
+              </CCol>
+              <CCol md="4">
                 <template v-if="loadingClients">
                   <div class="spinner-border m-4" role="status">
                     <span class="visually-hidden"></span>
@@ -20,7 +30,7 @@
                     <label>Cliente</label>
                     <multiselect
                       v-model="sale.client"
-                      :disabled="loadingButtonsActions"
+                      :disabled="clients.length === 0 || loadingButtonsActions"
                       :options=clients
                       placeholder="Selecciona el cliente"
                       label="name"
@@ -39,6 +49,10 @@
                         <span class="text-muted">No se encontraron resultados</span>
                       </template>
                     </multiselect>
+                    <small v-if="!loadingClients && clients.length === 0" class="empty-hint-2 tight">
+                      <CIcon name="cil-inbox" class="mr-1" />
+                      No hay clientes disponibles.
+                    </small>
                     <br>
                   </div>
                 </template>
@@ -52,18 +66,9 @@
                   autocomplete="off"
                 />
               </CCol>
-              <CCol md="4">
-                <CInput
-                  label="Número de Venta"
-                  :lazy="false"
-                  :value="sale.consecutive"
-                  disabled
-                  autocomplete="off"
-                />
-              </CCol>
             </CRow>
 
-            <CRow>
+            <CRow class="mt-3">
               <CCol md="4">
                 <CSelect
                   label="Tipo de Venta"
@@ -74,22 +79,13 @@
                 />
               </CCol>
               <CCol md="4">
-                <CSelect
-                  label="Boleta/Factura"
-                  :disabled="loadingButtonsActions"
-                  :value.sync="sale.boleta_factura"
-                  :options=types_sales
-                  placeholder="Seleccione un tipo"
-                />
-              </CCol>
-              <CCol v-if="sale.boleta_factura == 'factura'" md="4">
                 <CInput
-                  label="RUC"
-                  :disabled="loadingButtonsActions"
-                  :value.sync="sale.ruc"
-                  @keydown="validateNumber"
-                  maxlength="11"
-                  placeholder="Ingresa el ruc..."
+                  label="Número de Venta"
+                  :lazy="false"
+                  :value="sale.consecutive"
+                  v-show="sale.consecutive != ''"
+                  disabled
+                  autocomplete="off"
                 />
               </CCol>
             </CRow>
@@ -232,7 +228,6 @@
           consecutive: "",
           date: this.getCurrentDate(),
           client: "",
-          ruc: "",
           description: "",
           subtotal: 0,
           deposit: 0,
@@ -249,7 +244,7 @@
       }
     },
     async mounted() {
-      await this.getClients();
+      await this.getClients(null);
       await this.getSale();
       this.getTotalGeneral();
       this.loadingProducts = false;
@@ -262,11 +257,11 @@
     methods: {
 
       //* Main Functions
-        async getClients(){
+        async getClients(filters){
 
           await this.request(async () => {
             const url = this.$store.state.url
-            const resp = await list(url + this.prefix_clients)
+            const resp = await list(url + this.prefix_clients, filters)
             if (resp.status === 200){
               let setClients = (resp.data.data).map(role => ({
                 id: role.id,
@@ -326,7 +321,6 @@
             this.sale.deposit         = item.deposit;
             this.sale.consumption     = item.consumption;
             this.sale.boleta_factura  = item.boleta_factura;
-            this.sale.ruc             = item.ruc;
             this.sale.total           = item.total;
             this.sale.details         = item.details;
 
@@ -421,7 +415,6 @@
           formData.append('total', data.total);
           formData.append('type', data.type);
           formData.append('boleta_factura', data.boleta_factura);
-          formData.append('ruc', data.ruc);
           formData.append('description', data.description);
 
           (data.details).forEach(function(detail, index) {
@@ -469,6 +462,15 @@
 
           return total;
 
+        },
+        async selectBoletaFactura(){
+          if(this.sale.boleta_factura == "factura"){
+            await this.getClients({type_document: 'ruc'});
+          } else {
+            await this.getClients(null);
+          }
+          this.sale.client = "";
+          this.getTotalGeneral();
         },
 
         //? Modal

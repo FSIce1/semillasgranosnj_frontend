@@ -10,6 +10,16 @@
 
             <CRow>
               <CCol md="4">
+                <CSelect
+                  label="Boleta/Factura"
+                  :disabled="loadingButtonsActions"
+                  :value.sync="purchase.boleta_factura"
+                  :options=types_purchases
+                  @change="selectBoletaFactura"
+                  placeholder="Seleccione un tipo"
+                />
+              </CCol>
+              <CCol md="4">
                 <template v-if="loadingProviders">
                   <div class="spinner-border m-4" role="status">
                     <span class="visually-hidden"></span>
@@ -20,7 +30,7 @@
                     <label>Proveedor</label>
                     <multiselect
                       v-model="purchase.provider"
-                      :disabled="loadingButtonsActions"
+                      :disabled="providers.length === 0 || loadingButtonsActions"
                       :options=providers
                       placeholder="Selecciona el proveedor"
                       label="name"
@@ -39,6 +49,10 @@
                         <span class="text-muted">No se encontraron resultados</span>
                       </template>
                     </multiselect>
+                    <small v-if="!loadingProviders && providers.length === 0" class="empty-hint-2 tight">
+                      <CIcon name="cil-inbox" class="mr-1" />
+                      No hay proveedores disponibles.
+                    </small>
                     <br>
                   </div>
                 </template>
@@ -52,18 +66,9 @@
                   autocomplete="off"
                 />
               </CCol>
-              <CCol md="4">
-                <CInput
-                  label="Número de Venta"
-                  :lazy="false"
-                  :value="purchase.consecutive"
-                  disabled
-                  autocomplete="off"
-                />
-              </CCol>
             </CRow>
 
-            <CRow>
+            <CRow class="mt-3">
               <CCol md="4">
                 <CSelect
                   label="Tipo de Compra"
@@ -74,22 +79,13 @@
                 />
               </CCol>
               <CCol md="4">
-                <CSelect
-                  label="Boleta/Factura"
-                  :disabled="loadingButtonsActions"
-                  :value.sync="purchase.boleta_factura"
-                  :options=types_purchases
-                  placeholder="Seleccione un tipo"
-                />
-              </CCol>
-              <CCol v-if="purchase.boleta_factura == 'factura'" md="4">
                 <CInput
-                  label="RUC"
-                  :disabled="loadingButtonsActions"
-                  :value.sync="purchase.ruc"
-                  @keydown="validateNumber"
-                  maxlength="11"
-                  placeholder="Ingresa el ruc..."
+                  label="Número de Compra"
+                  :lazy="false"
+                  :value="purchase.consecutive"
+                  v-show="purchase.consecutive != ''"
+                  disabled
+                  autocomplete="off"
                 />
               </CCol>
             </CRow>
@@ -232,7 +228,6 @@
           consecutive: "",
           date: this.getCurrentDate(),
           provider: "",
-          ruc: "",
           description: "",
           subtotal: 0,
           deposit: 0,
@@ -249,7 +244,7 @@
       }
     },
     async mounted() {
-      await this.getProviders();
+      await this.getProviders(null);
       await this.getPurchase();
       this.getTotalGeneral();
       this.loadingProducts = false;
@@ -262,11 +257,11 @@
     methods: {
 
       //* Main Functions
-        async getProviders(){
+        async getProviders(filters){
 
           await this.request(async () => {
             const url = this.$store.state.url
-            const resp = await list(url + this.prefix_providers)
+            const resp = await list(url + this.prefix_providers, filters)
             if (resp.status === 200){
               let setProviders = (resp.data.data).map(role => ({
                 id: role.id,
@@ -468,6 +463,15 @@
 
           return total;
 
+        },
+        async selectBoletaFactura(){
+          if(this.purchase.boleta_factura == "factura"){
+            await this.getProviders({type_document: 'ruc'});
+          } else {
+            await this.getProviders(null);
+          }
+          this.purchase.client = "";
+          this.getTotalGeneral();
         },
 
         //? Modal
