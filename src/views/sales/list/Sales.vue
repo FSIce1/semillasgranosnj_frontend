@@ -246,14 +246,19 @@
         },
         async downloadReport(method, type, extention, sale) {
 
-          await this.request(async () => {
-            const url = this.$store.state.url
-            if(type == "excel"){
-              await report(url+method, sale, "reporte N°"+sale.consecutive+extention);
+          if (this.loading) return;  
+            this.loading = true;
+
+          try {
+            const url = this.$store.state.url;
+            if (type === "excel") {
+              await report(url + method, sale, `reporte N°${sale.consecutive}${extention}`);
             } else {
-              await ticket(url+method, sale, "reporte N°"+sale.consecutive+extention);
+              await ticket(url + method, sale, `reporte N°${sale.consecutive}${extention}`);
             }
-          }, { loadingKey: "loading" })
+          } finally {
+            this.loading = false;
+          }
 
         },
 

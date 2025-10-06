@@ -197,8 +197,7 @@
           price             : "",
           price_purchase    : "",
           stock             : "",
-          converted_stock   : "",
-          equivalent        : "",
+         equivalent        : "",
           minimum_quantity  : "",
         },
         warehouses: [],
@@ -296,7 +295,6 @@
                 price_purchase: d.price_purchase || "",
                 converted_price: d.converted_price || "",
                 stock: d.stock || "",
-                converted_stock: d.converted_stock || "",
                 equivalent: d.equivalent || "",
                 minimum_quantity: d.minimum_quantity || "",
               }
@@ -341,7 +339,6 @@
           formData.append('price_purchase', data.price_purchase);
           formData.append('converted_price', data.converted_price ?? 0);
           formData.append('stock', data.stock);
-          formData.append('converted_stock', data.converted_stock);
           formData.append('equivalent', data.equivalent);
           formData.append('minimum_quantity', data.minimum_quantity ?? 0);
 
@@ -354,7 +351,7 @@
           this.$emit("close-modal-product");
         },
         cleanModal(){
-          this.product    = { id:"", cod_product:"", name:"", id_warehouse:"", id_lot:"", id_unit_measure:"", price:"", price_purchase:"", converted_price:"", stock:"", converted_stock:"", equivalent:"", minimum_quantity:"" }
+          this.product    = { id:"", cod_product:"", name:"", id_warehouse:"", id_lot:"", id_unit_measure:"", price:"", price_purchase:"", converted_price:"", stock:"", equivalent:"", minimum_quantity:"" }
           this.titleModal = "Nuevo Producto";
           this.textButton = "Guardar";
         },

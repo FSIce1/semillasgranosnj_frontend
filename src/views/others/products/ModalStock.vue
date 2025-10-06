@@ -87,7 +87,6 @@
             name            : "",
             equivalent      : "",
             stock           : "",
-            converted_stock : "",
           },
           flagModalProducts: false,
           flagModalProducts2: false,
@@ -146,7 +145,6 @@
           formData.append('name', data.name);
           formData.append('equivalent', data.equivalent);
           formData.append('stock', data.stock);
-          formData.append('converted_stock', data.converted_stock);
 
           return formData;
 
@@ -157,7 +155,7 @@
           this.$emit("close-modal-stock");
         },
         cleanModal(){
-          this.product = { id:"", name:"", equivalent:"", stock:"", converted_stock:"" }
+          this.product = { id:"", name:"", equivalent:"", stock:"" }
         },
 
     },

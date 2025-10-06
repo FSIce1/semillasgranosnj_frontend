@@ -247,20 +247,26 @@
         },
         async downloadReport(method, type, extention, purchase) {
 
-          await this.request(async () => {
-            const url = this.$store.state.url
-            if(type == "excel"){
-              await report(url+method, purchase, "reporte N°"+purchase.consecutive+extention);
+          if (this.loading) return;  
+            this.loading = true;
+
+          try {
+            const url = this.$store.state.url;
+            if (type === "excel") {
+              await report(url + method, purchase, `reporte N°${purchase.consecutive}${extention}`);
             } else {
-              await ticket(url+method, purchase, "reporte N°"+purchase.consecutive+extention);
+              await ticket(url + method, purchase, `reporte N°${purchase.consecutive}${extention}`);
             }
-          }, { loadingKey: "loading" })
+          } finally {
+            this.loading = false;
+          }
 
         },
 
       //* Secondary Functions
         request,
         sendEditPurchase(item) {
+          console.log(item);
           this.$router.push({ 
             name: 'Agregar compra', 
             query: { data: JSON.stringify(item) }

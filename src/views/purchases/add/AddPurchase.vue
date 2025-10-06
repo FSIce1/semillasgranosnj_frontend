@@ -314,6 +314,7 @@
 
             this.purchase.id              = item.id;
             this.purchase.consecutive     = item.consecutive;
+            this.purchase.type            = item.type;
             this.purchase.date            = item.date;
             this.purchase.provider        = item.provider;
             this.purchase.description     = item.description;

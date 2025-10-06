@@ -314,6 +314,7 @@
 
             this.sale.id              = item.id;
             this.sale.consecutive     = item.consecutive;
+            this.sale.type            = item.type;
             this.sale.date            = item.date;
             this.sale.client          = item.client;
             this.sale.description     = item.description;
