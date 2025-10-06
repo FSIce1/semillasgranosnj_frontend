@@ -229,7 +229,7 @@
       tableItems () { return this.loading ? [] : this.clients },
       descriptionDocument(){ return this.client.type_document == 'DNI' ? 'Ingrese DNI' : 'Ingrese RUC' },
       labelDocument(){ return this.client.type_document == 'DNI' ? 'DNI' : 'RUC' },
-      lengthDocument(){ return this.client.type_document == 'DNI' ? 7 : 11 },
+      lengthDocument(){ return this.client.type_document == 'DNI' ? 8 : 11 },
       placeholderDocument(){ return this.client.type_document == 'DNI' ? 'Ingresa el DNI...' : 'Ingresa el RUC...' }
     },
     data () {
