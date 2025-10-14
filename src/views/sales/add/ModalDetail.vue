@@ -219,9 +219,6 @@
           } else if(this.detail.amount <= 0){
             Swal.fire("Alerta", "La cantidad debe ser mayor a 0", "warning");
             return
-          } else if(this.detail.amount > parseFloat(this.detail.product.stock)){
-            Swal.fire("Alerta", "No hay stock sufiente el producto '"+this.detail.product.name+"' cuenta con una cantidad de "+this.detail.product.stock+" "+this.detail.product.um, "warning");
-            return
           } else if((parseFloat(this.detail.product.stock) - this.detail.amount < this.detail.product.minimum_quantity)){
             message = ", el producto '"+this.detail.product.name+"' se está agotando";
           }

@@ -72,23 +72,23 @@
               </template>
 
               <template #amount="{ item }">
-                <td>{{ item.amount }}</td>
+                <td class="text-center">{{ item.amount }}</td>
               </template>
 
               <template #product="{ item }">
-                <td>{{ item.product.name }}</td>
+                <td class="text-center">{{ item.product.name }}</td>
               </template>
 
               <template #type="{ item }">
-                <td>{{ item.product.type }}</td>
+                <td class="text-center">{{ item.product.type }}</td>
               </template>
 
               <template #price="{ item }">
-                <td>{{ item.price }}</td>
+                <td class="text-center">{{ item.price }}</td>
               </template>
 
               <template #total="{ item }">
-                <td>{{ item.total }}</td>
+                <td class="text-center">{{ item.total }}</td>
               </template>
 
             </TableCustom>
