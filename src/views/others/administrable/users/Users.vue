@@ -156,7 +156,7 @@
 
         <!-- BUTTON EDIT -->
         <template #buttonEdit="{item}">
-          <BaseButton :modo="'editar'" :loading="loadingButtonEdit[item.id]" @click="editModal(item.id)"></BaseButton>
+          <BaseButton :modo="'editar'" :loading="loadingButtonEdit[item.id]" @click.stop.prevent="editModal(item.id)"></BaseButton>
         </template>
 
         <!-- BUTTON DELETE -->
@@ -263,7 +263,7 @@
 
             if (resp.status === 200) {
               this.roles = (resp.data?.data || []).map(role => ({
-                value: role.id,
+                value: String(role.id),
                 label: role.name
               }))
             } else {
@@ -292,6 +292,8 @@
         },
         async editModal(id){
 
+          if (this.loadingModal || this.loadingButtonEdit?.[id]) return;
+
           this.flagModal = true
           this.titleModal = "Modificar Usuario"
           this.textButton = "Modificar"
@@ -309,13 +311,12 @@
                 email: d.email || "",
                 phone: d.phone || "",
                 password: d.password || "",
-                role_id: d.role_id || "",
+                role_id: String(d.role_id) || "",
               }
               this.$set(this.loadingButtonEdit, id, false)
             }
-          } catch (e) {
-            // ya maneja Swal arriba
           } finally {
+            this.$set(this.loadingButtonEdit, id, false);
             this.loadingModal = false
           }
 

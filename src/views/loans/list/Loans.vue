@@ -197,14 +197,19 @@
         },
         async downloadReport(method, type, extention, loan) {
 
-          await this.request(async () => {
-            const url = this.$store.state.url
+          if (this.loading) return;  
+            this.loading = true;
+
+          try {
+            const url = this.$store.state.url;
             if(type == "excel"){
               await report(url+method, loan, "reporte N°"+loan.consecutive+extention);
             } else {
               await ticket(url+method, loan, "reporte N°"+loan.consecutive+extention);
             }
-          }, { loadingKey: "loading" })
+          } finally {
+            this.loading = false;
+          }
 
         },
 

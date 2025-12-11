@@ -216,9 +216,9 @@
         if (newValue) {
 
           this.cleanModal();
-          
+
           if (this.selectedProduct && this.selectedProduct.id) {
-            await Promise.all([ this.getWarehouses(true), this.getUnitsMeasure(true) ])
+            await Promise.all([ this.getWarehouses(true), this.getUnitsMeasure(true), this.onWarehouseChange(this.selectedProduct.id_warehouse) ])
             this.titleModal = "Modificar Producto"
             this.textButton = "Modificar"
             await this.edit(this.selectedProduct.id)
@@ -260,7 +260,7 @@
           await this.request(async () => {
             const url = this.$store.state.url
             const resp = await list(url + this.prefix_warehouses)
-            const setWarehouses = (resp.data.data).map(role => ({ value: role.id, label: role.name }));
+            const setWarehouses = (resp.data.data).map(warehouse => ({ value: String(warehouse.id), label: warehouse.name }));
             if (resp.status === 200) this.warehouses = setWarehouses || []
             else this.warehouses = []
           }, { loadingKey: "loadingModal", load: load })
@@ -271,7 +271,7 @@
           await this.request(async () => {
             const url = this.$store.state.url
             const resp = await list(url + this.prefix_units_measure)
-            const setUnitsMeasure = (resp.data.data).map(role => ({ value: role.id, label: role.name }));
+            const setUnitsMeasure = (resp.data.data).map(unit_measure => ({ value: String(unit_measure.id), label: unit_measure.name }));
             if (resp.status === 200) this.units_measure = setUnitsMeasure || []
             else this.units_measure = []
           }, { loadingKey: "loadingModal", load: load })
@@ -288,9 +288,9 @@
                 id: d.id || "",
                 cod_product: d.cod_product || "",
                 name: d.name || "",
-                id_warehouse: d.id_warehouse || "",
-                id_lot: d.id_lot || "",
-                id_unit_measure: d.id_unit_measure || "",
+                id_warehouse: String(d.id_warehouse ?? ""),
+                id_lot: String(d.id_lot) || "",
+                id_unit_measure: String(d.id_unit_measure) || "",
                 price: d.price || "",
                 price_purchase: d.price_purchase || "",
                 converted_price: d.converted_price || "",
@@ -315,13 +315,9 @@
           await this.request(async () => {
             const url = this.$store.state.url
             const resp = await show(url + "getLots" + `/${id}`)
-            if (resp.status === 200){
-              let setLots = (resp.data.data).map(lot => ({
-                value: lot.id,
-                label: lot.name
-              }));
-              this.lots = setLots;
-            }
+            let setLots = (resp.data.data).map(lot => ({ value: String(lot.id), label: lot.name }));
+            if (resp.status === 200) this.lots = setLots || []
+            else this.lots = []
           }, { loadingKey: "loadingLots" })
 
         },
